@@ -1,0 +1,18 @@
+reset
+set term post eps enhanced dashed color font 'Helvetica,20'
+set output "<OUTPUT_DIR>/<UNIQUE_NAME>_eval_latency.eps"
+#set term png font 'Helvetica,20'
+#set output "<OUTPUT_DIR>/<UNIQUE_NAME>_eval_latency.png"
+set nologscale x
+set nologscale y
+set key autotitle columnheader right top 
+set xlabel "Packet"
+set ylabel "Latency"
+set size 1, 0.75
+#set format x "10^{%T}"
+#set xrange [150000:150100]
+#set yrange [0:0.015]
+#set tics nomirror
+#set border 3
+plot "<GROUNDTRUTH_DAT>" using 0:1 title "Groundtruth" w lines lw 1,\
+    "<APPROX_DAT>" using 0:1 title "Approx" w lines lw 1

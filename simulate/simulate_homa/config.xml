@@ -1,0 +1,8 @@
+<hostConfig>
+    <transportConfig>
+    </transportConfig>
+    <appConfig>
+        <isSender>true</isSender>
+        <destIds>-1</destIds>
+    </appConfig>
+</hostConfig>

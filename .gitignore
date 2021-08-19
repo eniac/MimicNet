@@ -1,0 +1,11 @@
+__pycache__/
+*.swp
+*.DS_Store
+.mimictype
+a.out
+simulate/common/ml_models/*
+train/lstm/*.ckpt
+train/lstm/*.hdf5
+data/*
+*.ckpt
+*.hdf5

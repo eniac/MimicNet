@@ -1,0 +1,18 @@
+reset
+set term post eps enhanced dashed color font 'Helvetica,20'
+set output "<OUTPUT_DIR>/<UNIQUE_NAME>_eval_throughput_cdf.eps"
+#set term png font 'Helvetica,20'
+#set output "<OUTPUT_DIR>/<UNIQUE_NAME>_eval_throughput_cdf.png"
+set nologscale x
+set nologscale y
+set key autotitle columnheader right top 
+set xlabel "Throughput"
+set ylabel "CDF"
+set size 1, 0.75
+#set format x "10^{%T}"
+#set xrange [0.001:.1]
+#set yrange [0:1]
+#set tics nomirror
+#set border 3
+plot "<GROUNDTRUTH_DAT>" using 1:2 title "Groundtruth" w lines lw 5,\
+    "<APPROX_DAT>" using 1:2 title "Approx" w lines lw 5

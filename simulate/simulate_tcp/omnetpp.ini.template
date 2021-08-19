@@ -1,0 +1,58 @@
+# Four configurations
+# For cmdenv, use "-c <config>"
+# 1. Base
+# 2. RecordTraining
+# 3. RecordEval
+# 4. RecordAll
+
+
+[General]
+# Flip these to get a full packet trace
+cmdenv-express-mode = true
+#cmdenv-express-mode = false
+#cmdenv-message-trace = true
+
+rng-class = "cMersenneTwister"  #default
+num-rngs = 1                    #default
+seed-0-mt = 0
+
+sim-time-limit = <SIMU_LEN>s
+
+**.networkLayer.arp.globalARP = true
+**.vector-recording = false
+
+**.tcpType = "TCP"
+**.tcp.tcpAlgorithmClass = "<TCP_VARIANT>"
+**.tcp.mss = 500
+**.tcp.windowScalingSupport = false
+**.tcp.advertisedWindow = 65535
+**.tcp.increasedIWEnabled = true
+**.sendBytes = 0
+
+# Queue configuration
+**.eth[*].queueType = "<QUEUE_TYPE>" # in routers
+**.eth[*].**.frameCapacity = 100 # in routers
+# **.eth[*].queue.dataQueue.mac.txQueueLimit = 100000
+
+
+[Config Base]
+network = FatTree
+
+**.configurator[*].disabled = false
+**.configurator[*].addStaticRoutes = true # Needs to be true
+**.configurator[*].optimizeRoutes = false
+**.configurator[*].storeHostAddresses = true
+
+include <TRAFFIC_CONFIG>
+
+include <CLUSTER_CONFIG>
+
+
+[Config RecordTraining]
+extends = Base, TrainPCAPs
+
+[Config RecordEval]
+extends = Base, EvalPCAPs
+
+[Config RecordAll]
+extends = Base, TrainPCAPs, EvalPCAPs
