@@ -5,7 +5,7 @@ Full Process:
 Download script separately or run from outer directory
 ```bash
 # running from outer directory
-./mimic/run_0_setup CPU|GPU
+./MimicNet/run_0_setup CPU|GPU
 source /etc/profile.d/mimicnet.sh
 ```
 
@@ -15,7 +15,7 @@ export CUDA_HOME=<<cuda_path>>
 ```
 
 
-the remaining scripts should be run inside the mimic directory
+the remaining scripts should be run inside the MimicNet directory
 ### 1. Compile 
 
 script used to build the libraries 
@@ -33,11 +33,11 @@ runs the simulation for the specified protocol and prepares the results
 ```
 ### 3. Hypertrain 
 
-trains mimic models and finds optimal hyperparameters
+trains Mimic models and finds optimal hyperparameters
 
 ```bash
 #  variant is the protocol being simulated
-#  train_script is the script used to train the mimic models
+#  train_script is the script used to train the Mimic models
 #  data_path is the location of the prepared results from 2_generate
 #  search_space_file is tune/hp_configs/lstm.json
 ./run_3_hypertrain <<VARIANT>> <<TRAIN_SCRIPT>> <<DATA_PATH>> <<SEARCH_SPACE_FILE>>
@@ -45,7 +45,7 @@ trains mimic models and finds optimal hyperparameters
 
 ### Run full process
 
-To start, run the following command in order to train a mimic model for a specific variant.
+To start, run the following command in order to train a Mimic model for a specific variant.
 ```bash
 # Currently supported variants are tcp, dctcp and homa
 ./run_all <<VARIANT>>
@@ -64,7 +64,7 @@ Following files need to be changed/created
 - prepare/Packet
 - train/lstm/train_lstm_[protocol]
 
-Where simulate_[protocol] is a directory that contains the script to run the simulation of the protocol, and likewise simulate_mimic_protocol is the directory that contains the script used to run the simulation of the protocol with the mimics.
+Where simulate_[protocol] is a directory that contains the script to run the simulation of the protocol, and likewise simulate_mimic_protocol is the directory that contains the script used to run the simulation of the protocol with the Mimics.
   
 for extract_features, the extract_mimic_features method needs to be modified depending on important features
   
