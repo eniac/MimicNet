@@ -27,7 +27,7 @@ sudo rm -f /etc/profile.d/mimicnet.sh
 echo "export TCL_LIBRARY=/usr/share/tcltk/tcl8.6" | sudo tee -a /etc/profile.d/mimicnet.sh
 
 echo "" | sudo tee -a /etc/profile.d/mimicnet.sh
-echo "export MIMICNET_HOME=${BASE_DIR}/mimic" | sudo tee -a /etc/profile.d/mimicnet.sh
+echo "export MIMICNET_HOME=${BASE_DIR}/MimicNet" | sudo tee -a /etc/profile.d/mimicnet.sh
 echo "export INET_HOME=${BASE_DIR}/parallel-inet" | sudo tee -a /etc/profile.d/mimicnet.sh
 echo "export OPT_HOME=${BASE_DIR}/opt" | sudo tee -a /etc/profile.d/mimicnet.sh
 echo "export PATH=\$PATH:${BASE_DIR}/parallel-inet-omnet/bin" | sudo tee -a /etc/profile.d/mimicnet.sh
@@ -64,14 +64,14 @@ sudo apt-get install -y libpcap-dev
 
 
 echo "Getting our code and parallel inet..."
-if [[ ! -d "mimic" ]]; then
-    GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no" git clone git@github.com:eniac/MimicNet.git
+if [[ ! -d "MimicNet" ]]; then
+    GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no" git clone https://github.com/eniac/MimicNet.git
 fi
 if [[ ! -d "parallel-inet-omnet" ]]; then
-    GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no" git clone git@github.com:qizzz/parallel-inet-omnet.git
+    GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no" git clone https://github.com/eniac/parallel-inet-omnet.git
 fi
 if [[ ! -d "parallel-inet" ]]; then
-    GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no" git clone git@github.com:qizzz/parallel-inet.git
+    GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no" git clone https://github.com/eniac/parallel-inet.git
 fi
 
 
@@ -148,6 +148,6 @@ make install
 
 echo "Make our code..."
 pip install msgpack hyperopt
-cd ${BASE_DIR}/mimic
+cd ${MIMICNET_HOME}
 ./run_1_compile.sh $1
 
