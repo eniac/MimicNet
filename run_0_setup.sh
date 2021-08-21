@@ -62,20 +62,13 @@ sudo apt-get install -y build-essential gcc g++ bison flex perl \
 sudo apt-get install -y openmpi-bin libopenmpi-dev
 sudo apt-get install -y libpcap-dev
 
-
-echo "Getting our code and parallel inet..."
 if [[ ! -d "MimicNet" ]]; then
+    echo "Getting MimicNet code..."
     GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no" git clone https://github.com/eniac/MimicNet.git
 fi
-if [[ ! -d "parallel-inet-omnet" ]]; then
-    GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no" git clone https://github.com/eniac/parallel-inet-omnet.git
-fi
-if [[ ! -d "parallel-inet" ]]; then
-    GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no" git clone https://github.com/eniac/parallel-inet.git
-fi
-
 
 echo "Installing OMNET++..."
+cp -r ${MIMICNET_HOME}/third_party/parallel-inet-omnet .
 cd parallel-inet-omnet
 mkdir -p bin
 ./configure
@@ -84,6 +77,7 @@ cd ..
 
 
 echo "Installing INET..."
+cp -r ${MIMICNET_HOME}/third_party/parallel-inet .
 cd parallel-inet
 ./compile.sh
 cd ..
@@ -146,7 +140,7 @@ fi
 make -j
 make install
 
-echo "Make our code..."
+echo "Building MimicNet..."
 pip install msgpack hyperopt
 cd ${MIMICNET_HOME}
 ./run_1_compile.sh $1
