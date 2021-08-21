@@ -104,6 +104,9 @@ while getopts "s:S:r:l:a:b:c:d:q:v:L:" opt; do
     d ) # mode
       MODE="$OPTARG"
       ;;
+    L ) # Link speed
+      LINK_SPEED="$OPTARG"
+      ;;
     \? )
       echo "Usage: ./run.sh Base|RecordTraining|RecordEval|RecordAll [-s seed] " \
            "[-r routing] [-l load] [-a servers_per_rack] " \
