@@ -57,18 +57,18 @@ Models:
 	./run_3_hypertrain needs a training script to be provided. In order to use a custom model, the custom training script should be provided here instead.
 
 Protocols:
-Following files need to be changed/created
+Following files/directories need to be changed/created
 - simulate/simulate_[protocol]
 - simulate/simulate_mimic_[protocol]
-- prepare/extract_features_[protocol]
-- prepare/Packet
-- train/lstm/train_lstm_[protocol]
+- prepare/extract_features_[protocol].py
+- prepare/Packet.py
+- train/lstm/train_lstm_[protocol].py
 
-Where simulate_[protocol] is a directory that contains the script to run the simulation of the protocol, and likewise simulate_mimic_protocol is the directory that contains the script used to run the simulation of the protocol with the Mimics.
+Where simulate_[protocol] is a directory that contains the script to run the simulation of the protocol, and likewise simulate_mimic_[protocol] is the directory that contains the script used to run the simulation of the protocol with MimicNet.
   
-for extract_features, the extract_mimic_features method needs to be modified depending on important features
+In extract_features_[protocol].py, the `extract_mimic_features` method needs to be modified depending on important features
   
-Packet should store the relevant flags used to determine whether packets match in the protocol (see Packet or HomaPkt for examples).
+Packet.py should store the relevant flags used to determine whether packets match in the protocol (see Packet.py or HomaPkt.py for examples).
 
-For the train script, all of the methods need to be changed to represent the feature vector for the specific protocol. 
+For the training script, all of the methods need to be changed to represent the feature vector for the specific protocol. 
 
