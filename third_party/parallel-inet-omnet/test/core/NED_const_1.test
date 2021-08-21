@@ -1,0 +1,44 @@
+%description:
+Test that non-volatile parameters in NED are really converted to constant.
+
+%file: test.ned
+
+simple Test
+{
+    parameters:
+        @isNetwork(true);
+        double p0 = truncnormal(10, 3);
+        double p1 = 1+truncnormal(10, 3);
+        double p2 = exponential(1);
+        double p3 = 1+exponential(1);
+}
+
+%file: test.cc
+
+#include <omnetpp.h>
+
+namespace @TESTNAME@ {
+
+class Test : public cSimpleModule
+{
+  public:
+    Test() : cSimpleModule(16384) { }
+    virtual void activity();
+};
+
+Define_Module(Test);
+
+void Test::activity()
+{
+    for (int i=0; i<getNumParams(); i++)
+        ev << par(i).getName() << ":" << (par(i).isExpression()?"expr":"constant") << endl;
+}
+
+}; //namespace
+
+%contains: stdout
+p0:constant
+p1:constant
+p2:constant
+p3:constant
+

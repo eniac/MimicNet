@@ -1,0 +1,129 @@
+%description:
+Test channel data rate
+
+%file: test.ned
+
+channel MyConn extends ned.DatarateChannel
+{
+    parameters:
+        datarate = 1e5bps;
+        delay = 0.1s;
+}
+
+simple Node1
+{
+    gates:
+        output out;
+}
+
+simple Node2
+{
+    gates:
+        input in;
+}
+
+network Test
+{
+    submodules:
+        node1: Node1;
+        node2: Node2;
+    connections:
+        node1.out --> MyConn --> node2.in;
+}
+
+%file: test.cc
+
+#include <omnetpp.h>
+
+namespace @TESTNAME@ {
+
+class Node1 : public cSimpleModule
+{
+  public:
+    Node1() : cSimpleModule(16384) { }
+    virtual void activity();
+};
+
+Define_Module(Node1);
+
+#define PRINTGATESTATE()  ev << "t=" << simTime() << ": busy:" << g->getTransmissionChannel()->isBusy() << ", finishes:" << g->getTransmissionChannel()->getTransmissionFinishTime() << endl;
+
+void Node1::activity()
+{
+    cPacket *pkt;
+    cGate *g = gate("out");
+
+    PRINTGATESTATE();
+
+    wait(1.0);
+
+    PRINTGATESTATE();
+
+    pkt = new cPacket("pkt1");
+    pkt->setBitLength(500);
+    send(pkt, g);
+
+    PRINTGATESTATE();
+
+    wait(1.0);
+    PRINTGATESTATE();
+
+    pkt = new cPacket("pkt2");
+    pkt->setBitLength(300);
+    send(pkt, g);
+
+    PRINTGATESTATE();
+    wait(0.004);
+    PRINTGATESTATE();
+
+    pkt = new cPacket("pkt3");
+    pkt->setBitLength(200);
+    send(pkt, g);
+
+    wait(0.002);
+    PRINTGATESTATE();
+
+    wait(1.0);
+    PRINTGATESTATE();
+}
+
+class Node2 : public cSimpleModule
+{
+  public:
+    Node2() : cSimpleModule(16384) { }
+    virtual void activity();
+};
+
+Define_Module(Node2);
+
+
+void Node2::activity()
+{
+    for (;;)
+    {
+        cMessage *msg = receive();
+        ev << "t=" << simTime() << ": " << msg->getName() << " arrived" << endl;
+        delete msg;
+    }
+}
+
+}; //namespace
+
+%inifile: test.ini
+[General]
+network = Test
+cmdenv-express-mode = false
+cmdenv-event-banners = false
+
+%contains: stdout
+t=0: busy:0, finishes:0
+t=1: busy:0, finishes:0
+t=1: busy:1, finishes:1.005
+t=1.105: pkt1 arrived
+t=2: busy:0, finishes:1.005
+t=2: busy:1, finishes:2.003
+t=2.004: busy:0, finishes:2.003
+t=2.006: busy:0, finishes:2.006
+t=2.103: pkt2 arrived
+t=2.106: pkt3 arrived
+t=3.006: busy:0, finishes:2.006

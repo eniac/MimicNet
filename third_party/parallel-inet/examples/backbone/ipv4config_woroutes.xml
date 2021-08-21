@@ -1,0 +1,65 @@
+<config>
+	<interface hosts='*.backbonerouter[*]' address='10.x.x.x' netmask='255.x.x.x'/>
+	
+
+	<interface hosts='*.treeLan[0].**' address='20.x.x.x' netmask='255.x.x.x'/>
+	<interface hosts='*.treeLan[1].**' address='21.x.x.x' netmask='255.x.x.x'/>
+	<interface hosts='*.treeLan[2].**' address='22.x.x.x' netmask='255.x.x.x'/>
+	<interface hosts='*.treeLan[3].**' address='23.x.x.x' netmask='255.x.x.x'/>
+	<interface hosts='*.treeLan[4].**' address='24.x.x.x' netmask='255.x.x.x'/>
+	<interface hosts='*.treeLan[5].**' address='25.x.x.x' netmask='255.x.x.x'/>
+	<interface hosts='*.treeLan[6].**' address='26.x.x.x' netmask='255.x.x.x'/>
+	<interface hosts='*.treeLan[7].**' address='27.x.x.x' netmask='255.x.x.x'/>
+	<interface hosts='*.treeLan[8].**' address='28.x.x.x' netmask='255.x.x.x'/>
+	<interface hosts='*.treeLan[9].**' address='29.x.x.x' netmask='255.x.x.x'/>
+	<interface hosts='*.treeLan[10].**' address='30.x.x.x' netmask='255.x.x.x'/>
+	<interface hosts='*.treeLan[11].**' address='31.x.x.x' netmask='255.x.x.x'/>
+	<interface hosts='*.treeLan[12].**' address='32.x.x.x' netmask='255.x.x.x'/>
+	<interface hosts='*.treeLan[13].**' address='33.x.x.x' netmask='255.x.x.x'/>
+	<interface hosts='*.treeLan[14].**' address='34.x.x.x' netmask='255.x.x.x'/>
+	<interface hosts='*.treeLan[15].**' address='35.x.x.x' netmask='255.x.x.x'/>
+	<interface hosts='*.treeLan[16].**' address='36.x.x.x' netmask='255.x.x.x'/>
+	<interface hosts='*.treeLan[17].**' address='37.x.x.x' netmask='255.x.x.x'/>
+	<interface hosts='*.treeLan[18].**' address='38.x.x.x' netmask='255.x.x.x'/>
+	<interface hosts='*.treeLan[19].**' address='39.x.x.x' netmask='255.x.x.x'/>
+	<interface hosts='*.treeLan[20].**' address='40.x.x.x' netmask='255.x.x.x'/>
+	<interface hosts='*.treeLan[21].**' address='41.x.x.x' netmask='255.x.x.x'/>
+	<interface hosts='*.treeLan[22].**' address='42.x.x.x' netmask='255.x.x.x'/>
+	<interface hosts='*.treeLan[23].**' address='43.x.x.x' netmask='255.x.x.x'/>
+	<interface hosts='*.treeLan[24].**' address='44.x.x.x' netmask='255.x.x.x'/>
+	<interface hosts='*.treeLan[25].**' address='45.x.x.x' netmask='255.x.x.x'/>
+	<interface hosts='*.treeLan[26].**' address='46.x.x.x' netmask='255.x.x.x'/>
+	<interface hosts='*.treeLan[27].**' address='47.x.x.x' netmask='255.x.x.x'/>
+	<interface hosts='*.treeLan[28].**' address='48.x.x.x' netmask='255.x.x.x'/>
+	<interface hosts='*.treeLan[29].**' address='49.x.x.x' netmask='255.x.x.x'/>
+	<interface hosts='*.treeLan[30].**' address='50.x.x.x' netmask='255.x.x.x'/>
+	<interface hosts='*.treeLan[31].**' address='51.x.x.x' netmask='255.x.x.x'/>
+	<interface hosts='*.treeLan[32].**' address='52.x.x.x' netmask='255.x.x.x'/>
+	<interface hosts='*.treeLan[33].**' address='53.x.x.x' netmask='255.x.x.x'/>
+	<interface hosts='*.treeLan[34].**' address='54.x.x.x' netmask='255.x.x.x'/>
+	<interface hosts='*.treeLan[35].**' address='55.x.x.x' netmask='255.x.x.x'/>
+	<interface hosts='*.treeLan[36].**' address='56.x.x.x' netmask='255.x.x.x'/>
+	<interface hosts='*.treeLan[37].**' address='57.x.x.x' netmask='255.x.x.x'/>
+	<interface hosts='*.treeLan[38].**' address='58.x.x.x' netmask='255.x.x.x'/>
+	<interface hosts='*.treeLan[39].**' address='59.x.x.x' netmask='255.x.x.x'/>
+	<interface hosts='*.treeLan[40].**' address='60.x.x.x' netmask='255.x.x.x'/>
+	<interface hosts='*.treeLan[41].**' address='61.x.x.x' netmask='255.x.x.x'/>
+	<interface hosts='*.treeLan[42].**' address='62.x.x.x' netmask='255.x.x.x'/>
+	<interface hosts='*.treeLan[43].**' address='63.x.x.x' netmask='255.x.x.x'/>
+	<interface hosts='*.treeLan[44].**' address='64.x.x.x' netmask='255.x.x.x'/>
+	<interface hosts='*.treeLan[45].**' address='65.x.x.x' netmask='255.x.x.x'/>
+	<interface hosts='*.treeLan[46].**' address='66.x.x.x' netmask='255.x.x.x'/>
+	<interface hosts='*.treeLan[47].**' address='67.x.x.x' netmask='255.x.x.x'/>
+	<interface hosts='*.treeLan[48].**' address='68.x.x.x' netmask='255.x.x.x'/>
+	<interface hosts='*.treeLan[49].**' address='69.x.x.x' netmask='255.x.x.x'/>
+	<interface hosts='*.treeLan[50].**' address='70.x.x.x' netmask='255.x.x.x'/>
+	<interface hosts='*.treeLan[51].**' address='71.x.x.x' netmask='255.x.x.x'/>
+	<interface hosts='*.treeLan[52].**' address='72.x.x.x' netmask='255.x.x.x'/>
+	<interface hosts='*.treeLan[53].**' address='73.x.x.x' netmask='255.x.x.x'/>
+	<interface hosts='*.treeLan[54].**' address='74.x.x.x' netmask='255.x.x.x'/>
+	<interface hosts='*.treeLan[55].**' address='75.x.x.x' netmask='255.x.x.x'/>
+	<interface hosts='*.treeLan[56].**' address='76.x.x.x' netmask='255.x.x.x'/>
+
+
+
+</config>

@@ -1,0 +1,56 @@
+%description:
+Check xmldoc(): no such file
+
+%file: test.xml
+
+<foo id="1">
+    <foo id="2" color="red">one</foo>
+    <foo id="3">
+        <bar id="3" color="yellow">
+            <baz id="5" color="green" weight="heavy">six</baz>
+        </bar>
+    </foo>
+</foo>
+
+%global:
+
+#ifdef _MSC_VER
+#pragma warning(disable:4786)
+#endif
+
+%file: test.ned
+
+simple Test
+{
+    parameters:
+        @isNetwork(true);
+        xml xmlconfig = xmldoc("nosuchfile.xml");
+}
+
+%file: test.cc
+
+#include <string.h>
+#include <omnetpp.h>
+
+namespace @TESTNAME@ {
+
+class Test : public cSimpleModule
+{
+  public:
+    Test() : cSimpleModule(16384) { }
+    virtual void activity();
+};
+
+Define_Module(Test);
+
+void Test::activity()
+{
+}
+
+}; //namespace
+
+%exitcode: 1
+
+%contains: stdout
+Error reading `nosuchfile.xml'
+

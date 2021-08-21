@@ -1,0 +1,25 @@
+%description:
+Test the --deep option
+
+%file: top.msg
+message Top {}
+
+%file: a/a.msg
+message A {}
+
+%file: b/b.msg
+message B {}
+
+%testprog: work -h classes
+%ignore-exitcode: 1
+%file: buildspec
+all:
+	$(OPP_MAKEMAKE) --deep
+
+%contains: stdout
+class A
+%contains: stdout
+class B
+%contains: stdout
+class Top
+

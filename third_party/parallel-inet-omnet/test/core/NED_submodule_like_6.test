@@ -1,0 +1,99 @@
+%description:
+Test parameter and gate multiple inheritance for module interfaces.
+
+%file: test.ned
+
+import testlib.Dump;
+
+moduleinterface IModule
+{
+    parameters:
+        string p0;
+}
+
+moduleinterface IModule1 extends IModule
+{
+    parameters:
+        int p1;
+    gates:
+        input in;
+}
+
+moduleinterface IModule2 extends IModule
+{
+    parameters:
+        double p2;
+    gates:
+        output out;
+        inout g;
+}
+
+module Module like IModule1, IModule2
+{
+    parameters:
+        string p0;
+        int p1;
+        double p2;
+    gates:
+        input in;
+        output out;
+        inout g;
+    connections allowunconnected:
+}
+
+network Test
+{
+    parameters:
+        string aType = "Module";
+    submodules:
+        a: <aType> like IModule1 {
+            parameters:
+                p0 = "Hello";
+                p1 = 1;
+                p2 = 2;
+        }
+        b: <aType> like IModule2 {
+            parameters:
+                p0 = "Hello";
+                p1 = 1;
+                p2 = 2;
+        }
+        dump: Dump;
+    connections:
+        a.out --> b.in;
+        b.out --> a.in;
+        a.g <--> b.g;
+}
+
+%file: test.cc
+
+%contains: stdout
+module Test: Test {
+    parameters:
+        @isNetwork
+        aType = "Module"
+    submodules:
+        module Test.a: Module {
+            parameters:
+                p0 = "Hello"
+                p1 = 1
+                p2 = 2
+            gates:
+                in: <-- b.out
+                out: --> b.in
+                g$i: <-- b.g$o
+                g$o: --> b.g$i
+        }
+        module Test.b: Module {
+            parameters:
+                p0 = "Hello"
+                p1 = 1
+                p2 = 2
+            gates:
+                in: <-- a.out
+                out: --> a.in
+                g$i: <-- a.g$o
+                g$o: --> a.g$i
+        }
+}
+

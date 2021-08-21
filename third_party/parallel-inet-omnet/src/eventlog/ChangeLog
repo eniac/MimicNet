@@ -1,0 +1,58 @@
+2014-06-30  ------ omnetpp-4.5 released ------
+
+2014-02-13  ------ omnetpp-4.4.1 released ------
+
+2013-12-20  ------ omnetpp-4.4 released ------
+
+2013-11-14  Rudolf Hornig
+
+	* Fixes for compiling with clang
+
+2013-09-12  ------ omnetpp-4.3.1 released ------
+
+2013-04-02  ------ omnetpp-4.3 released ------
+
+2013-02-08  ------ omnetpp-4.3rc1 released ------
+
+2012-03-13  ------ omnetpp-4.2.2 released ------
+
+2012-01-17  ------ omnetpp-4.2.1 released ------
+
+2011-10-28  ------ omnetpp-4.2 released ------
+
+2011-09-11  ------ omnetpp-4.2rc1 released ------
+
+2011-05-05  ------ omnetpp-4.2b2 released ------
+
+2011-02-23  ------ omnetpp-4.2b1 released ------
+
+2010-06-11  ------ omnetpp-4.1 released ------
+
+2010-05-31  ------ omnetpp-4.1rc2 released ------
+
+2010-04-20  ------ omnetpp-4.1b4 released ------
+
+2010-03-14  ------ omnetpp-4.1b3 released ------
+
+2009-11-09  Levente Meszaros
+
+	* Fixed handling eventlog-recording-intervals, recording stopped at the first non recorded
+	event and did not start afterwards.
+
+2009-03-12  ------ omnetpp-4.0 released ------
+
+2009-02-27  ------ omnetpp-4.0rc2 released ------
+
+2008-12-12  ------ omnetpp-4.0rc1 released ------
+
+2008-11-26  Andras Varga
+
+	* library renamed to oppeventlog
+
+2008-02-23  Andras Varga
+
+	* Started the ChangeLog. The Eventlog library was added in omnetpp-4.0.
+	It implements reading and traversing eventlog files recorded by
+	simulations, and also provides a command-line tool (eventlogtool).
+	Files >2GB are supported. The lib is used by Sequence Charts
+	in the IDE. Author: Levente Meszaros.

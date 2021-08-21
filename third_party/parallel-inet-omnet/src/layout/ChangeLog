@@ -1,0 +1,110 @@
+2014-06-30  ------ omnetpp-4.5 released ------
+
+2014-02-13  ------ omnetpp-4.4.1 released ------
+
+2013-12-20  ------ omnetpp-4.4 released ------
+
+2013-09-12  ------ omnetpp-4.3.1 released ------
+
+2013-04-02  ------ omnetpp-4.3 released ------
+
+2013-02-08  ------ omnetpp-4.3rc1 released ------
+
+2012-03-13  ------ omnetpp-4.2.2 released ------
+
+2012-01-17  ------ omnetpp-4.2.1 released ------
+
+2011-10-28  ------ omnetpp-4.2 released ------
+
+2011-09-11  ------ omnetpp-4.2rc1 released ------
+
+2011-05-05  ------ omnetpp-4.2b2 released ------
+
+2011-02-23  ------ omnetpp-4.2b1 released ------
+
+2011-02-18  Andras Varga
+
+	* in the layouter external interface (GraphLayouter), changed cModule*
+	pointers to int nodeId as a means of identifying nodes, because
+	using cModule* was not very convenient with the SWIG JNI wrapper
+	(nativelibs library).
+
+	* added BasicGraphLayouterEnvironment, for use from the IDE
+
+	* BasicSpringEmbedderLayout: findNode() is no longer linear search
+
+2011-02-15  Andras Varga
+
+	* In the external interface of layouters (GraphLayouter class),
+	changed "int" to "double" for coordinates and distances. Internally
+	they all already calculated everything in floating point.
+
+2010-06-11  ------ omnetpp-4.1 released ------
+
+2010-05-31  ------ omnetpp-4.1rc2 released ------
+
+2010-05-15  Andras Varga
+
+	* Improvements on the "classic" layouting algorithm:
+
+	- Correctly take into account the bounding box of anchored nodes when
+	  clipping anchor positions to background boundaries. See new fields
+	  x1off, y1off, x2off, y2off fields of Node.
+
+	- Subgraphs that are not connected to any fixed node are now allowed
+	  to stretch to negative coordinates during layouting, and will get
+	  shifted back to positive coordinates afterwards. This is only done
+	  if there is no background size given, otherwise there was no
+	  guarantee that the layouted subgraph would fit into the background
+	  area. See new field connectedToFixed of Node.
+
+	- Initial random distribution of nodes: area is now basically
+	  proportional to the number of nodes (i.e. one side is proportional
+	  to the square root of #nodes), instead of being fixed 600x400.
+	  We take the union of that area and the area already occupied by
+	  fixed nodes, and there is also a minimum size.
+
+	- Fix: addEdge(): module size was taken into account incorrectly
+
+	- Refactoring: bounding box calculation, creating the initial random
+	  distribution, etc. factored out to separate methods.
+
+2010-04-29  Andras Varga
+
+	* Bugfixes and cleanup of "classic" layouting algorithm:
+	- fix: dynamically created modules in Tkenv often ended up outside
+	  the compound module rectangle (see test/anim/dynamic2 test)
+	- initial random placement to use the area already occupied by fixed
+	  nodes (but minimum 600x400)
+	- removed scalingMode, setConfineToArea(), setScaleToArea(); related
+	  functionality is now internal to the layouter class
+	- removed several tweaks and nonlinearities from layouting code
+	- removed unused CONTRACTING_BOX code
+	- renaming of variables ("from"/"to" to "src"/"target", etc)
+
+2010-04-20  ------ omnetpp-4.1b4 released ------
+
+2010-03-14  ------ omnetpp-4.1b3 released ------
+
+2009-03-12  ------ omnetpp-4.0 released ------
+
+2009-02-27  ------ omnetpp-4.0rc2 released ------
+
+2008-12-12  ------ omnetpp-4.0rc1 released ------
+
+2008-11-26  Andras Varga
+
+	* library renamed to opplayout
+
+2008-04-19  Andras Varga
+
+	* basicspringembedderlayout: changed initial rect to 1000x1000 (was 100x100)
+
+2008-02-23  Andras Varga
+
+	* Started the ChangeLog. The Layout library was added in omnetpp-4.0.
+	It implements graph layouting algorithms, used for rendering networks
+	and compound modules in the IDE (graphical NED editor, NED documentation
+	generator), and in the runtime environment (Tkenv). BasicSpringEmbedderLayout
+	was taken from 3.x Tkenv; the other, more advanced algorithms were
+	implemented by Levente Meszaros.

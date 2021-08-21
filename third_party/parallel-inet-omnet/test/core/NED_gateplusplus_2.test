@@ -1,0 +1,31 @@
+%description:
+Test gate++ notation in connections: for loops, and mixing indices with '++'
+
+%file: test.ned
+
+module Node
+{
+    gates:
+        input in[];
+        output out[];
+    connections allowunconnected:
+}
+
+network Test
+{
+    submodules:
+        a: Node;
+        b: Node {
+            gates:
+                in[3];
+                out[3];
+        }
+    connections:
+        for i=0..2 {
+            a.out++ --> b.in[i];
+            a.in++ <-- b.out[i];
+        }
+}
+
+%file: test.cc
+// prevent "no object files" linker error if test is run alone

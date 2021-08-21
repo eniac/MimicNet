@@ -1,0 +1,48 @@
+%description:
+Test namespace.
+
+%file: test.msg
+
+namespace @TESTNAME@;
+
+class Foo { }
+
+struct Struct { }
+
+message cMessage { } // that is, @TESTNAME@::cMessage extends ::cMessage
+
+message Derived1 extends cMessage { }  // extends @TESTNAME@::cMessage
+
+message Derived2 extends ::cMessage { }  // extends OMNeT++ class (::cMessage)
+
+
+%includes:
+#include "test_m.h"
+
+%activity:
+
+// checks that classes are in the correct namespace
+::@TESTNAME@::Foo x;
+::@TESTNAME@::Struct y;
+::@TESTNAME@::cMessage m;
+::@TESTNAME@::Derived1 d1;
+::@TESTNAME@::Derived2 d2;
+
+// assest that the correct cMessage base class was generated for Derived1 and Derived2
+ASSERT(dynamic_cast< ::@TESTNAME@::cMessage*>(&d1) != NULL);
+ASSERT(dynamic_cast< ::@TESTNAME@::cMessage*>(&d2) == NULL);
+
+// check descriptor full name
+ev << x.getDescriptor()->getFullName() << "\n";
+
+// yet again
+ev << cClassDescriptor::getDescriptorFor("@TESTNAME@::Foo")->getClassName() << "\n";
+ev << cClassDescriptor::getDescriptorFor("@TESTNAME@::Struct")->getClassName() << "\n";
+ev << ".\n";
+
+%contains: stdout
+@TESTNAME@::Foo
+@TESTNAME@::FooDescriptor
+@TESTNAME@::StructDescriptor
+.
+

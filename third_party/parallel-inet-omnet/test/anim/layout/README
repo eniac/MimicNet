@@ -1,0 +1,13 @@
+
+Tests auto-layouting capability in Tkenv.
+
+Currently problematic ones:
+- net60 oscillates around a stable solution
+- dyna for n>10 is total failure
+- networkLayers is total failure
+
+In general, when there're many anchored nodes, they cause the graph
+oscillate wildly...
+
+bug in springembedderlayout: forces applied to an anchor must
+be divided by the number of nodes attached to the anchor

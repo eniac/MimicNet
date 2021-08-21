@@ -1,0 +1,17 @@
+%description:
+Test display string inheritance.
+
+%file: test.ned
+
+import testlib.Dump;
+
+network Test {
+    @display("i,,=foo,t=\n#UNRESOLVED: test is not implemented yet"); // illegal tag name (?)
+    submodules:
+        dump: Dump;
+}
+
+%exitcode: 1
+
+%contains: stdout
+// TODO:

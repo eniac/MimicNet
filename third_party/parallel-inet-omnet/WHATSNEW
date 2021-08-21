@@ -1,0 +1,3387 @@
+What's New
+==========
+
+This file summarizes OMNeT++ changes in each release. For changes related to
+simulation model compatibility, see doc/API-Changes. For more detailed info
+about all changes, see include/ChangeLog, src/*/ChangeLog, and ide/ChangeLog.
+
+
+OMNeT++ 4.5 (June 2014)
+-----------------------
+
+Tkenv:
+
+ - The Tkenv GUI has been redesigned for single-window mode to improve
+   usability and user experience. Tkenv has also received a new, modern look
+   and feel, due to the use of the Ttk widgets and a custom Ttk theme.
+
+   Details:
+   - single-window mode, with object navigator + 3 built-in inspectors
+     that interact in a meaningful way (new inspector windows can still
+     be opened)
+   - keep inpector windows on top of the main window at all times
+   - use Ttk widgets everywhere, with custom theme - this makes a huge
+     difference in looks on all platforms but esp. on OS X
+   - BLT no longer needed (we use Ttk instead)
+   - inspectors are no longer tied to a single object; visited objects
+     are remembered as navigable history (back/forward)
+   - module graphics now remembers zoom level and settings per NED type
+   - for each log line, the context module is now stored, and is shown
+     as a line prefix where it makes sense (differs from event's module)
+   - Tkenv now stores message sendings and also a clone of corresponding
+     message objects (cMessage), and can show them in the log window
+   - message printer classes can be contributed to customize the
+     messages view of log windows
+   - more concise status area that shows more information at the same time
+   - part of the status area can be turned off to free up vertical space
+   - timeline drawing now adapts to font size
+   - on-demand scrollbars (i.e. they are hidden when not needed)
+   - main menu cleanup (reorganized, removed obsolete items)
+   - dialogs where it makes sense now remember size and location
+   - additional hotkeys: Ctrl+Plus/Minus for Zoom, Ctrl+F5 Run Until,
+     Ctrl+Q Quit, etc.
+   - OS X: use Command key for hotkeys instead of Ctrl
+   - countless other, smaller improvements
+
+Other:
+
+  - In the Windows bundle, the debugger have been upgraded to gdb-7.7;
+    Tcl/Tk has been upgraded to version 8.6.0.
+  - New configure.user option to prefer clang over gcc if both are installed
+  - New configure.user option to enable/disable C++ 11 compilance (-std=c++11)
+    Note that this is NOT supported on Windows because of issues with the bundled
+    MinGW 4.7 compiler.
+  - Tcl/Tk version 8.5 is required, 8.6 is preferred; BLT is no longer in use
+
+
+OMNeT++ 4.4.1 (Feb 2014)
+------------------------
+
+Bugs fixed: http://tinyurl.com/omnetpp441-fixes
+
+
+OMNeT++ 4.4 (Dec 2013)
+----------------------
+
+Sim:
+
+  - Support for optional signal checking. When signal checking is turned on,
+    signals emitted by modules/channels must be declared with a @signal property
+    in the module's or channel's NED description; undeclared signals will result
+    in a runtime error. Signal declarations are of the form
+
+        @signal[<signalName>](type=<dataType>).
+
+    <signalName> may contain wildcards (?,*). Type is optional; if present,
+    data type can be long, unsigned long, double, simtime_t, string, or a
+    registered class name. To allow NULL pointers, append a question mark to
+    the class name. Example:
+
+        @signal[receivedPk](type=cPacket?);
+
+    This feature is controlled by the check-signals=<bool> configuration
+    option, and it is turned off by default for now.
+
+  - Support for @statistic-style declarative result recording on dynamically
+    registered signals (e.g. "conn-<n>" where n is an integer). Instead of
+    @statistic, add a @statisticTemplate property in the NED file, and for
+    each new signal call ev.addResultRecorders(...).
+
+  - Support for programmatically adding result filters and recorders on
+    signals: cResultRecorder has been revised to allow result recorders
+    to be used without a corresponding @statistic attribute, e.g. they
+    can now be added to signals programmatically.
+
+  - Further signals-related changes:
+    - added emit(simsignal_t, const cObject*) to cComponent
+    - added receiveSignal() overload for bool to cIListener
+    - introduced SimsignalType which replaces the older cITimestampedValue::Type
+    - added cObjectFactory::isInstance() method that effectively wraps a
+      dynamic_cast
+    - added Register_Abstract_Class() macro that allows abstract classes to be
+      used in signal declarations as type.
+
+  - Added cNEDValue::parseQuantity()
+
+  - New result filter: removeRepeats
+
+  - Feature: Just-in-Time debugging support. It adds the following new
+    configuration options: debugger-attach-on-startup=<bool>,
+    debugger-attach-on-error=<bool>, debugger-attach-command=<string>,
+    debugger-attach-wait-time=<time>. When any of the first two options are
+    set to true, the simulation kernel will launch an external debugger
+    attached to the simulation process at the appropriate time. The default
+    debugger on Linux is Nemiver.
+
+NED:
+
+  - More freedom in NED property syntax: (1) Hyphens, dots and colons are now
+    allowed in property names and indices; and (2) values no longer need
+    to be enclosed in quotes if they contain parens, provided that parens are
+    balanced.
+
+Tkenv:
+
+  - Feature: Animation filters (right-click on any message, and select
+    "Exclude messages like '...' from animation" from the context menu.)
+
+  - Feature: "Debug Next Event" (Ctrl+F9). It causes the simulation program
+    to stop in the debugger just before entering the handleMessage() call.
+
+  - Fixes and workarounds for various issues on Mac OS X (poor animation speed,
+    missing icons on OS X Mavericks, hang on the F5 key, etc.)
+
+  - Fix: the "Filter Window Contents" dialog could lose state
+
+  - Source cleanup (consistent naming style for Tcl procedures)
+
+IDE:
+
+  - Use Eclipse 4.3 as base platform
+
+  - Support for project-specific images: icons from the "images/" folder of the
+    project and its dependencies are automatically used by the NED editor, and
+    added to the Tkenv image path when the simulation is launched. (The folder
+    name is currently hardcoded; it will become configurable in future versions.)
+
+  - Sequence Chart: Fixed bug that caused including the same reuses multiple times.
+    Fixed error handling when the error occurs in paint during startup.
+
+Improved support for C++11, Mac OS X:
+
+  - The source now compiles without any warning with both gcc and clang, using
+    the "-std=c++11 -Wall" flags (clang is the default compiler on OS X since
+    version 10.9 Mavericks).
+
+  - Added proper support for cross-compilation using ./configure --host=i686-w64-mingw32
+
+  - Updated install instructions for OS X 10.9 Mavericks. Specifically, gdb is
+    no longer distributed with OS X; users are expected to install it themselves
+    from MacPorts, and digitally sign it.
+
+  - IDE: fixed the launcher not to throw error if the toolchain is clang.
+
+  - Updated the source to compile with both Bison 2.3 and 3.0
+
+Bugs fixed: http://tinyurl.com/omnetpp44-fixes
+
+
+OMNeT++ 4.3.1 (Sept 2013)
+-------------------------
+
+The IDE was made more friendly to first-time users:
+
+  - When the IDE is started with an empty workspace (e.g. on first-time
+    launch), it offers the user the following options: (1) Import the OMNeT++
+    sample simulations into the workspace; and (2) Download and install the
+    INET Framework.
+
+  - The latter function is also available via the Help > Install Simulation
+    Models... menu item. The menu item brings up a dialog with the list of
+    simulation models available for automated installation, and lets the user
+    choose. Currently only the INET Framework is listed there, but it is
+    planned to add further models.
+
+  - When the IDE is started for the first time, it now displays some helpful
+    introductory pages in the editor area: "Getting Started" (practical
+    advice for getting past the first 10 minutes spent in the IDE);
+    "At a Glance" (explains the common file types like NED, msg and ini, and
+    their purposes); "OMNeT++ Samples" (describes each example simulation in
+    two sentences, then provides links for opening the project, viewing the
+    README, launching the simulation, etc.) These pages are also available
+    from the Help system (except the last one, which has a dedicated menu item
+    under the Help menu.)
+
+Further IDE improvements:
+
+  - IDE launcher script: fixed #670 (vmargs conflict between omnetpp.ini and
+    the launcher script). This bug could cause IDE crashes by PermGenSpace
+    exhaustion.
+
+  - Analysis Tool, Output Vector View: show "Go to" actions in the context
+    menu (instead of the view's pulldown menu)
+
+  - Analysis Tool: fixed #389 (Useless items in the Statistic Name filter):
+    The filter hints of combos is now computed from the result items filtered
+    by the other 2 combos.
+
+  - Analysis Tool: fixed #388 (add '*.host[*].*' variant to module filter hints)
+
+  - Ability to import sample projects even if workspace is different from
+    omnetpp/samples
+
+  - Trying to launch a closed project will now offer opening it
+
+  - NED documentation generator: fixed #672 (Illegal group reference error)
+
+  - Changed default appearance of the main welcome page to be more user
+    friendly
+
+  - Some other bug fixes
+
+
+OMNeT++ 4.3 (March 2013)
+------------------------
+
+IDE:
+
+  - Updated to Eclipse 3.8.2.
+
+  - The CDT debugger no longer stops at the main() function by default.
+
+  - The bundled GDB has been downgraded to 7.4, due to problems with the one
+    in the 4.3rc1 version
+
+Tools:
+
+  - The configure script now correctly detects the X headers on Mac OS X 10.8.
+
+
+OMNeT++ 4.3rc1 (Jan 2013)
+-------------------------
+
+IDE:
+
+  - Analysis tool: added support for computed scalars. Read the updated the
+    User Guide for further details.
+
+  - Analysis tool: added 'Logarithmic X axis' option to scatter chart.
+
+  - Added NED editor support for named channels.
+
+  - Added support for opening files from the command line, i.e. use:
+    $ omnetpp Aloha.ned
+
+  - Added full screen mode (Ctrl-Shift-F11).
+
+  - Usability improvements in the Analysis Tool.
+
+  - Better error reporting in the Sequence Chart and Event Log views.
+
+  - The CDT C++ code analyzer has been turned off as it was reporting
+    too many false positives.
+
+  - The IDE has been switched over to use CDT's DSF debugger instead of
+    the older CDI.
+
+  - The IDE no longer runs the C/C++ Indexer before build (the code now
+    collects the information for makefile dependency generation by other
+    means)
+
+  - Added pretty printing of STL containers (std::map, etc), simtime_t
+    and other objects to the debugger; see the updated User Guide for
+    details.
+
+  - Updated the bundled MinGW (GCC, linker and GDB).
+
+  - Updated to Eclipse 3.8.1; the IDE now requires Java 1.6+.
+
+NED:
+
+  - Added named channels support, e.g. "...<--> eth1: EthernetChannel <-->...",
+    with the purpose of making it easier to address channel objects when
+    assigning parameters from ini files. Channel definitions can now specify
+    a default name (via the @defaultname property), too.
+
+Sim:
+
+  - Added the cPatternMatcher and cMatchExpression utility classes to the API.
+    cPatternMatcher is a glob-style pattern matching class. cMatchExpression
+    builds on top of cPatternMatcher and lets you combine patterns with AND,
+    OR, NOT for matching fields of arbitrary objects.
+
+  - Added hasEncapsulatedPacket() to cPacket.
+
+  - Implemented calculateWeightedSingleShortestPathsTo() in cTopology.
+
+  - Signals implementation now allows static initialization of simsignal_t
+    variables.
+
+  - Fixed a bug in Expression where '-2m' was evaluated to '2' (meter was lost)
+
+Tools:
+
+  - The simulator now supports Mac OS X 10.8 (you need to install XQuartz; see
+    the Install Guide)
+
+  - Simplified makefile output: Makefiles now output only the filenames to the
+    console instead of whole commands. This makes the build output less noisy.
+    If you need the old behavior, use the 'V=1' (verbose on) option on
+    the make command line.
+
+
+OMNeT++ 4.2.2 (March 2012)
+--------------------------
+
+Bugs fixed: http://tinyurl.com/omnetpp422-fixes
+
+
+OMNeT++ 4.2.1 (Jan 2012)
+------------------------
+
+Bugs fixed: http://tinyurl.com/omnetpp421-fixes
+
+
+OMNeT++ 4.2 (Nov 2011)
+----------------------
+
+Several bug fixes.
+
+
+OMNeT++ 4.2rc2 (Nov 2011)
+-------------------------
+
+Documentation:
+
+  - Revised and significantly expanded the "C++ Development" chapter in the
+    User Guide to better assist model developers; smaller improvements in
+    other chapters
+
+Tools:
+
+  - Updated MSYS and MinGW binaries in the Windows distribution.
+
+  - The build system now creates 64-bit binaries on Mac OS X 10.6 and 10.7
+    (if your processor supports it). Previously the -m32 flag was added to
+    the GCC command line to force the creation of 32-bit binaries. (This
+    was necessary because earlier versions of CDT did not support 64-bit
+    debugging).
+
+  - Enabled pretty-printing of variables in gdb (see below)
+
+IDE:
+
+  - Better C++ debugging experience: std::string, std::vector, std::map and
+    other standard classes as well as simtime_t are now displayed in a
+    meaningful way; simulation objects (cObject) display their full paths.
+    This functionality is enabled by gdb pretty printer extensions written
+    in Python, and is thus available for command-line gdb debugging too.
+    For activating the pretty printers, see misc/gdb/README.
+
+  - NED documentation generator improvements: better-looking tables in the
+    generated documentation; running Doxygen is now cancellable; etc.
+
+  - Dropped PowerPC support for the IDE because Mac OS X 10.7 no longer
+    supports this architecture.
+
+Sim:
+
+  - Refactored operator= and copy constructor in all classes. Now they
+    delegate to the same function in the super class, and the common
+    part of the two is factored out to private copy() functions.
+
+  - Fixed all warnings to make it compile using -Wall -Werror.
+
+  - Coroutines used for 'activities' are now implemented using the
+    swapcontext() POSIX call (if it is available on the system).
+
+Sample simulations:
+
+  - Database example revived. It demonstrates using database as configuration
+    source, as storage for output scalars and vectors, and as source of
+    network topology. Currently it works with MySQL.
+
+Countless bug fixes and smaller improvements.
+
+
+OMNeT++ 4.2rc1 (Aug 2011)
+-------------------------
+
+Ini files:
+
+ - Ini files: iterations (${...}) can now refer to other iteration variables,
+   using the dollar or the dollar-brace syntax ($var or ${var}). This
+   improvement makes it possible to have loops where the inner iteration range
+   depends on the outer one. When needed, the default top-down nesting order
+   of iteration loops is modified (loops are reordered) to ensure that
+   expressions only refer to more outer loop variables, but not to inner ones.
+   When this is not possible, an error is generated with the "circular
+   dependency" message. Variables are substituted textually, and the text
+   resulting from substitution is NOT evaluated except in the '<from>..<to>
+   step <step>' syntax, and in the 'constraint=' ini file option. CAUTION:
+   textual substitution means that variables in arithmetic expressions should
+   be protected with parentheses. The text substitution model was chosen for
+   greater flexibility as well as the ability to produce a more consistent
+   semantics. See src/envir/ChangeLog for more details.
+
+ - Incompatible change: In the constraint= configuration option, variables now
+   MUST be referenced with the dollar sign ($foo or ${foo} syntax), and also
+   be surrounded with parens (to ensure precedence after the textual variable
+   substitution). For example, the expression x+y<10 must be changed to
+   $x+$y<10, or for greater safety, to ($x)+($y)<10.
+
+ - Parallel iteration: it is now supported to use named iteration
+   variables and parallel iteration together (${foo=...!bar} syntax.)
+   This was not supported previously.
+
+ - Some iteration-related error messages have been improved to provide
+   more context.
+
+Sim:
+
+ - Result filter/recorder interfaces and registration macros made public
+   (moved to src/sim), so that users can contribute their own result filters
+   and recorders. Files: cresultlistener.h, cresultfilter.h  cresultrecorder.h.
+   Result filters have to be subclassed from cResultFilter or the more specific
+   cNumericResultFilter or cObjectResultFilter base classes and registered with
+   the Register_ResultFilter() macro; result recorders have to be subclassed
+   from cResultRecorder or the more specific cNumericResultRecorder, and
+   registered with the Register_ResultRecorder() macro. After that, the new
+   filter or recorder can be used in the source= and record= attributes of
+   @statistic, and with the **.result-recording-modes configuration option.
+
+ - The Define_Function() macros have been renamed to Define_NED_Math_Function().
+   For backwards compatibility, the old macro definitions remain, but issue
+   a deprecation warning. Note that the preferred way of defining new NED
+   functions is now the Define_NED_Function() macro.
+
+ - The API for custom NED functions defined via Define_NED_Function() has been
+   changed. cDynamicExpression::Value (the old value class) has been factored
+   out to a new cNEDValue class. Data members are no longer public, they can
+   be manipulated via various methods. NOTE: This change is NOT backwards
+   compatible: user-supplied NED functions will need to be revised.
+   Look at src/sim/nedfunctions.cc for code examples.
+
+ - Measurement unit support: added "mps" (m/s) and "kmph" (km/h) as recognized
+   units; changed "Kbps" to the more standard "kbps"; changed byte multiples
+   notation to use the now-standard IEC binary prefixes: KB -> KiB,
+   MB -> MiB, GB -> GiB, TB -> TiB. The latter changes affect backwards
+   compatibility, i.e. you may need to update existing models.
+
+Tools:
+
+ - opp_run: bugfix: release-mode simulation models compiled as shared libraries
+   could not be run using a debug-mode opp_run program (they either crashed
+   or reported that a module was not registered with the Register_Module()
+   macro.) As part of the fix, a new opp_run_release program has been
+   introduced, and opp_run (which is now always compiled as debug) delegates
+   to it when necessary.
+      Due to makefile changes related to the fix, you may need to re-create the
+   makefiles of your simulation when upgrading to OMNeT++ 4.2. (You only need
+   to do that when working on the command line. The IDE automatically recreates
+   the makefiles, so no action is needed on your part if you are using only the
+   IDE.) See src/envir/ChangeLog for details of this change.
+
+ - Implemented number filter expressions using multiple inputs for statistics source
+   expressions. For example:
+
+      @statistic[dropRate](source="count(packetDropped)/count(packetSent)");
+
+ - opp_msgc: improvement: announcements and type definitions now observe
+   whether they are above the namespace declaration (=outside the namespace)
+   or below it (=inside the namespace). This change makes it consistent with
+   cplusplus blocks that had this behavior for quite some time. A related
+   improvement is that type lookup in namespaces has been modified to make it
+   possible to use unqualified names when declaring fields. See
+   src/nedxml/ChangeLog for details.
+
+ - Akaroa support improved; samples/aloha/akaroa.ini was added as example
+
+Documentation:
+
+ - Several chapters in the User Manual have been updated; especially, the
+   Message Definitions section was turned into a separate chapter, and
+   was completely revised.
+
+IDE:
+
+ - Upgraded to Eclipse 3.7
+
+ - Added Eclipse Marketplace to the Help menu. You can now install
+   additional features from the market.
+
+ - Before running the simulations, the IDE will show the command line in
+   the console view to help you execute the same simulation from the
+   command line.
+
+ - Ctrl-Tab now works on freshly opened NED files even if you do not explicitly
+   select a simple module. In that case, the IDE opens the .h and .cc files
+   associated with the first simple module in the NED file.
+
+ - Improvement on the Manage Build Configurations dialog: newly created build
+   configurations are now configured, by copying the source entries from one
+   of the existing build configurations.
+
+ - Project Makemake Options property page: overhaul for better usability.
+
+ - Documentation generator: turn on JAVADOC_AUTOBRIEF in newly generated
+   doxy.cfg files. (When this option is on, there is no need for @brief
+   in C++ doxy comments; instead the first sentence of the comment is taken
+   automatically as brief description.)
+
+ - Bug fixes on: IDE makefile generator; the Project Features feature;
+   the Inifile Editor (hover info, content assist, etc); the NED editor
+   (display string proposals for connections and channels, etc.); Organize
+   Imports feature; NED documentation generator; Simulation Launcher (e.g.
+   launching folders with simulations in them works again);
+
+ - SVN support removed from the IDE. It had very few users, and can be
+   installed from the Market if needed.
+
+ - Removed Animation Player as it was only a "technology preview" bundled
+   with the beta releases to gather feedback from the user community. The
+   animator is scheduled to appear in the next major OMNeT++ release.
+
+
+OMNeT++ 4.2b2 (May 2011)
+------------------------
+
+Most important feature: "Project Features" (see below).
+
+NED:
+
+ - Added support for conditional submodules. Syntax:
+
+     udp: UDP if needsUDP {...}
+     tcp: <tcpType> like ITCP if needsTCP {...}
+
+ - Added the xml() NED function, which accepts a string argument and parses
+   it as XML. Its most notable use is eliminating "empty.xml" files from INET:
+   one can use xml("<root/>") in NED files instead.
+
+ - Implemented default value for parametric submodule and channel types.
+   NED now supports the following syntax:
+
+     mobility: <default("NullMobility")> like IMobility;
+
+   The effect is that the NullMobility NED type will be used for the mobility
+   submodule if the type name is not specified otherwise, e.g. in the config-
+   uration with something like
+
+     **.mobility.type-name = "ConstSpeedMobility"
+
+ - Added the firstAvailable() NED function, which is helpful with the Project
+   Features feature (see below). It accepts any number of strings (see new
+   varargs support for NED functions), interprets them as NED type names
+   (either short names or fully qualified names), and returns the first one
+   that exists and is also "available" (its C++ implementation class exists).
+   Example usage:
+
+     tcp: <default(firstAvailable("TCP_lwIP", "TCP_NSC", "TCP"))> {..}
+
+   It chooses the TCP_lwIP, TCP_NSC or TCP module type for the tcp submodule,
+   in this order, unless the type is explicitly defined to be something else
+   in the configuration.
+
+ - Parametric submodule type can now also be specified in NED files, using
+   patterns that end in the new "typename" keyword. An example:
+
+     network Net {
+         parameters:
+             host[*].tcp.typename = "TCP_lwIP";
+         ...
+     }
+
+Ini files:
+
+ - The "type-name" per-object configuration option (**.typename=) has been
+   renamed in to "typename", for consistency with the similar new NED feature.
+
+Sim:
+
+ - Implemented varargs support for NED functions. If the signature (see
+   Define_NED_Function() and Define_NED_Function2() macros) ends in ", ...",
+   then the function will accept any number of additional arguments of any type.
+   At runtime, the implementation has access to both the actual number and
+   types of args. When passing extra args, optional arguments (those marked
+   with '?' in the signature) must all be present, i.e. varargs can only come
+   when all typed args are there.
+
+IDE:
+
+ - Upgraded to Eclipse 3.6.2
+
+ - Implemented the "Project Features" feature, which makes it possible to
+   disable unused parts ("features") of a project to reduce compilation time
+   and complexity. It has been invented to help INET Framework users and
+   developers deal with the growing size of the framework. Features are
+   described in the project's .oppfeatures file, authored by INET developers.
+   Users can activate/deactivate features in the Project Features page of
+   the Project Properties dialog (this page is directly accessible from the
+   Project menu and from the Build Configurations submenu of the project's
+   context menu in Project Explorer). Features map to NED packages and C++
+   source folders; disabling a feature maps to NED package exclusion, and
+   folder exclusion in CDT (C++ Development) configuration. Features can also
+   define C/C++ symbols (for #ifdefs), and extra libraries to link with.
+   At build time, the IDE checks the project's configuration (NED, CDT) and
+   if it is inconsistent with the selected features, it offers fixing it.
+   Features can also be used from the command line by exporting Makefiles
+   (or opp_makemake commands) that reflect a particular enablement of features.
+
+ - Support for excluding (disabling) NED packages. This feature is needed for
+   the Project Features feature. Exclusions can be edited on the NED Source
+   Folders project property page, and are saved into the project's .nedfolders
+   file.
+
+IDE/Animation Player:
+
+ - Implemented lazy loading of the eventlog file: the tool can now animate
+   large eventlog files with acceptable performance.
+
+ - Animation effects refined, e.g. packet transmission on a datarate channel.
+
+ - Heavy bugfixing. Note that the tool is still being actively developed, and
+   it is generally not yet ready for everyday use.
+
+IDE/Inifile Editor:
+
+ - Usability: the editor now comes up with the page (text or form) that was
+   used last time, and not always with the form editor. (When you flip the
+   editor to the other page, the page type is stored in the preferences.
+   When an editor is opened, the setting is read from the preferences and
+   the corresponding page is activated.)
+
+ - Improved text hover (F2) and hyperlink (Ctrl+click) support: the editor
+   can now show information and go to the definition of modules that occur
+   in the inifile key. For example, for a **.host[*].tcp.sackSupport = true
+   line, the user can hover over (or Ctrl+click) the host[*] part, and the
+   editor will show relevant information and go to the definition of the
+   host[] submodule vector in the NED network description.
+
+ - Improved content assist: per-object configuration options are now filtered
+   by the type of object that the key refers to; for example, if you type
+   **.ppp[*].txPkBytes.<Ctrl+Space>, the editor will know from the NED files
+   that txPkBytes is a statistic, and offer completions accordingly.
+
+ - Content assist: different types of completions (modules, parameters,
+   statistics, configuration options, etc) are now marked with icons.
+
+ - Markers on included inifiles are now removed when the main inifile is
+   closed. (Fix for #176)
+
+ - Added the Copy action to the Module Parameters view context menu: you can
+   now select the key for an unassigned parameter in the view, and copy/paste
+   it into the editor area.
+
+IDE/Wizards:
+
+ - New Tictoc Example and New Source-Sink Example wizards: fix: the root
+   Makefile executed opp_makemake in the src/ folder at each build,
+   overwriting the IDE-generated Makefile.
+
+ - New OMNeT++ Project wizard template: now it is possible to set "custom make"
+   for a folder: specify <foldername>:CUSTOM in the makemakeOptions= template
+   variable in template.properties. Use "." to name the project root folder.
+   Example: makemakeOptions = .: CUSTOM, src: --deep -meta:recurse...
+
+ - New option for template.properties: preRunTemplate=<fti-file-name>. Example:
+   preRunTemplate = main.fti. The option causes the given template file to be
+   evaluated for its side effects, just after the user hits Finish but before
+   any file is copied or template is evaluated. It is not allowed to produce
+   text output, but the variables it sets will be substituted into other
+   template.properties variables, and will also be available in other template
+   files. (Note: all other templates are run in isolation, and cannot change
+   variables for other templates!) The preRunTemplate option is the only way
+   to programmatically set the value of makemakeOptions and similar
+   template.properties options.
+
+IDE/Graphical Editor:
+
+ - Switched back double-click behavior to Open NED Type action. The Properties
+   dialog can now opened with Ctrl+Enter (Alt+Enter was unavailable.)
+
+IDE/Sequence Chart and Event Log:
+
+ - Added show/hide options for arrows that represent mixed dependencies.
+   (Such arrows are drawn when the sequence chart is filtered, and represent
+   e.g. a sequence of message sendings and self-messages)
+
+ - Eventlog: enhanced performance of event tracing filter
+
+ - Simulations now record the termination message and result code into the
+   eventlog file
+
+ - Note: eventlog file format has changed (in order to better serve the
+   Animation Tool) -- .elog files recorded with any prior version of OMNeT++
+   have to be re-recorded.
+
+Many bug fixes, mostly in the IDE; you can see the detailed list at:
+http://tinyurl.com/omnetpp42b2-fixes
+
+
+OMNeT++ 4.2b1 (Feb 2011)
+------------------------
+
+Partial list of changes since 4.1 (see ChangeLog files in individual folders
+for a more complete list):
+
+Simulation runtime:
+
+ - Removed #include <winsock.h> from <platdep/timeutil.h>; the reason
+   is that it conflicted with lwIP code recently integrated into INET.
+   <platdep/sockets.h> still includes <winsock.h>, but now
+   <platdep/sockets.h> (and <platdep/timeutil.h>) MUST precede <omnetpp.h>
+   in all source files.
+
+ - Ini files: implemented multiple inheritance for sections. Syntax:
+
+     [Config Foobar]
+     extends = Foo, Bar
+
+   When the runtime looks for a config option or param assignment, sections
+   are examined in a "fallback order" until the first match is found. In the
+   above example the order would be: Foobar, Foo, Bar, General.
+   OMNeT++ uses C3 linearization to compute the section fallback order,
+   see e.g. http://en.wikipedia.org/wiki/C3_linearization
+
+ - Ini files: better parsing for iteration variables, e.g. the value in
+   ${x=uniform(1,2)} is now parsed as one item, not as "uniform(1" and "2)".
+   Nested parens/brackets/braces and string literals are recognized;
+   escaping commas and close-braces is now possible using backslash.
+
+ - NED: fixed deep parameter assignments: parameter references were
+   interpreted in the wrong context. Deep parameter assignments are when
+   an inifile-like pattern is used to name the parameter(s) to be set, as in:
+
+      network Inet {
+          parameters:
+              host[*].tcp.nagleEnabled = true;
+          ...
+      }
+
+ - Resolved spurious errors: 'Class "..." not found -- perhaps its code
+   was not linked in, or the class wasn't registered with Register_Class()'
+   Added a check to ensure that the debug and the release versions of
+   the simulation library are not loaded at the same time. This problem
+   occurred when a model was built as 'release' and the debug version of
+   'opp_run' was used to start it. As a result, the simulation seemingly
+   started but complained about missing classes.
+
+ - Fix: Some classes were thrown out by the linker if OMNeT++ was statically
+   built, and the simulation was complaining at runtime about the missing
+   cCompoundModule class.
+
+ - Eventlog recording: .elog file format change: message creations and
+   duplications (cloning) are now recorded; MC (ModuleCreated) entries now
+   precede GC (GateCreated) entries. IMPORTANT: The sequence chart in the
+   IDE will only work on .elog files in the new format, existing event logs
+   need to be re-recorded!
+
+IDE/Animation Player:
+
+ - This is a new component in the IDE, you can access it by right-clicking
+   an .elog file and selecting "Open With / OMNeT++ Animation Player" from
+   the context menu. This is a preliminary implementation (Technology
+   Preview) not yet optimized for large files, the practical maximum file
+   size it can handle is about 10MB.
+
+IDE/C++ Development:
+
+ - Added a new "Clean Local" item to the project's context menu that does
+   not clean referenced projects. This resolves the problem that CDT's
+   "Clean Project" command also cleans the referenced projects, e.g. if
+   you have a Foo project that depends on INET, cleaning Foo also cleans
+   INET which takes a long time to recompile. Now you can use the
+   "Clean Local" command to clean Foo only.
+
+ - Added new "OMNeT++ Code Formatter" profile. This coding convention follows
+   the rules used in the OMNeT++ kernel and the INET Framework. (No tabs, etc.)
+
+ - Added MachO64 binary parsers and error parsers. This makes it possible to
+   debug a 64-bit executable on Mac OS X 10.6
+
+ - Linux only: Added support for profiling with Valgrind. To activate this
+   feature, select "Profile as... / OMNeT++ Simulation" from the Project
+   Explorer context menu. This feature requires Valgrind to be installed
+   on your system. (Note: the main IDE toolbar does not show a Profile button
+   next to the Run and Debug buttons at this time, but profiling is still
+   available via the Project Explorer context menu.)
+
+ - The Makemake page in Project Properties can now fix the "Source Folders
+   differ across configurations" problem in the project setup, which usually
+   occurs when you add a build configuration to an existing project later.
+   The dialog now displays a "Fix it" link.
+
+IDE/Graphical Editor:
+
+ - Several performance optimizations for the NED Editor. It can open much larger
+   files than before. NED validation is done now in a background thread and
+   does not block the UI.
+
+ - Select 'NED Type Selection' dialog now works correctly on first open. It
+   shows the defining projects for the types.
+
+ - Enhanced drag and drop capabilities in NED Graphical Editor. You can
+   drop NED types into a compound module either to create submodules
+   (if you drop it into the submodule area), or to turn it into
+   an inner type (if you drop on the title of the compound module).
+
+ - The Graphical Editor now displays the file's package name at the top.
+
+ - Graphical Editor displays self-connections as arcs in the module's upper
+   right corner.
+
+ - The resize/move feedback figures have been changed from a simple outline
+   to translucent blue.
+
+ - Added a 'Properties' dialog that can edit one or several objects
+   at a time, and allows you to change graphical and type information.
+   It also has a preview panel.
+
+ - Enhanced editing of type fields in the 'Property View'. The editor correctly
+   enumerates the possible choices and adds an import statement if necessary.
+
+ - 'Open Type' and 'Open Supertype' have been reassigned to the F3 function key.
+   Double-click now opens the 'Properties' dialog.
+
+ - The IDE now uses the use native (C++) layouter code for placing unpinned
+   submodules, which means better performance and consistency with the
+   simulation runtime (Tkenv).
+
+IDE/Inifile Editor:
+
+ - Support for inifile improvements in this release, namely multiple section
+   inheritance and better parsing for iteration variables
+
+ - Performance improvements: inifile is now analyzed in the background so that
+   it does not block the UI, and features that need its results (hover text,
+   content assist, etc) have a timeout how long they are willing to wait for it
+   (see bug #132 for details). It is now also possible to disable inifile
+   analysis. Further performance and UI responsiveness improvements are planned.
+
+IDE/Sequence Chart:
+
+ - Added 'Go to Simulation Time' and 'Go to Event Number' in the context menu.
+
+ - 'Go to Simulation Time' in the 'Event Log' view now supports relative values.
+
+ - The Sequence Chart tool now knows about message creations and duplications
+   (cloning), and as a result, in certain situations it is now able to better
+   identify relationships between events and draw a better sequence chart.
+   NOTE: Due to changes in the .elog file format, the tool will only work with
+   newly recorded files. Existing event logs need to be re-recorded!
+
+IDE/Launcher:
+
+ - The command-line for launching the simulation now uses relative paths instead
+   of absolute ones. This makes the starting command-line easier to understand.
+
+IDE/Documentation Generator:
+
+ - Added tilde notation as an alternative to automatic hyperlinking of module
+   names in comments. The latter was often too aggressive (e.g. linking to the
+   IP module in the phrase "IP address" is wrong). Automatic hyperlinking can
+   now be turned off in the generator, and then the user is expected to mark
+   words to be hyperlinked with a tilde: "the ~IP module". The INET Framework
+   has already been converted to use the tilde notation.
+
+ - Added Javascript to autoload frameset page if a content page is opened by
+   itself. This is useful when URLs to specific content pages are posted on
+   the mailing list or sent over email.
+
+ - Implemented @include in NED comments. Lines in the included file don't have
+   to start with "//", but otherwise they are processed exactly as NED comment
+   text.
+
+ - Fix: External pages (@externalpage) now appear under the "Selected Topics"
+   node of the navigation tree in the generated documentation.
+
+ - Several minor fixes: recognize the <u> (underline) HTML tag; sanitize the
+   file names for @page; added/refined test cases
+
+Tkenv:
+
+ - Parallel simulation: Placeholder modules are now displayed with a semi-
+   transparent icon (or if it's a rectangle or oval, with dotted border).
+
+ - Fix (bug #248): compute coordinates (and sizes) in double and not int;
+   necessary if background scaling (bgs display string tag) is set up.
+
+ - Better choice of default user interface font, especially on Linux.
+
+ - The generic UI font and the font used in graphics are now configurable
+   in the Simulation Options dialog.
+
+ - The default font for log text is now proportional (same as the generic UI
+   font), for better readability and space efficiency. It can be customized
+   (switched back to a monospace font, etc) in the Simulation Options dialog.
+
+ - Minor: menu items have been changed to title case
+
+ - Tcl errors are now logged into .tkenvlog instead of dumping them on stdout.
+
+Misc:
+
+ - Added -g option to 'scavetool scalar' command. You can specify how the
+   scalars are grouped into columns/variables.
+
+ - The build system can now build large projects on windows. The 32K command-line
+   limitation has been resolved.
+
+ - Updated base system to Eclipse 3.6.1
+
+ - Added a detailed IDE change log file doc/IDE-Changes
+
+Several bugs have been fixed; you can see the detailed list at:
+http://tinyurl.com/omnetpp42b1-fixes
+
+
+OMNeT++ 4.1 (June 2010)
+-----------------------
+Changes after 4.1rc2:
+
+ - Testing on various Linux distros, updated Installation Guide
+
+ - Simulation error messages now contain the event number and the simulation
+   time
+
+ - Tkenv: contents of simulation error dialogs are now inserted into the
+   main window as well, for reference and easier copy/paste
+
+ - Various bug fixes
+
+
+OMNeT++ 4.1 rc2 (June 2010)
+-------------------------------
+Simulation kernel:
+
+ - cChannel: added forceTransmissionFinishTime(simtime t), so that
+   channels can support aborted transmissions (needed e.g. for Ethernet).
+
+ - cChannel: added getNominalDatarate(). This is often needed in models,
+   for example in INET to fill in the interface entry.
+
+ - added forgetXMLDocument(filename) and flushXMLDocumentCache() to
+   cEnvir (see bug #131)
+
+ - cPar: added a note to the xmlValue() method that the lifetime of
+   the returned objects may be limited. Modules should NOT hang on to
+   cXMLElement pointers between events!
+
+Envir:
+
+ - Ini file inclusion now behaves as textual substitution: if an included
+   ini file does not contain [General] or [Config XXX] lines, the file's
+   content will be treated as if copy/pasted into the section containing
+   the include. Ini files that do not start with a section heading will
+   now be accepted and treated as if they started with [General].
+   Rationale: allow factoring out orthogonal pieces of config into
+   separate files.
+
+IDE:
+
+ - Added support for the `m` tag on connections allowing to set the preferred
+   directions of a connection between a submodule and its compound module.
+
+Misc:
+
+ - various fixes on Tkenv, the IDE and the build system
+
+
+OMNeT++ 4.1 rc1 (May 2010)
+--------------------------
+
+Partial list of changes since 4.1b4 (see ChangeLog files in individual folders
+for a more complete list):
+
+Simulation kernel:
+
+ - Enter_Method_Silent() may now take arguments (a printf-like arg list),
+   and it logs the call into the event log file.
+
+ - Re-added cChannel::calculateDuration() that was removed in 4.1b3
+
+ - Fix: exponential(), normal(), truncnormal() and geometric() could produce
+   +INF, due to log(dblrand()) in their code where dblrand() can produce zero.
+   As a side-effect of the fix, the fingerprints of all simulations that use
+   those distributions as input have changed.
+
+NED:
+
+ - New NED function: expand(). It substitutes ${} config variables into a string.
+   Example usage in a NED parameter:
+   string fileName = default(expand("${resultdir}/${configname}-${runnumber}.txt"));
+
+MSG:
+
+ - Implemented @sizetype property for array fields; it can be used to specify
+   the C++ type of the array size and array indices (by default it is unsigned
+   int).
+
+ - Fix: A "using namespace" line inside a cplusplus {{...}} block confused the
+   parser.
+
+Tkenv:
+
+ - Implemented bilinear filtering for image/icon resize in Tkenv.
+
+ - Simulation Options dialog: layouting algorithm can now be chosen
+   from Fast, Advanced and Adaptive (default: Adaptive)
+
+ - Implemented minimum icon size, resize window on layout and auto-adjust zoom
+   options. New controls in the Simulation Options dialog:
+    - "[] Resize window to fit network with current zoom level first"
+    - "[] Adjust zoom so that network fills window"
+    - "Minimum icon size when zoomed out (pixels)"
+
+ - Added hotkeys for zoom in/out: Ctrl+N and Ctrl+M. Ctrl+N was already
+   used by "Toggle module name", it was reassigned to Ctrl+D.
+
+ - Improvements on the classic ("fast") layouting algorithm
+
+ - Application icon for Tkenv
+
+ - Several bug fixes (see ChangeLog)
+
+IDE:
+
+ - Analysis Tool: charts now support a much higher zoom level
+
+ - NED Documentation Generator: generating full inheritance and usage diagrams
+   can now be turned off (they were often too busy to be useful)
+
+ - Several other bug fixes
+
+
+OMNeT++ 4.1 beta 4 (April 2010)
+-------------------------------
+Simulation kernel:
+ - Added statistics to the built-in channel types, ned.DatarateChannel and
+   ned.DelayChannel. They are not recorded by default; recording can be turned
+   on with "**.channel.result-recording-modes = all" in the configuration.
+   DatarateChannel records the following: busy state (as vector);
+   utilization (time average as scalar); number of packets (as scalar);
+   number of bytes (as scalar); number of packets discarded in channel
+   disabled state (as scalar); throughput (bps, as scalar). You can see the
+   declarations of these statistics by running "opp_run -h neddecls".
+
+ - handleParameterChange() is now called for each component with NULL
+   as the parameterName after the last stage of the initialization phase.
+   This allows the components to refresh their cached parameter values
+   if some parameters were changed during the initialization phase.
+   Existing code needs to be updated to accept name=NULL and interpret
+   it as "any parameter".
+
+ - signals framework: changes in the cIListener interface since the previous
+   beta; changed cTimestampedValue class (which is used to emit a signal for
+   statistics purposes with a different timestamp than the current simulation
+   time) to support all data types
+
+ - histogram classes: added getters getNumFirstVals() and getRangeExtension-
+   Factor(); for integer histograms, cell boundaries are now at whole numbers,
+   not halfs; implemented dup(); default number of cells changed
+
+ - cChannel's process() method (which was introduced in the previous beta)
+   was renamed to processMessage()
+
+NED:
+ - Inner types can now refer to the parameters of their enclosing type.
+
+ - Statistics recording: introduced the source= key within the @statistic
+   property, which lets you use a derived value as statistic. For example:
+   @statistic[dropPercent](source=100*dropRatio;record=vector,last),
+   where dropRatio is a signal emitted from the module. This feature also
+   lets one emit message or packet objects as signals, and record some
+   property of them as statistics. For example:
+   @statistic[bytesSent](source=packetBytes(pkSent);record=sum).
+
+ - The @signal property can now be used to declare signals, for example
+   those that can be used as source for @statistic. An example:
+   @signal[pkSent](type=cPacket).
+
+ - Introduced optional statistic recording modes: now you can add optional
+   items to the record= key of the @statistic property, by appending "?"
+   to them. For example: @statistic[eed](record=vector?,histogram?,mean).
+   By default, only non-optional items are active; optional ones can be
+   turned on with **.result-recording-modes = all (see below).
+
+ - Implemented the @dynamic property. When a submodule is marked with @dynamic
+   or @dynamic(true) inside a compound module, the submodule will not be
+   instantiated at network setup; rather, it is expected that it will be
+   instantiated at runtime, using dynamic module creation. A module created
+   this way will pick up parameter values from the submodule declaration in
+   the NED file as well as from the ini file. @dynamic submodules are
+   displayed in the graphical NED editor as semi-transparent, but otherwise
+   can be edited (and configured in the inifile editor) like other submodules.
+
+Envir:
+ - The result-recording-mode= configuration option was renamed to
+   result-recording-modes=.
+
+ - result-recording-modes now has support for optional recording modes (those
+   marked with "?" in @statistic(record=..), see above). The value "default"
+   selects non-optional modes from @statistic(record=..), and "all" selects
+   all of them. The list can be fine-tuned by adding recording modes prefixed
+   with "+" or "-" (for "add" and "remove", respectively). A lone "-" disables
+   all recording modes. Some examples:
+     **.result-recording-modes = default,+vector,-histogram
+     **.result-recording-modes = all,-vector
+     **.result-recording-modes = last
+   The first one selects non-optional recording modes plus records everything
+   as output vector, but disables histogram recording. The second one selects
+   all recording modes but disables vector recording. The third one only
+   records the last value from all statistics. There are further examples in
+   src/envir/ChangeLog.
+
+ - Created a result filter and result recorder API, for filters/recorders
+   that can be used in the source= and record= keys of @statistic.
+   Result filters must subclass from ResultFilter, recorders subclass from
+   ResultRecorder; classes must be registered with the Register_ResultFilter()
+   and Register_ResultRecorder() macros.
+
+ - New command-line options: -h neddecls prints the NED declarations for
+   built-in types (ned.DatarateChannel, etc); -h resultfilters and -h
+   resultrecorders prints the list of available result filters and
+   result recorders (such as min, max, mean, timeavg, last, histogram,
+   vector, packetBytes, packetBits, etc).
+
+ - Result file change: integer histograms are now marked with "attr type int"
+   instead of "attr isDiscrete 1" in output scalar files.
+
+IDE:
+ - NED editor: added banner comment for module/channel types created
+   graphically
+
+ - Ini file editor usability: more specific names for table columns in form
+   editor; split "Output Files" page into "Result Recording" and "Event Log"
+   pages in form editor
+
+ - Analysis editor: separate horizontal and vertical zoom controls;
+   more usable context menu for charts; result file reading made more
+   robust (better error messages on errors); at the same time, removed
+   support for reading old-style (3.x) vector files
+
+ - Sequence Chart: more usable context menu; display of method calls and
+   message reuse arrows turned off by default
+
+ - Improved the display of @statistic and @signal properties in Module
+   Hierarchy view
+
+ - Dozens of bugfixes and other improvements
+
+Tooling:
+ - Updated MinGW and MSYS tools in the Windows distribution. The new MSYS
+   now should work on Win64 (although the compiler still produces 32bit code).
+   The GCC compiler is updated to a pre-release version of MinGW 4.5 (this
+   solves the debugging issues on Windows platform).
+
+Build system:
+ - Extra long command lines are supported now for the MinGW linker. (Uses a
+   temporary file to pass args to the linker if the command line is >32K.)
+
+Tkenv:
+ - It is now possible to turn eventlog recording on/off interactively, not only
+   via omnetpp.ini options; see "Toggle eventlog recording" toolbar button.
+
+ - Module initialization messages are now not printed; we added an option to
+   turn them back on in the Simulation Options dialog.
+
+Cmdenv:
+ - Printing of module initialization messages is now suppressed in express mode
+
+Bugfixes since beta 3:
+ - in express mode, log messages (ev<<) were not recorded into the eventlog
+ - NED graphical editor added explicit "ned.IdealChannel" to connections
+ - NED editor failed to add blank lines between components created graphically
+ - pack/unpack error for "long long" type fixed (on MinGW compiler)
+ - fixed (reduced) the size of filter text field in the NED editor palette
+ - Go To C++ Definition in NED file is working again
+ - opp_test: %subst to understand backrefs ($1) in the replacement string
+ - many other bug fixes
+
+
+OMNeT++ 4.1 beta 3 (March 2010)
+-------------------------------
+Simulation library:
+ - New channel programming model. The user needs to override the process()
+   method of cChannel, which has the following parameters: the message;
+   the time the message will reach the source gate of the connection; and
+   a reference to a struct (cChannel::result_t) in which the method should
+   return the results. result_t fields to be filled in are the propagation
+   delay, the transmission duration, and a flag to indicate whether to model
+   that the message got lost in the channel (when this is set, the simulation
+   kernel will delete the message after process() returns).
+
+ - New class: cHistogram. It is a merger of cDoubleHistogram and cLongHistogram
+   (which have been kept for compatibility). cHistogram can work in "integers"
+   or "doubles" mode; the difference is that in "integers mode", cell boundaries
+   will be chosen to be integers. The default behavior is to automatically
+   choose the mode after precollecting some (by default 100) observations.
+   The significance of cHistogram is that the "histogram" recording mode
+   of the new statistics framework (see below) uses cHistogram in its default
+   setup.
+
+ - New statistics recording framework using signals. The module's C++ code
+   emits statistics as signals, and collector objects are attached externally,
+   by the simulation framework. Statistics are declared in NED files using
+   @statistic properties, and actual recording (whether to record values as
+   output vector, or as histogram, or the average/minimum/maximum etc value
+   as scalars) can be configured from ini files. The runtime cost of
+   statistics that are not recorded is minimal, which allows module authors
+   to emit lots of statistics in the code, and let the end users decide which
+   statistics they want to record and in what form. Earlier, such functionality
+   would have required extensive C++ programming in module.
+
+ - Added a simTime() NED function that returns the current simulation time.
+   simTime() makes it possible to create time-dependent distributions, e.g.:
+   interArrivalTime = exponential(simTime()<10s ? 0.5s : 2s)
+
+Envir:
+ - New configuration option: warmup-period. This is associated with the new
+   statistics recording framework: when specified, values produced during
+   the first X seconds of the simulation will not be calculated in the
+   results. For existing statistics that are calculated manually inside
+   modules and recorded e.g. as recordScalar() in finish(), the module C++
+   code of course needs to be modified to respect the warmup period; the
+   length of the warmup period can be obtained from C++ code as
+   simulation.getWarmupPeriod().
+
+ - New configuration option: result-recording-mode (renamed to ~-modes in
+   beta4); this option specifies what to record from statistics declared
+   in NED. Example value: vector,histogram,timeavg,min,max.
+
+ - New configuration option: debug-statistics-recording. When turned on,
+   the simulation program will dump what result recorders have been attached
+   to which module signals.
+
+ - Renamed "vector-recording-interval" configuration option to
+   "vector-recording-intervals" (plural) which is a more precise name, plus
+   more consistent with eventlog-recording-intervals.
+
+NED:
+ - New properties associated with the statistics recording framework (above):
+   @signal defines a signal emitted by the module, and @statistic defines
+   a statistic that is available for recording. (A statistic can use a signal
+   "as is", or can be some function of it; for example, a signal can be
+   a packet, and a corresponding statistic can be the length of the packet.)
+
+IDE:
+ - The IDE is now based on Eclipse 3.5.2 and CDT 6.0.2.
+
+ - Content assist for icons (with preview!), colors and other display string
+   tags in the NED source editor. Content assist is now also supported
+   for channel parameters, and @signal and @statistic properties.
+
+ - Statistic and signal declarations are now shown in the Module Hierarchy view.
+
+ - Content assist for statistics names in the ini file editor.
+
+ - Several usability enhancement in the Analysis Editor:
+   - SVG export for charts.
+   - Redesigned filter interface on the Browse Data page provides more space.
+   - Tree view in the Browse Data page: it shows results in a tree organized
+     along runs, modules, results and result properties as tree levels.
+     Tree levels can be freely configured.
+   - Charts in the Chart Sheet are resized fill the editor window automatically.
+   - The number of columns can be configured on the Chart Sheet.
+
+ - Direct method calls can be visualized in Sequence Charts (needs to be
+   turned on manually)
+
+ - Generated NED documentation now includes signal and statistic declarations.
+
+ - New FreeMarker template editor for editing of ".ftl" files, used for the new
+   templated wizards feature (see 4.1b1).
+
+Tooling:
+ - The git package has been updated to version 1.6.5.
+
+Documentation:
+ - Extensive documentation review and proofreading.
+
+Bugfixes since beta 2:
+ - Fixed regressions related to parameter handling.
+ - The IDE no longer crashes on multi-processor Windows machines.
+ - git commands are working correctly now on Windows (git merge etc.)
+ - The new version of Eclipse platform (3.5.2) solves the 'dead button' problem
+   found on Linux systems with the latest version of GTK.
+ - Documentation generator now correctly generates docs from NED files
+   containing the @titlepage property.
+ - Boolean parameters now can be recorded as scalars.
+
+
+OMNeT++ 4.1 beta 2 (Jan 2010)
+-----------------------------
+API:
+ - Added a "signal mechanism" to support emitting signals from a model. Signals
+   can be used to decouple production of simulation results (statistics) from
+   recording them, for model change notifications, publish-subscribe style
+   module communication, and several other purposes. See the Manual for more
+   information.
+
+Simulation kernel:
+ - Source files are now compatible with GCC 4.4 version.
+
+ - Performance and memory optimizations.
+
+IDE:
+ - Result charts and sequence diagrams can now be exported in SVG format. This
+   allows the creation of publication quality charts and diagrams.
+
+Tooling:
+ - The bundled MinGW GCC compiler and MSYS binaries have been updated
+   to their latest version (on Windows).
+
+Documentation:
+ - A very detailed Installation Guide has been created. It provides step-by-step
+   installation instructions for the most popular operating systems.
+
+ - An IDE Developers Guide has been created that describes how to enhance the
+   OMNeT++ IDE and extend it with new functionality.
+
+
+OMNeT++ 4.1 beta 1 (Jan 2010)
+-----------------------------
+
+Simulation kernel:
+ - Added setCapacity()/getCapacity() to cArray. setCapacity() can be used
+   to trim back the internally allocated array after a large number of
+   items have been removed from it.
+
+ - cGate: added getNameSuffix() method.
+
+ - FES performance improvement: cMessageHeap was changed to more efficiently
+   handle the insertion and removal of events scheduled for the current
+   simulation time. Such events are actually quite common due to plain
+   (zero delay, zero datarate) connections between modules.
+
+ - Performance improvement: cMessage::getArrivalTime() was consuming
+   10-20% of CPU time in many configurations. Solution is return
+   a reference (const simtime_t&) instead of a value.
+
+ - Fixed cPacketQueue::remove() incorrect behavior when called
+   with a packet that was not in the queue
+
+ - Dynamic module creation: modules now pick up parameter values from the
+   parent compound module's submodules section in the NED file. This will be
+   useful with the @dynamic() submodule property (see later beta releases).
+
+ - Fix: parse() and some other cPar methods did not cause handleParameter-
+   Changed() to be called on the owner module
+
+ - Many other bugfixes and improvements; see include/ChangeLog and
+   src/sim/ChangeLog
+
+NED:
+ - Deep parameter assignments: it is now possible to assign parameters of
+   sub-submodules, sub-sub-submodules, etc. from a compound module, using
+   inifile-like wildcards. For example, **.tcp.mss=1024 may be used in a
+   network NED file to configure TCPs inside all hosts in the network.
+   This feature also involves a slight NED DTD change (doc/ned2.dtd).
+
+ - Re-assigning a parameter that has an already assigned non-default value
+   in an ancestor is no longer allowed.
+
+ - Compound modules may now have a custom C++ implementation class,
+   i.e. the @class() property is now understood for compound modules as well
+
+ - Fix: operands of the '%' (integer modulo) NED operator now must be
+   dimensionless (otherwise the result of truncation depends on the choice
+   of the measurement unit)
+
+Msg files:
+ - opp_msgc: fixed namespace support. It is now possible to use types
+   from other namespaces as base class, field type, or field enum.
+   The src/nedxml/ChangeLog file contains some examples for this.
+
+ - opp_msgc: improved cplusplus {{..}} blocks: their contents can be placed
+   into or outside the namespace {...} block in the generated header file,
+   depending on whether the block occurs before or after the namespace
+   declaration in the msg file.
+
+ - opp_msgc: removed support for enum inheritance (which was an undocumented
+   and generally unused feature, with several issues)
+
+ - opp_msgc: the message compiler can now be used to generate reflection info
+   (cClassDescriptor) for existing classes. If you add @existingClass(true)
+   into a message/class/struct, opp_msgc will not generate code for the class,
+   only a descriptor object. (Corresponds to -Xnc command-line option.)
+
+ - opp_msgc: generating descriptors can also be controlled via properties now.
+   @descriptor(false) instructs opp_msgc not to generate a cClassDescriptor,
+   and @descriptor(readonly) instructs it not to generate field setters into
+   the cClassDescriptor. (Corresponds to -Xnd, -Xns command-line options.)
+
+Envir:
+ - When parallel simulation is enabled, host name and process ID will be
+   included by default in the output file names.
+
+ - A related fix: host name and PID are now inserted before default file
+   extension instead of appending them at the end.
+
+IDE:
+ - The IDE is now based on Eclipse 3.5.1 and CDT 6.0.1.
+
+IDE features:
+ - NED editor:
+    o adaptive palette: items with matching @labels properties and those
+      already in the compound module are shown at the top
+    o palette filtering: easily accessible text field to filter palette
+      contents (case insensitive substring search)
+    o when creating connections, connection chooser now offers connections
+      with matching gates, using @labels properties of gates
+    o new parameter editor dialog for channels and modules
+    o completion proposals for connection parameters
+    o visual feedback for multiple and conditional connections
+    o better validation of NED files in the editor
+
+ - Parameter grouping in the Module Hierarchy view
+
+ - The simulation launcher now checks for errors (and warns if any) before
+   launching simulations
+
+ - Sequence Chart: attaching vectors to axes made more intuitive
+
+ - Analysis Tool: many chart sheet and chart usability enhancements
+
+IDE extensibility:
+ - Support for easy creation of templated wizards that can contribute to
+   the New OMNeT++ Project, New OMNeT++ Simulation, New Simple Module,
+   New NED File, etc. dialogs. Such wizards are simple text files inside
+   the templates/ folders of OMNeT++ projects. Wizards for creating wizards
+   have also been provided. Templated wizards is one of the killer features
+   of OMNeT++ 4.1. Read the IDE Customization Guide for further info!
+
+ - Automatic discovery and activation of Eclipse plugins dropped into the
+   plugins/ folders of OMNeT++ projects. This allows easy deployment of
+   project-specific IDE extensions. Check the IDE Developers Guide for more
+   information.
+
+Tkenv:
+ - Two-way connections are now rendered as a single line (without arrows)
+
+ - Enhanced connection layouting for modules with a large width or height.
+
+ - Right-clicking on a point covered by several objects now brings up a
+   popup menu that contains a submenu for each object under the mouse.
+   Previously only the topmost object was accessible, making crowded areas
+   hard to inspect.
+
+Tooling:
+ - Source files are now compatible with GCC 4.4 version (fixed missing #includes)
+ - Updated MinGW GCC compiler to 4.4 (on Windows)
+ - Updated MSYS binaries (on Windows)
+
+
+OMNeT++ 4.0 (March 2009)
+-------------------------
+This is a major revision of the whole simulation platform, with fundamental
+changes in nearly every component. Changes since version 3.4b2:
+
+GUI:
+  An Eclipse-based comprehensive simulation IDE has been introduced to replace
+  the previous standalone GUI programs gned, scalars and plove. The IDE supports
+  all stages of a simulation project: developing, building, configuring and
+  running simulation models, and analyzing results. It also supports
+  visualizing simulation execution traces as sequence charts, and generating
+  documentation. We are also bundling version control (cvs, svn, git) Eclipse
+  plug-ins with the IDE. The IDE is supported on the three major platforms,
+  Linux, Mac OS X and Windows. Since Eclipse is extremely extensible, we expect
+  that OMNeT++-based simulation frameworks will contribute their own custom
+  wizards into the IDE.
+
+Tooling:
+  On the Windows platform, we have standardized on using the MinGW compiler.
+  We are bundling a version of MSys and MinGW with the distribution, along
+  with MinGW versions of several open-source programs and libraries needed
+  or found useful with OMNeT++, such as gdb, perl, libxml, gmp, graphviz,
+  Tcl/Tk, svn and git. MinGW was chosen over Cygwin because MinGW builds and
+  uses libraries in the native Windows (MSVC-compatible) binary format, and
+  builds programs that execute without a Unix emulation layer. The MSVC
+  compiler is only supported in the commercial version of OMNeT++.
+
+Build system:
+  In order to facilitate working with large simulation models like the INET
+  Framework, the makefile generator opp_makemake has been extended with the
+  --deep option. With --deep, opp_makemake generates a makefile that takes
+  care of building a whole source directory tree.
+
+  Another big change is out-of-directory builds for both the OMNeT++ libraries
+  and simulation models: object files and other by-products of the build
+  process go in a separate directory tree (out/).
+
+  Simulation models can now easily be compiled with debug/release compiler
+  options, simply with the commands "make MODE=debug" and "make MODE=release";
+  there is no need to modify configure.user.
+
+Simulation kernel:
+  Simulation kernel internals have been redesigned with memory efficiency in
+  mind, to support large-scale simulations better. Techniques include string
+  pooling (storing freqeuently occurring strings such as module, gate and
+  parameter names only in one copy), shared parameter value instances,
+  gate vector descriptors (gate name, type and size are only stored once
+  for the whole gate vector), and optimal packing of object fields (e.g.
+  packing several boolean variables into an unsigned int).
+
+  The simulation kernel as a library has been made significantly easier to
+  embed in other (non-OMNeT++) programs. The way of using the OMNeT++
+  simulation kernel as a plain C++ library has been documented in the Manual,
+  and two corresponding code examples have been added to the distribution.
+
+  There have been several complaints about precision loss due to simtime_t
+  being represented with the C type "double". In 4.0, double has been replaced
+  with an int64-based fixed-point representation; the precision can be
+  configured in omnetpp.ini as a power of ten, with the default being
+  picosecond resolution (1e-12).
+
+  Regarding the API, several functions have been given better or more
+  consistent names, with the most visible change being that getter methods
+  have been prefixed with the word "get". Migration of simulation models
+  to 4.0 is assisted by scripts that perform this renaming (and several other
+  adjustments) in the source code.
+
+  cMessage has been split into a base cMessage plus a cPacket class.
+  The bit length, encapsulated message and error flag fields have been
+  moved to cPacket.
+
+  Modules have now the possibility to receive nonzero-duration messages
+  at the beginning of the reception; this is done by reconfiguring the
+  gate object.
+
+  sendDirect() calls now expect the propagation delay and transmission
+  duration values in separate arguments; this was done to facilitate
+  the animation of wireless transmissions later.
+
+NED:
+  The NED language has been revised and significantly extended. An overview
+  of changes:
+
+  The language syntax has been changed to make it more consistent. A migration
+  tool is provided to convert old NED files to the new syntax.
+
+  A Java-like package system has been introduced to make the language scale
+  to large model frameworks and to prevent name clashes; NED files files are
+  now read from directory trees listed on the NEDPATH.
+
+  Channels have been made first-class citizens. They can have arbitrary
+  parameters like modules do, and may have custom C++ implementation classes.
+  Three predefined channel types have been created, ned.IdealChannel,
+  ned.DelayChannel and ned.DatarateChannel.
+
+  Inheritance is now supported for module and channel types. Derived modules
+  and channels may add new parameters and gates, may set or modify parameter
+  values and gate vector size, and (in the case of compound modules) may add
+  new submodules and connections.
+
+  Inner types are now supported. This is most useful for making channel
+  definitions local to the network definition that uses them.
+
+  Module and channel interfaces have been introduced, to make "like"
+  relationships more explicit. Module and channel interfaces can be used as
+  a placeholder where normally a module or channel type would be used, and the
+  concrete module or channel type is determined at network setup time by a
+  parameter. Concrete module types have to "implement" the interface they can
+  substitute.
+
+  Inout gates and bidirectional gates are now supported. In the C++ code,
+  inout gates appear as (input,output) gate pairs.
+
+  Parameters can now have default values. The default value can be overridden
+  in the ini file. If the ini file does not assign any value to the parameter,
+  the default values get used automatically.
+
+  Support for arithmetic expressions has become more complete, e.g. string
+  manipulation is also possible.
+
+  It is possible to annotate module or channel types, parameters, gates and
+  submodules with properties. Metadata can carry extra information for
+  various tools, the runtime environment, or even for other modules in the
+  model. Examples include display strings, parameter prompt string and unit
+  of measurement.
+
+  Default icons (in general, default display strings) are now supported.
+  Display strings are represented as metadata annotation (@display property),
+  which can be modified via inheritance.
+
+Ini files:
+  Instead of runs, named configuration sections were introduced in the ini
+  file.
+
+  The concept of "runs" have been refined to provide parameter study support;
+  Ini files now can specify parameter ranges and the runtime is able to explore
+  them. The notion of experiment, measurement and replication was introduced to
+  help the general workflow of result analysis.
+
+  Configuration options are now checked; mistyped configuration options are
+  reported. Configuration options can be given on the command-line as well,
+  overriding the values specified in the ini file.
+
+  The new "fingerprint" ini file option allows for quick-and-simple regression
+  tests. The fingerprint is basically a hash of event times and module IDs
+  during the simulation, and it can detect if the simulation follows a
+  different trajectory after a supposedly "harmless" code change.
+
+Result analysis:
+  The new result analysis tool in the IDE (which replaces plove and scave)
+  supports the notion of experiments, measurements and replication. The IDE
+  now stores all operations required to create a diagram or chart in a "recipe"
+  file. It can recreate the charts and diagrams automatically after re-running
+  the simulation or the whole experiment.
+
+  The vector and scalar file format has changed to support the new features
+  of the IDE. Vector files are now indexed for efficiency.
+
+
+OMNeT++ 4.0rc2 (Feb 2009)
+-------------------------
+Improvements since rc1:
+
+Documentation:
+  - Significant work went into updating the Manual. The following chapters are
+    either new, or have been rewritten or significantly expanded:
+      3 The NED Language
+      7 Building Simulation Programs
+      8 Configuring Simulations
+      9 Running Simulations
+      10 Network Graphics And Animation
+      11 Analyzing Simulation Results
+      15 Plug-in Extensions
+      16 Embedding the Simulation Kernel
+      17 Appendix: NED Reference
+    Chapters that need further work are:
+      4 Simple Modules
+      6 The Simulation Library
+
+  - Revised the User Guide. Text and screenshots have been updated to the
+    current state of the UI.
+
+IDE:
+  - added the GIT plugin (now the IDE supports CVS, Subversion and GIT)
+
+  - added the NED documentation generator. The generated documentation is
+    under the Creative Commons license.
+
+  - the IDE now generates GPL/LGPL/BSD copyright into newly created files;
+    license may be declared by adding a @license property in package.ned
+
+  - various bugfixes
+
+Simulation kernel:
+  There were several changes to make it easier to use the simulation kernel
+  as a C++ library, to embed simulations into programs:
+
+  - support for multiple instances of cSimulation. "simulation" is no longer
+    a global variable but a macro that expands to cSimulation::getActive-
+    Simulation(). Multiple cSimulation objects may coexist; before invoking
+    any function in the simulation library, the correct cSimulation instance
+    must be activated with cSimulation::setActiveSimulation().
+
+  - one environment object per cSimulation instance. "ev" now maps to
+    cSimulation::getActiveEnvir(), which is short for cSimulation::getActive-
+    Simulation->getEnvir().
+
+  - added cNullEnvir, a default do-nothing implementation for cEnvir, from
+    which users can start subclassing their own custom environment objects
+
+  - created cRunnableEnvir by factoring out run() method from cEnvir;
+    simulation user interfaces like Cmdenv or Tkenv subclass from
+    cRunnableEnvir, but other custom environment objects do not need to.
+
+  - cConfiguration was split to a smaller cConfiguration plus a cConfigurationEx
+    class that adds the rest of the methods. When the simulation kernel is
+    used as library, only cConfiguration needs to be implemented.
+    cConfigurationEx is needed only when one wants to plug in a different
+    configuration object into the existing Envir library, replacing
+    SectionBasedConfig.
+
+  - find more details and examples in the manual, in include/ChangeLog,
+    in src/sim/ChangeLog, and in the new sample simulations embedding
+    and embedding2.
+
+Samples:
+  - added embedding examples
+
+NED:
+  - fix: channel types could not refer to local parameters ("this.param" caused
+    an error)
+
+  - refactored the registration of user-defined NED functions: added the
+    possibility to register a documentation string (which gets printed in the
+    "opp_run -h nedfunctions" output); cNEDFunction and Define_NED_Function()
+    now expects the function signature in a C-like syntax.
+
+Message files:
+  - opp_msgc: improvement related to bug #33. Type *announcement* now can
+    specify the base class of the declared class: "class B extends A;".
+    To declare that the class does not have any base class interesting to
+    opp_msgc, one must declare it as "extends void". See src/nedxml/ChangeLog
+    for examples and more details.
+
+Tkenv:
+  - message display strings made consistent with module display strings: the
+    "o" tag was removed, use "b=width,height,shape,color,borderwidth" instead.
+    Also, a special color name "kind" has been introduced, which maps
+    to a color depending on the message kind.
+
+  - fixed bug #34: in Fast mode, bubble didn't get displayed for recently
+    created modules
+
+Cmdenv/Tkenv:
+  - added -a option: lists all configurations and the number of runs in them
+
+  - bugfixes: --repeat and --constraint command-line options were ignored
+    when using -x option
+
+  - on the command-line, accept per-object configuration options, also without
+    object name pattern. Thus, both of the following are accepted, and are
+    equivalent:
+       opp_run --**.vector-recording=false
+       opp_run --vector-recording=false
+
+Tools:
+  - added opp_runall tool
+
+  - scavetool: renamed "summary" command to "list"; split the "filter" command
+    into "vector" and "scalar" commands. The new "scalar" command can apply
+    processing operations too. Currently it only supports the "scatter" operation,
+    which creates a scatter plot dataset from the scalars.
+
+  - opp_test: added a %extraargs option (was needed for new test/envir tests)
+
+Packaging:
+  - the Windows package now contains MinGW-GIT (the "git" command-line tool,
+    and gitk). Please use the hyphen-less form of commands (e.g. git checkout
+    instead of git-checkout).
+
+Several bugfixes:
+  - see http://dev.omnetpp.org/bugs/changelog_page.php
+
+
+OMNeT++ 4.0rc1 (Dec 2008)
+-------------------------
+Improvements since beta 8:
+
+General:
+  - added the "opp" prefix to library names to prevent name clashes with
+    other programs: liboppsim.so, liboppenvir.so, libopplayout.so,
+    liboppcommon.so; oppsim.dll, oppenvir.dll, opplayout.dll, oppcommon.dll,
+    etc.
+
+IDE:
+  - fixed the crash caused by static linking of libstdc++.so (bug #7)
+  - improved stability of CDT integration
+  - improved diagnostics: when simulation launch fails, Console View displays
+    the command line, PATH, other environment variables, etc to help track
+    down the problem.
+  - several other bugfixes (see bugtracker)
+
+Samples:
+  - queueinglib changed to build a dynamic library, which is run using opp_run
+
+  - added queueinglibext, which shows how to extend an existing model with
+    C++ code from a new project
+
+Tkenv:
+  - reimplemented filtering, to fix poor performance and weird scrolling of
+    log windows (bugs #16 and #17). The log is now stored in a memory buffer,
+    and filtering re-fills the text widget from the buffer.
+
+  - new feature: when you open a per-module output window, it comes up
+    containing previous messages (and not empty as it used to). This
+    feature was made possible by storing the log.
+
+  - UI updates during Fast and Express Run changed from event-based
+    (i.e. "every x events") to time-based ("every x milliseconds").
+    Time only checked every 16 and 256 events though, respectively,
+    to save CPU cycles.
+
+  - implemented font selection for text windows and list controls
+
+  - settings are now saved to $HOME/.tkenvrc, only inspectors are saved
+    to .tkenvrc in the current directory. (Motivation: font selection is
+    tyically meant to be global by the user, not per-simulation)
+
+Cmdenv:
+  - status updates in express mode are now time-based (every 2s by default),
+    not event number based
+
+  - other status update improvements: always autoflush status updates;
+    print a final status update when simulation stops
+
+Tools:
+  - seedtool was renamed opp_lcg32_seedtool, and added a warning in its help
+    that it is an obsolete tool and probably should not be used.
+
+Several bugfixes:
+  - see http://dev.omnetpp.org/bugs/changelog_page.php
+
+
+OMNeT++ 4.0 beta 8 (Nov 2008)
+-----------------------------
+Improvements since beta 7:
+
+IDE:
+  - Makemake configuration made more flexible. Now any directory may contain
+    a makefile, either generated or custom one. The corresponding property
+    page was redesigned, and also moved to the OMNeT++ category (was under
+    the C/C++ Build category). It is now also possible to export a makefile-
+    creation script to support command-line builds. Note: syntax of the
+    .oppbuildspec file changed (file written by 4.0b8 will not be understood
+    by 4.0b7).
+  - added Parameter Editor dialog as a field editor in the Property View
+  - moved Cleanup NED Files command from the Navigation menu to the Source menu
+  - several smaller fixes and improvements
+
+Tkenv:
+  - implemented module output window filtering: modules can be selected
+    using a checkbox tree dialog. Bound to Ctrl+H.
+  - implemented "Run until message", available in the Run Until dialog and
+    in the context menu of message objects
+  - event banner text revised, plus now includes message name and class
+    as well; added "Short event banners" checkbox to options dialog
+  - fixed popup menu behaviour on Linux (use tk_popup instead of post)
+
+Other:
+  - opp_makemake: generates separate target for each recursively invoked
+    makefile. Several smaller fixes and improvements
+  - beginnings of a regression test suite for opp_makemake: test/makemake.
+
+
+OMNeT++ 4.0 beta 7 (Oct 2008)
+-----------------------------
+First public beta release of 4.0.
+
+
+OMNeT++ 4.0 beta 1..6 (Mar 2008..Sep 2008)
+------------------------------------------
+Internal testing releases.
+
+
+OMNeT++ 3.4b1/b2 (Nov 2006)
+---------------------------
+This release significantly improves Tkenv:
+  - until now, Tkenv has been using various form-style inspectors to display
+    the most important data members of objects. These inspectors have now been
+    replaced with more comprehensive and consistent treeview-based
+    inspectors.
+
+  - broadcast animation has been implemented. When the feature is turned on,
+    multiple send() or sendDirect() calls occurring within a handleMessage()
+    call will be animated together, concurrently. This significantly improves
+    the animation of wireless simulations. Note: the new animation mode
+    implies that send/sendDirect calls are no longer animated at the
+    place of the call as previously, but together at the end of processing
+    the event (that is, after handleMessage() has already returned) -- that is,
+    out-of-sequence with writing the log, for example. The broadcast animation
+    feature can be turned off in the Simulation Options dialog.
+
+  - implemented message filtering for the timeline, and improved on object
+    filtering (Find/Inspect Objects dialog) by extending patterns with
+    AND, OR, NOT operations and object field matchers.
+
+  - implemented scrollback buffer limiting for event log windows (default is
+    100,000 lines)
+
+Simulation library:
+  - several methods and classes already marked as DEPRECATED in their
+    documentations and doc/API-Changes.txt are now marked as such, using
+    GCC's __attribute__((__deprecated__)) facility, which results in warnings
+    during compilation of code that uses them. Those pieces of code need to be
+    changed in order to be compatible with future OMNeT++ versions.
+
+  - opp_msgc was improved: as an experimental feature, class fields can now be
+    annotated with properties of the form @propertyname(value). The following
+    properties are accepted: field-level: @enum(enumname), @editable or
+    @editable(true), @getter(methodname), @setter(methodname),
+    @sizeGetter(methodname), @sizeSetter(methodname), @label(some-text),
+    @hint(some-text); class-level: @customize, @omitGetVerb (or:
+    @customize(true), @omitGetVerb(true)).
+
+Other:
+  - makefile improvements, from Laura Marie Feeney and Michael Tuexen.
+  - the FDDI sample simulation has retired (it used lots of deprecated APIs)
+
+
+OMNeT++ 3.3 (Oct 2006)
+----------------------
+This release contains several GUI enhancements in Tkenv, and several bugfixes.
+Tkenv:
+  - display string enhancement: connections with zero thickness set ("o=,0")
+    now do not appear in the network graphics.
+
+  - added object icons to inspector listboxes
+
+  - added Run/Fast/Express buttons to every module inspector window, as well as
+    a "Find/inspect messages, queues, etc within this module" button. These
+    functions are all available via hotkeys too (F5,F6,F7,Ctrl+S).
+
+  - added "Copy to clipboard" and "Save window contents" toolbar icons to all
+    text windows. (Copy has already been available with Ctrl+C.)
+
+  - main window position gets saved and restored
+
+Bugfixes:
+  - fix: gamma_d() was bogus for the alpha<1 case [reported by Patrick McDonnell]
+
+  - fix: worked around a fiber-related Visual C++ problem that caused certain
+    activity()-based modules crash when the simulation was restarted.
+
+  - fixed a bug which sometimes caused Tkenv to crash when inspecting an
+    internally refcounted message.
+
+  - fixed a bug in Tkenv's setObjectListResult() [crash reported by Rodolfo
+    Ribeiro Gomes and others]
+
+  - fix: on some Linux systems, Tkenv used unreadably small font size in some
+    dialogs
+
+  - opp_msgc improvements: don't accept reserved words as identifiers; added
+    OMNeT++ version check into generated code
+
+  - fix: the simulation can now be in a directory whose path name contains spaces
+    (e.g. "Program Files"); opp_nmakemake also fixed to accept include paths
+    with spaces.
+
+  - many other minor fixes and improvements; see the ChangeLogs of the
+    corresponding source directories for more details.
+
+
+OMNeT++ 3.2p1 (Jan 2006)
+------------------------
+This is a maintenance release. Changes include:
+  - support for VC8.0 (Microsoft Visual C++ 2005 [Express]).
+  - opp_nmakemake -b <dir> failed for directory names containing "++"
+  - fixed bug in Plove/Scalars "Save picture" function
+
+
+OMNeT++ 3.2 (Oct 2005)
+----------------------
+The following brief list wraps up the most important new features and
+changes since the 3.1 release. Please read on to the sections about the
+the prereleases (3.2pre1..4) for more details on these points, and for
+a more complete list. Even more details can be found in the doc/API-Changes
+file and the ChangeLog files of the individual source directories.
+
+General:
+  - support for database (MySQL) storage of: model topology, model
+    configuration, output vectors and scalars and model topology.
+
+Simulation core:
+  - simplified the signature of simple module constructors; Module_Class_Mem-
+    bers() is no longer required. Please check below or in doc/API-changes
+    for backward compatibility information.
+
+  - cleanup-time garbage collection turned OFF by default. It can be turned
+    on manually, but the preferred way is to add proper destructors to
+    simple modules.
+
+  - implemented reference counting of encapsulated messages, primarily to
+    increase the performance of wireless simulations.
+
+  - WATCH() revisited: now its variants support STL container classes, and
+    basically any data type that has operator<<.
+
+  - modules can now get notified when a module parameter changes. Just redefine
+    the new handleParameterChange(const char *parname) method of cModule.
+
+  - several other API improvements -- see doc/API-Changes.
+
+  - several opp_msgc improvements
+
+GUI:
+  - added the TimeBar to Tkenv, and made the "Find/Inspect Objects" dialog
+    nonmodal (a long-standing wish).
+
+  - several GNED refinements, the most visible one being that on opening a NED
+    file it automatically tries to open all its imports as well (feature can
+    be turned off).
+
+  - big usability improvements in Plove and Scalars: Chart Settings dialog
+    has been redesigned, and your custom settings can be saved as defaults.
+    Plove also has new filters, and some problems got fixed in existing ones.
+
+
+OMNeT++ 3.2pre4 (Sep 2005)
+--------------------------
+Simulation kernel:
+  - cleanup-time garbage collection turned OFF by default. Simple modules
+    have to deallocate all dynamically objects themselves, that is,
+    proper destructors have to be added to every simple module class.
+    Related new omnetpp.ini entries: perform-gc=<yes/no>, print-undisposed=
+    <yes/no>.
+
+  - added method cSimpleModule::cancelAndDelete(cMessage *msg) method, to
+    facilitate writing destructors.
+
+  - requirement for simple module constructors changed: they are invoked
+    without args now. Module_Class_Members() is now unnecessary, but still
+    accepted. See include/ChangeLog for details. All sample simulations
+    have been updated accordingly.
+
+    POTENTIAL INCOMPATIBILITY: modules with handcoded constructors need
+    to be modified. Add default values to constructor arguments:
+    (const char *name=NULL, cModule *parent=NULL).
+
+  - dup() method got moved to cPolymorphic, and return type changed to
+    cPolymorphic. In the next release we'll drop MSVC 6.0 support,
+    and move to covariant return types (which MSVC 6.0 doesn't support).
+
+New examples:
+  - database integration. With the given extensions, one can transparently
+    redirect output vectors and output scalars into a MySQL database, read
+    module parameters from a MySQL database (all without modification of
+    existing models), or build a network from topology stored in a database.
+
+Other:
+  - NED: enabled parent module gates to get connected with "++".
+    parentmodgate++ connects the first unconnected gate, but it doesn't
+    create new ones -- it is an error to exceed sizeof(gate).
+
+  - Precision in output vector/scalar files, that is, the number of
+    significant digits printed can be set from the configuration now:
+    [General] / output-scalar-precision=<int>, output-vector-precision=<int>.
+    The default is 12, but it might not be straightforward to decide what
+    is the "optimal" setting -- see src/envir/ChangeLog for a discussion.
+
+  - configure script revised significantly: better detection of compiler
+    (e.g. the Intel compiler is autodetected now); detection of linker
+    flags needed for OMNeT++ models to be put into static/dynamic libs
+    (-z allextract/--whole-archive, --export-dynamic); detection of "make"
+    program (must be GNU make); improvement in detecting BLT and MPI.
+    Now it also allows variables to be defined on the command line before
+    running ./configure, as an alternative to configure.user.
+
+  - nedtool and the preload-ned-files= omnetpp.ini entry now distinguishes
+    between two types of listfiles, @listfile and @@listfile; the difference
+    is in the interpretation of relative paths contained in the list file;
+    see src/nedc/ChangeLog for details.
+
+  - GNED: further improvements
+
+
+OMNeT++ 3.2pre3 (Aug 2005)
+--------------------------
+Tkenv:
+  - the "Find/Inspect Objects" dialog became nonmodal, and it can be kept
+    open while the simulation is running.
+
+  - added the "Run until next local event" command to modules' context menu
+    (which pops up when you right-click an icon)
+
+GNED:
+  - reorganized and improved connection properties dialog (knows what gates
+    submodules have, which gates are vectors, only offers output gates as src
+    gate and input gates as dest gate, etc.)
+
+opp_msgc:
+  - "const fix": generate both const and non-const getter methods for fields
+    of class or struct type.
+
+  - it is no longer required to write out "fields:" in an otherwise empty
+    class definition
+
+  - added the possibility to set a base class field. E.g. kind=5 will
+    generate the setKind(5) line into the constructor.
+
+  - generate a protected and unimplemented operator==(), to prevent
+    accidental usage of compiler-generated one
+
+  - added the possibility (-P option) to declare generated classes to be
+    dllexport/dllimport on Windows.
+
+  - generated C++ header now contains relevant part of the .msg files as
+    Doxygen comment
+
+nedtool, dynamic NED loading:
+  - don't look for the module type if the module vector size is zero
+
+opp_nmakemake:
+  - added options (-s, -t, -d) to enable building Windows DLLs from simple
+    modules, plus -P option to support opp_msgc's similar option
+
+Simulation kernel:
+  - implemented reference counting of encapsulated messages. This should
+    dramatically increase performance of wireless simulations, where lots
+    of message duplication is done (AirFrames) with most copies discarded
+    without looking into them (noisy channel or wrong L2 dest address).
+    There' nominal (<1%) performance penalty for other simulations.
+
+omnetpp.ini:
+  - one can now use parameters like $MODULE_FULLPATH in the 2nd argument
+    of xmldoc(), i.e. the paths expression to select part of an XML file
+    to load. This allows for assigning XML params of several modules with a
+    single line in omnetpp.ini. Consider the following:
+      **.xmlConfig=xmldoc("all-in-one.xml","config[@mod=$MODULE_FULLPATH]")
+    where all-in-one.xml contains <config mod="net.host1.rt">...</config>
+    elements for every module.
+
+  - also fixed some anomalies in the XML path expression interpreter.
+
+
+OMNeT++ 3.2pre2
+---------------
+Simulation kernel:
+  - WATCH() overhaul: now anything can be watched that has operator<<. If it
+    also has operator>>, you can use WATCH_RW() to make it editable on the GUI.
+    Objects and pointers to objects can be watched with WATCH_OBJ() and
+    WATCH_PTR(). STL container classes can be watched via WATCH_VECTOR(),
+    WATCH_PTRVECTOR(), WATCH_MAP(), WATCH_PTRMAP(), etc.
+
+  - modules can now get notified when a module parameter changes. Just redefine
+    the new handleParameterChange(const char *parname) method of cModule.
+
+Tkenv:
+  - flush omnetpp.vec every time the simulation is stopped (to enable looking
+    at it with Plove to decide if simulation needs to be run longer)
+
+  - added support for OPP_PLUGIN_PATH environment variable, and
+    [Tkenv]/plugin-path= omnetpp.ini entry.
+
+  - cGate inspector: channel attributes (delay, error and datarate)
+    can now be changed from the GUI.
+
+  - added support for custom items on the context menu (e.g. right-click
+    on a router, "Inspect Routing Table..." Usage: place a .tcl file into
+    the plugin path (./plugins by default) that calls the extendContextMenu
+    Tcl procedure.
+
+GNED: Michael Franzen contributed several improvements and fixes:
+  - new option: "Open imported files automatically": tries to open all the
+    files that are imported by an opened NED file. (It takes care that
+    every NED file is opened only once.)
+
+  - an "import path" can be specified, which is a list of directories
+    where imported files are searched for (Andras)
+
+  - new option: "Autoextend gates using gate++ notation". When this option
+    is enabled (Options Menu), GNED does not generate "gatesizes" sections,
+    and automatically uses the extension operator "++" on all gates that
+    are connected. However, you always can use indices in the property page
+    of modules to override automatic gate extension.
+
+  - "Auto-calculate gate size": when switched on, this option generates
+    "gatesize" entries for every gate of a module that is endpoint for
+    indexed connections. The code searches for the maximum index of all
+    connections ending at that port and generates the "gatesize" entry
+    from that. If no indexed connection to the port is found, the
+    "gatesize" entry is removed again.
+
+  - "Set 'nocheck' for new modules": generates "connections nocheck" for
+    all newly generated modules. This feature has a counterpart in the
+    property page of modules: an "Allow unconnected gates" checkbox
+    to enable/disable this feature for each module individually.
+
+  - plus several smaller fixes
+
+Heaps of small API improvements, see include/ChangeLog. A sample:
+   - cOutvector: added recordWithTimestamp()
+   - cDisplayString: setTagArg() now accepts numeric (long) arg too.
+   - cMessage: if "vector" is a vector gate, msg->arrivedOn("vector")
+     now checks if msg arrived one of the vector's gates.
+   - cXMLElement: added getFirstChildWithTagName() and getNextSiblingBy-
+     TagName()
+Thanks to Michael Tuexen, Ignacio Arenas Jimenez and Wei Yang Ng who suggested
+several of the above improvements.
+
+
+OMNeT++ 3.2pre1
+----------------
+  - Plove and Scalars: improved Chart Settings dialog, and default settings
+    can now be saved. New Plove filters, and fix in the winavg filter.
+  - Tkenv: added Timeline Status Bar
+  - Tkenv: fixed the r= display string tag (it displayed a circle half the
+    specified size)
+  - Tkenv: cMessage inspector now displays message size in bytes as well (not
+    just in bits); also, it now displays time *until* arrival time (a delta)
+    in addition to the absolute arrival time.
+  - new cMessage member functions: byteLength(), setByteLength(), addByte-
+    Length(). They just invoke the length(), setLength(), addLength() methods.
+  - new utility function simtimeToStrShort()
+  - fixed gcc-4 compilation errors, and removed -fwritable-strings compiler
+    option
+  - fixes and improvements on opp_neddoc
+  - configure script now accepts NO_TCL=1 variable (for emergency use only)
+  - opp_nmakemake: improved output of recursive build
+  - Readme.MSVC updated on how to build DLLs from simple modules
+Plus a number of smaller fixes, see the ChangeLogs in individual directories.
+Documentation update is still TBD.
+
+
+OMNeT++ 3.1 (Mar 2005)
+----------------------
+This release contains several bugfixes since 3.0, as well as new features
+and new example simulations. To see a detailed list of problems fixed, check
+the ChangeLog files in the various source directories. Thanks all of you who
+have discovered and reported the problems.
+
+A brief list of enhancements since version 3.0:
+
+Real-time/hybrid simulation:
+- Real-time simulation has been implemented, and it is demonstrated by the
+  "Dyna/Real Time" sample simulation.
+
+- An example for hybrid (hardware-in-the-loop) simulation is now provided,
+  which is the "Sockets" sample simulation. It uses TCP sockets to communicate
+  with the outside world -- in real-life applications this will probably need
+  to be replaced with some other means of communication.
+
+- In relation to the above: new methods got added to the cScheduler interface.
+
+For Windows:
+- Debug info (*.pdb) files have been included in the installer, so one can now
+  single-step into the simulation kernel and user interface library sources
+  while debugging.
+
+Simulation library:
+- New utility class: cStringTokenizer. It splits strings to "tokens" along
+  given separator characters (by default spaces).
+
+- Changed the way scheduled events or pending messages are handled when their
+  destination module gets deleted during runtime. Before, these messages were
+  deleted by the cSimpleModule destructor, but this made it very long to clean
+  up large models. Now, messages are not deleted in the destructor, but left
+  in the FES -- they will be discarded in cSimulation::selectNextModule() when
+  they're met.
+
+- cDisplayString's getTagArg() method was modified to never return NULL; it
+  returns "" instead when the requested tag is not in the display string.
+
+Configuration:
+- Ini file runs can be given descriptions, and they will be displayed in the
+  Tkenv run selection dialog. Just add the description="some text" line
+  under the [Run x] headings.
+
+- New omnetpp.ini entry to help debugging: [General]/debug-on-errors=
+  true/false. If turned on, runtime errors (such as scheduling a message
+  into the past) will cause the program to break into the C++ debugger
+  if one is running, or just-in-time debugging is enabled. This makes it
+  possible to investigate the context of the error (stack frames, variables
+  etc). It works by doing INT 3 (debugger interrupt) on Windows, and
+  raise(SIGABRT) on Linux.
+
+- Slight change in the rules of handling included ini files, NED list files
+  and all filenames mentioned in them. All filenames are now understood as
+  relative to the location of the file which contains the reference,
+  rather than relative to the current working directory of the simulation.
+  This change is not backwards compatible, but has been found not to affect
+  any of the simulation frameworks already ported to 3.0.
+
+Tkenv:
+- Implemented the "t=<string>,<color>" display string tag for connections.
+  It makes the given string to appear near the connection arrow.
+
+- Tooltips can now be added to submodule icons, connection arrows and messages.
+  The tooltip text has to be given in the "tt=<tooltip-string>" display
+  string tag, and will be displayed if the mouse rests over the component for
+  a while. Tooltips allows more info to be displayed than can be squeezed
+  into the "t=" display string tag.
+
+- Added support for -r <run-number> command-line option, which has the same
+  effect as (but takes priority over) the [Tkenv]/default-run ini file entry.
+
+Misc:
+- opp_makemake, opp_nmakemake: implemented -X option (ignore subdirectory
+  during recursive build)
+
+- The -h command-line option is now understood by both Cmdenv and Tkenv,
+  and handled in a consistent way
+
+- The place/ icon directory was renamed to misc/ (Please update display
+  strings containing "i=place/..")
+
+- nedc got removed from the distribution
+
+Known problem: OMNeT++ windows have no Maximize button under recent
+KDE versions. This is a known Tk+kwin problem which was fixed in Tk
+early 2004.
+
+
+
+OMNeT++ 3.0 (Dec 2004)
+----------------------
+
+The following list summarizes *all* changes since OMNeT++ 2.3:
+
+- The simulation kernel has received an overhaul.
+
+- A new step-by-step tutorial, revised documentation and several new
+  sample simulations have been included to shorten your learning curve.
+
+- Dynamic NED loading will cut model build time and simplify your work.
+
+- Documentation generation tool will document your own large simulation
+  models, and help you quickly get an overview about the structure
+  of 3rd party models.
+
+- The new Random Number Architecture features a modern, very long cycle
+  Random Number Generator (Mersenne Twister) for more realistic simulation
+  results, and RNG mapping for more flexibility in simulation experiments.
+
+- Simulation models can now conveniently access XML configuration files
+  for complex input.
+
+- Plove now features a powerful interactive charting component, and also
+  an internal data-flow engine for processing output vectors before
+  plotting.
+
+- The new Scalars tool complements Plove, and lets you analyze and plot
+  scalar data produced by simulations.
+
+- Support for Parallel Distributed Simulation
+
+- Several Simulation GUI usability enhancements will save you time, and
+  make your work more efficient.
+
+- New icons, and enhanced animation capabilities (icon coloring, queue
+  length display, status text, transmission range, transient bubbles,
+  etc.) improve the overall look and feel of your models, give you more
+  insight, and make the models instantly presentable.
+
+- For better visualization of model dynamics, OMNeT++ now supports
+  animation of direct message sending and C++ method calls across modules.
+
+- The automatic network layouting using the SpringEmbedder algorithm will
+  let you work with large networks in the GUI, without the need for
+  individual positioning of nodes.
+
+- Ready to receive your extensions: plug-in interfaces for new random
+  number generators, new configuration databases and simulation event
+  schedulers complement existing plug-in interfaces for recording simulation
+  data, and let you implement custom input/output, real-time simulation,
+  hardware-in-the-loop simulation and more.
+
+Delta from 3.0 beta 1:
+
+- User Manual revised
+
+- Several bugfixes and new test cases, significant performance improvements
+  in the network setup code; more intuitive error messages at places.
+
+- The new <parametername>.use-default=true notation in omnetpp.ini makes it
+  possible to apply the NED file defaults (specified via input()) to some
+  or all unassigned module parameters.
+
+- histogram classes (cLongHistogram, cDoubleHistogram) revisited
+
+
+OMNeT++ 3.0 beta 1 (Nov 24 2004)
+--------------------------------
+- added new TicToc tutorial
+- nedtool: implemented -h option (put output files into current dir, not source
+  file's dir) [patch from Johnny Lai]
+- Windows binary release contains 4 sets of libs now: vc6-debug, vc6-release,
+  vc7-debug, vc7-release.
+- several fixes and improvements
+
+
+OMNeT++ 3.0 alpha 9 (Nov 3 2004)
+--------------------------------
+- fixed configure script problems in alpha 8
+
+- new random number architecture: support for Mersenne Twister and Akaroa
+  RNGs; unlimited number of RNGs; RNG mapping (module-local RNG numbers
+  can be mapped arbitrarily to physical RNGs from omnetpp.ini. Details
+  in src/envir/ChangeLog and on omnetpp.org.
+
+- Tkenv fixes and usability improvements: (1) allow user interactions during
+  message animation: animation speed can be changed with the slider, STOP
+  button can be clicked, inspectors can be closed, etc;  (2) improved
+  "Fast Run until next local event" function: now it always animates events
+  that occur in the local module;  (3) fixed display string handling bugs: in
+  "t=", commas and equals signs weren't handled properly.
+
+- signatures of fullPath() and info() functions changed to use std::string.
+  The new signatures are both safer (no danger of accidental buffer overrun
+  or confusion caused by using static buffers) and easier to use.
+  POTENTIAL INCOMPATIBILITY: fullPath() calls in sprintf(), ev.printf(),
+  new cException() etc calls should be changed to fullPath().c_str().
+  (ev<< statements are not affected.)
+
+- support for categorized icons (icons grouped into subdirectories with
+  the bitmaps folder) in GNED and Tkenv
+
+- linking problems (linker symbol conflicts) with recent Akaroa versions
+  resolved
+
+
+OMNeT++ 3.0 alpha 8 (Oct 2004)
+--------------------------------
+- in .msg files, struct fields can have initializers (a constructor gets
+  generated)
+- Tkenv: minor improvements
+- configure script refinements
+
+
+OMNeT++ 3.0 alpha 7 (Sept 2004)
+-------------------------------
+Several improvements and bug fixes since 3.0a6. Detailed list of changes:
+
+- loading XML config files via "xml"-type NED parameters or
+  ev.getXMLDocument(): If the document has an attached DTD (DOCTYPE
+  declaration), the document will be validated, and attribute default values
+  will be completed from the DTD.
+
+- Scalars tool: enhanced Copy to clipboard functionality: different
+  variables can be put on different columns. This makes it easier to use
+  Excel's PivotTable or OpenOffice's DataPilot) functionality to analyze
+  data.
+
+- NED: gate vectors, if there's no "gatesizes:", will be created with zero
+  size. (Previously they were created with size one -- this is a potential
+  incompatibility.)  A zero-sized gate vector is internally represented by a
+  single gate object whose size() method returns zero, and cannot be
+  connected.
+
+- Tkenv: bitmap path can now be specified in omnetpp.ini, using the
+  [Tkenv]/bitmap-path= entry. Value should be "quoted", and directories
+  should be separated by ";". The contents of the OMNETPP_BITMAP_PATH
+  environment variable (or if that's not set, the compilation-time bitmap
+  path) gets concatenated to this one.
+
+  IMPORTANT: if you forget the quotes, ONLY THE FIRST DIRECTORY will be
+  used with the rest ignored, because ";" is the comment mark in omnetpp.ini!
+
+- opp_makemake, opp_nmakemake: facilitated creating makefiles which only
+  have relative paths in them. The -b <basedir> option was added. <basedir>
+  is supposed to be the toplevel directory of large multi-directory
+  simulation model (such as IPSuite or MF). The -b option will cause all path
+  names (passed with -I, -L, etc.) to be converted from absolute to relative.
+  This means that makefiles will not need to be re-generated or edited when
+  the project is compiled in a different directory.
+
+- opp_neddoc: backslashing can be used to prevent intentional hyperlinking
+  of a word which is also a component (e.g. module) name. That is, if you
+  write "\IP", "IP" won't get hyper-linked in the HTML output, even if
+  there's a module type called IP. Single backslashes will be removed from
+  the HTML output -- double them if you want them to appear.
+
+- opp_neddoc: on Windows, listing directories on the command line which had
+  no .ned or .msg files in them caused opp_neddoc to stop with "file not
+  found" error.
+
+
+OMNeT++ 3.0 alpha 6 (Aug 2004)
+------------------------------
+POTENTIAL INCOMPATIBILITY: because the resolution of "*" has changed (it no
+longer matches "."), you may need to revise your existing omnetpp.ini files.
+
+New features introduced in this release, in nutshell: enhanced wildcard
+resolution in omnetpp.ini; direct support for XML config files via the "xml"
+NED parameter type; Cmdenv now lets you choose which modules' ev output you
+want to print; plugin interface for using configuration data sources other
+than omnetpp.ini. Several improvements in opp_neddoc and opp_makemake, and
+some bugfixes.
+
+For more details, see article
+  http://www.omnetpp.org/article.php?story=20040722133521209
+
+
+OMNeT++ 3.0 alpha 5 (June 2004)
+-------------------------------
+Plove has been completely rewritten under the skin. It is no longer a wrapper
+around grep, awk and gnuplot -- it boasts a powerful internal extensible
+data-flow engine (for filtering and processing output vectors before plotting),
+and a BLT-based plotting window (which allows a multiple plots via tabbed
+window, and these plots are a bit easier to customize than gnuplot-based ones
+were -- oh yes and they allow arbitrary zooming on the fly). The new Plove
+can also do scatter plot. Calculating histograms and cumulative distribution
+functions and various other refinements will come soon.
+
+What else? opp_msgc now generates the pack/unpack operations so parallel
+simulation has become a lot more transparent. Plus a couple of bugfixes of
+course. The test suite (test/core) is supposed to pass completely, except
+for one little known bug in ev<< w/ Cmdenv.
+
+
+OMNeT++ 3.0 alpha 4 (May 2004)
+------------------------------
+This alpha release introduces a new tool, Scalars for analysing output scalar
+(.sca) files. Scalars requires BLT. Another novelty is the new "control info"
+field in cMessage which provides a better way to implement communication
+between protocol layers than the traditional "interface packet" approach
+used in older IPSuite versions. (IPSuite has also been switched over to employ
+the control info approach.)
+
+
+OMNeT++ 3.0 alpha 3 (March 2004)
+--------------------------------
+Bugfixes.
+
+
+OMNeT++ 3.0 alpha 2 (March 2004)
+--------------------------------
+Improvements on opp_(n)makemake, Plove, Tkenv, parallel simulation; bugfixes.
+
+
+OMNeT++ 3.0 alpha 1 (Jan 2004)
+------------------------------
+Sames as 3.0 Preview
+
+
+OMNeT++ 3.0 Preview, 2004 January
+---------------------------------
+This is an intermediate code snapshot -- it was released to show you what
+features are planned for release 3.0, and possibly to get early feedback
+about them. It has not been fully tested.
+
+The model documentation tool opp_neddoc has been introduced. It generates
+fully hyperlinked documentation with diagrams from comments in .ned and .msg
+files. It can also link to Doxygen-generated C++ documentation. It works both
+on Unix and Windows.
+
+Several Tkenv network animation enhancements: next event marker; animation
+of sendDirect() and method calls between modules; message icons; auto-layouting
+of networks; icon coloring; module "bubbles" (callouts); display of queue
+length next to module icon; display of a status string above module icon;
+optional modifier icon on top of submodule icon; submodule icon optionally on
+top of a rect/oval; display of "transmission range"; color names in display
+strings are accepted in HSB (hue-saturation-brightness) too.
+
+Changing display strings was made more comfortable from simple modules.
+
+Other Tkenv enhancements: powerful object search dialog; enhanced plugin
+support (see test/tkenv/plugin); better tabnotebook and multi-column listbox
+widgets via BLT. All Tkenv settings restored from .tkenvrc now.
+
+New sample simulations: Tictoc (a step-by-step tutorial), Aloha, CQN (Closed
+Queueing Network), Queueing, Routing, RoutingDB, Point-to-Point Transmitter.
+Other changes are that Dyna and Dyna2, Fifo and Fifo2 was merged, Topo was
+renamed to NEDDemo, Token renamed to TokenRing. The Nim example has finally
+retired. The new/revised sample simulations demonstrate new Tkenv features
+and also more simulation kernel features. They also mark a shift from
+activity() based modules towards handleMessage()-based ones.
+
+Dynamic loading of NED files has been implemented, which means it is possible
+to use NED files directly, without nedc and C++ compilation. NED files
+containing compound modules and networks can be loaded dynamically.
+NED files can be loaded interactively (Tkenv "Load NED file" toolbar icon)
+or automatically (via omnetpp.ini, preload-ned-files= entry). (alpha!)
+
+Simulation kernel: internal object ownership handling, has been redesigned,
+which both reduced memory footprint (sizeof(cObject)) and increased speed.
+Another efficiency improvement is that for short object name strings,
+the string is now stored inside cObject (and not dynamically allocated via
+new char[...].)
+
+Distributed simulation support rewritten, currently experimental. (alpha!)
+
+Several new tests in test suite, also for testing opp_neddoc and Tkenv.
+
+TODO:
+The Manual is still to be updated at places. Further items are the
+introduction of new RNG architecture based on modern RNGs, and testing
+and completion of nedxml/nedtool (which will bring the retirement of nedc).
+
+
+OMNeT++ 2.3 release (June 2003)
+-------------------------------
+A major revision of the User Manual has taken place. In addition to
+documenting new features, several existing sections have been revised,
+updated and expanded for clarity and informativeness, based on feedback
+from the community.
+
+Even if you already have a printed copy of an earlier manual, this is
+a good time to discard it and print a new one -- even experienced OMNeT++
+users will find a wealth of new information in it. For the list of
+changes, see the "Document History" table at the front of the manual.
+
+Deprecations! To ensure your simulation will be compatible with future
+releases, please check doc/API-Changes.txt and remove use of
+deprecated functions from you simulation models. Functions deprecated
+now are likely to be removed in next major release.
+
+Improvements:
+- message subclassing: generated message classes now accept message kind
+  in the constructor.
+
+Bugfixes since 2.3b2:
+- fixed problem with deleting dynamically created modules
+- fixed opp_msgc problem with RedHat9's broken Perl (doesn't recognize [^\s]
+  in regexps)
+- minor improvements: opp_nmakemake now autodetects C++ file extension
+  (.cc or .cpp); opp_msgc doesn't choke on -I flag
+
+
+OMNeT++ 2.3b2 release (March 2003)
+----------------------------------
+This is a bugfix release. Resolved issues include:
+- wrong handling of channels (bug was introduced in 2.3b1)
+- opp_test failed on Unix if "." was not in the PATH
+- various smaller bugs in GNED, Tkenv, Envir, and opp_nmakemake
+- added several test cases (e.g. for channel testing) in test/
+
+See doc/API-Changes.txt for the list of changes since 2.2, including those
+that affect compatibility. ChangeLogs in respective source directories
+contain even more details.
+
+
+OMNeT++ 2.3b1 release (February 2003)
+-------------------------------------
+Licensing change: The license used in previous versions has been replaced
+with a new "Academic Public License" (doc/License). This license gives
+noncommercial users rights to use, modify and distribute copies of OMNeT++.
+The possibility of using OMNeT++ under the GPL has been removed. Commercial
+users of OMNeT++ should obtain a commercial license.
+
+Major changes of this release in nutshell:
+- The simulation kernel has been ported to use C++ exceptions and RTTI
+  (Run-time Type Information) and on Windows, the Fiber API. Also, there
+  has been extensive internal refactoring and refinement of the APIs.
+
+- The "message subclassing" feature has been officially introduced. It is now
+  documented in the manual, and used by several sample simulations.
+
+- Added the implementation of several distributions: continuous distributions
+  gamma, beta, Erlang, chi^2, student-t, Cauchy, triangular, lognormal, Weibull
+  and Pareto; discrete distributions Bernoulli, binomial, geometric, negbino-
+  mial and Poisson [contributed by Werner Sandmann and Kay Michael Masslow].
+
+- Contains an alpha version of the new NED compiler architecture,
+  built upon XML foundations. This includes a tool for generating
+  documentation from NED files.
+
+- Akaroa support. Akaroa does MRIP (multiple replications in parallel).
+
+- Tkenv GUI has been polished -- both functionality and usability has been
+  greatly improved. Plove GUI was also redesigned.
+
+For the list of changes that affect portability of simulation models,
+see the new doc/API-Changes.txt file. You can find even more detailed
+information in the ChangeLogs of the respective source directories.
+
+A more detailed list of changes follows:
+
+Simulation kernel refactoring:
+- On Windows, now Win32 native coroutines are used (Fibers API). This change
+  made it possible to introduce the use of C++ exceptions.
+
+- Error handling in simulation kernel (and in other libs too) has been ported
+  to C++ exceptions. This not only resulted in cleaner kernel code, but also
+  has benefits for you:
+  * you can now use try-catch for better error handling. The API documentation
+    describes which methods throw exceptions. The common exception class
+    is cException.
+  * methods like end(), endSimulation(), deleteModule() terminate the module
+    immediately even when called from handleMessage(). In earlier versions,
+    handleMessage() had to go through in any case.
+  * you can now safely use C++ libraries that throw exceptions, e.g. STL.
+  Methods like cSimpleModule::error() and opp_error() are remained for backward
+  compatibility, but they simply throw cException. opp_warning() remained but
+  its use is discouraged.
+
+- Use of C++ RTTI (Run-time Type Information). From now on, you can use
+  dynamic_cast<> in your code, and you don't need to provide a className()
+  method in your classes (because the kernel can figure it out using typeid
+  in the base class, cObject).
+
+- Eliminated gcc 3.0.x warnings, and changed to the I/O headers <iostream>, etc.
+
+- Several smaller auxiliary classes have been turned into inner classes of
+  their respective 'main' classes. (For example, cQueueIterator became
+  cQueue::Iterator, sTopoNode became cTopology::Node, etc; full list in
+  include/ChangeLog.) Compatibility typedefs exist for the old names.
+
+- Cleanup in cObject and cSimulation: several internally used methods have been
+  eliminated or moved to better places. (For example, inspector-related methods
+  cObject::inspector() and cObject::inspectorFactoryName() have been removed,
+  and inspectors are now fully internal matter of Tkenv.)
+
+- Refactoring on dynamic module creation: instead of modtype->buildInside(mod),
+  one should now write mod->buildInside(), which is more natural.
+  (The former syntax still works -- a cModuleType::buildInside() is still
+  provided for backward compatibility). buildInside() delegates task to
+  doBuildInside() (a new method), so it's doBuildInside() which should be
+  redefined in subclasses, and also nedc generates now doBuildInside() code.
+
+- Container classes are now more consistent in what they do when the requested
+  object doesn't exist:
+  * Convention 1: methods returning an object reference (e.g. cPar&) now
+    always throw an exception if the object is not found. (Until now, some
+    methods issued a warning and returned null reference, i.e. *(cPar*)NULL).
+  * Convention 2: methods returning a pointer (e.g. cGate*) return NULL
+    pointer if the object is not found. (Until now, some methods issued
+    a warning and returned NULL pointer.)
+  These conventions necessitated the following changes:
+  * par() of cModule and cMessage now throws an exception if parameter was not
+    found. (In simple module code, check for existence of a parameter before
+    accessing it can now be replaced with try-catch.)
+  * cModule: cGate *gate() methods no longer issue a warning if the gate is
+    not found, just return NULL.
+  * cArray::remove(cObject *) and cQueue::remove(cObject *) methods
+    now return NULL instead of the original pointer if the object was
+    not found.
+
+- cPar can now use compiled expressions subclassed from cDoubleExpression (a
+  new class). This is needed for code generated by the new nedtool.
+
+- cSimulation changes:
+  * lastModuleIndex() renamed to lastModuleId();
+  * operator[] deprecated (use module(int) method instead)
+  * del() renamed to deleteModule(); add() renamed to addModule()
+
+- Channels are now represented by real objects (subclassed from cChannel)
+  rather than parameters in cGate. Channels can be assigned to connections
+  via cGate's setChannel() method; at the same time, DEPRECATED cGate's
+  setDelay(), setError(), setDatarate(), setLink() methods (these attributes
+  should be set on the channel object).
+
+- cSubModIterator: operator[] deprecated (use operator()(int) method instead)
+
+- For further, more internal changes and for more details on the above changes
+  see include/ChangeLog and src/sim/ChangeLog.
+
+Simulation kernel new features:
+- Added convenience functions to cGate, cMessage, and cArray (see
+  API-Changes.txt for details).
+
+- A new utility class cDisplayStringParser lets you easily manipulate display
+  strings.
+
+Message subclassing, new NED compiler architecture:
+- The Perl-based message compiler opp_msgc is now available in bin/. Message
+  subclassing is documented in the manual, and it is demonstrated by several
+  sample simulations. 40+ test cases deal with testing the generated code.
+
+- Added nedtool, the new NED and message compiler (alpha). nedtool converts
+  NED from/to XML, providing much better integration possibilities (for example
+  it is now possible to use XML/XSLT to generate NED topologies from external
+  data sources -- or to extract NED info to arbitrary XML format.)
+
+- Added nedxml library (the library under nedtool) to src/, and its API-doc
+  to doc/nedxml-api.
+
+Manual:
+- Manual source has been converted from Word to Latex [thanks to Ulrich Kaage
+  for this non-trivial and time consuming task!]. He also added an Index.
+  HTML conversion (using L2H, by myself) is not 100% yet, you should regard
+  the PDF as the authoritative form.
+
+- New chapter about message subclassing, plus various updates, fixes and
+  clarifications [thanks to Phillip Feldman for his comments]
+
+Build:
+- In addition to Cygwin, the MinGW compiler is now also supported in Windows.
+  Older Cygwin versions with the 2.95.x compiler cannot be used any more.
+
+- Improved MSVC support: opp_nmakemake creates MSVC makefiles; running the
+  test suite now works smoothly with MSVC; opp_stacktool displays reserved
+  stack size for executables.
+
+- MSVC projects now need *different* compiler flags. Every source should be
+  compiled with exceptions enabled and using /GR, otherwise there will be RTTI
+  exceptions. Because of the Fiber API, reserved stack size should be set to
+  a low value, 64K.
+
+- New utilities (Unix, MSVC): opp_neddoc creates HTML documentation for NED
+  files; opp_neddocall creates HTML documentation for all nedfiles in a
+  directory tree; splitvec to split output vector files.
+
+- There are new targets in Makefiles that are generated by opp_makemake:
+  Target neddoc.html generates a file named neddoc.html by using the
+  opp_neddoc tool on all NED files. Target htmldocs generates HTML
+  documentation of all source files (*.h and *.cc) using Doxygen. The
+  HTML files are placed into the sub-directory ./htmldoc. Also, Makefile
+  now generates ../doc/api/tags. This tag file can be included when generating
+  model documentation.
+
+- Improved configure script. Now we support Tk8.4, and also optional packages
+  like Akaroa.
+
+- Test suite: the number of test cases has grown from 19 to about 120 since
+  omnetpp-2.2; now it covers a bigger part of the core functionality (modules,
+  messages, queues, parameter) as well as message subclassing and some aspects
+  of NED and Cmdenv. Tests for the distributions are in test/distr.
+
+GNED, Plove:
+- The Plove GUI has been redesigned, with focus on intuitiveness and usability.
+  It also features icon toolbars, tooltips and more self-explanatory dialogs.
+
+- The number of module icons available for simulations has grown from 41 to ~90
+  since the 2.2 release. GNED also has an improved icon selector dialog now.
+
+- There have been other small fixes and improvements in GNED, e.g. fixed the
+  bug which caused display strings always being added to connections.
+
+- All Tk GUIs now make use of the combobox widget from Bryan Oakley.
+
+Envir changes (apply both to Cmdenv and Tkenv):
+- Integrated Steffen Sroka's Akaroa extension that supports multiple
+  independent replicated simulation runs.
+  Akaroa can be activated by specifying
+      [General]
+      outputvectormanager-class=AkOutputVectorManager
+  in the ini file. By default, all output vectors are under Akaroa
+  control; the <modulename>.<vectorname>.akaroa=false setting can be used
+  to make Akaroa ignore specific vectors. For more info see the Akaroa
+  home page and the OMNeT++ documentation.
+
+- Added fname-append-host=yes/no ini file setting. When turned on, appends
+  the host name to the names of the output
+  files (output vector, output scalar, snapshot files). This is
+  useful when the simulation is run on multiple machines concurrently
+  (parallel independent runs (Akaroa) or parallel/distributed simulation),
+  and all running instances write to the same directory (e.g. shared
+  via NFS mount). [Idea from Steffen Sroka's Akaroa extension]
+
+- 2 bugfixes: (1) output scalar file did not get opened sometimes; (2) output
+  scalar file got removed between runs
+
+Cmdenv:
+- Cmdenv can now display various performance measures like event/sec,
+  event/simsec, simsec/sev, number of message objects, etc. during execution,
+  so you can compare Tkenv and Cmdenv performances.
+
+- The omnetpp.ini entries that control Cmdenv execution mode and amount of
+  printed info have been changed. An express-mode=yes/no (default: no) switch
+  has been introduced, with a meaning similar to Tkenv. Normal mode
+  (express-mode=no) can be controlled with the module-messages=yes/no,
+  event-banners=yes/no, and message-trace=yes/no entries (the third adds new
+  functionality), while express mode is affected by the status-frequency=
+  <num-events>, performance-display=yes/no entries. autoflush=yes/no has
+  also been added. The display-update=, verbose-simulation= entries are now
+  obsolete.
+
+- The -h command-line switch now lists all networks and modules linked into
+  the executable.
+
+Tkenv:
+- Inspector windows are now restored from a ./.tkenvrc file if you restart the
+  simulation. More precisely: as soon as an inspected object (identified by
+  fullpath and classname) gets created in the simulation, its window pops up.
+  Objects must have unique names for this to work properly! [Thanks to Nicky
+  Van Foreest for the idea]
+
+- For better navigation of simulation objects, an object tree view has been
+  added to the left side of the main window. It can be turned off from the
+  toolbar for performance.
+
+- Inspector windows have been re-though to make them more intuitive, consistent
+  and informative. All inspector windows now feature an inspector bar with
+  object fullpath, classname and pointer value (useful for debugging), and a
+  color code to make it easier to match different inspectors of the same
+  object. Axis labelling have been added to output vector inspectors.
+  Added tooltips to graphical module inspectors, speeded up animation of on
+  very long connection arrows, and refined functionality of the Step icon
+  into 3 distinct icons ("Run until next local event", "Fast", "Stop").
+
+- Improved File|New run and New network dialogs (now also available from the
+  toolbar) offer choice from a combobox. Other improvements: main text window
+  is now cleared when simulation is restarted; more tooltips & toolbar icons;
+  better output in Message Trace window; increased event number status bar
+  field width by 3 digits (it was limited in size to 1.000.000 events);
+
+- With "ring" layout, changed display order of modules from clockwise to the
+  more natural counter-clockwise.
+
+- Extensive internal refactoring mostly because of the introduction exception
+  handling and reorganization of inspector registration and creation.
+
+Sample simulations:
+- HCube, Token Ring and Dyna2 now use message subclassing. Token Ring has
+  also been significantly revised. The PVMEx example has been removed.
+
+- A new example simulation Topo has been created to demonstrate NED features.
+  Currently it shows how to build various parametric topologies (chain, mesh,
+  ring, star, random graph, binary tree, hexagonal grid) using NED.
+
+
+OMNeT++ 2.2p1,p2,p3
+-------------------
+Only exist in source patch form.
+
+
+In the OMNeT++ 2.2 release (May 2002)
+-------------------------------------
+It's almost a year since the last, 2.1 release, and that's why this change
+list tends to be a bit lengthy. Sorry about that.
+
+For this release I got many more bugfixes, bug reports and suggestions than
+for any previous one. Thanks to everybody who helped! Huge credit goes to
+Ulrich Kaage in Karlsruhe who built up a server infrastructure (CVS,
+bugtracker, Wiki, etc.) and was restless in testing and improving OMNeT++.
+Thanks Uli! This is the first release since the CVS went online last year.
+
+This release contains experimental support for the long-demanded feature known
+as 'message subclassing'. This means that C++ message classes can be generated
+from NED code, replacing the practice of dynamically adding cPar objects to
+messages. Data fields added via the subclassing mechanism are inspectable in
+Tkenv. The new NED syntax is experimental; the compiler extensions have been
+temporarily implemented in Perl. The new Dyna2 sample simulation demonstrates
+this feature. See doc/msgsubclassing.txt for more information.
+
+The simulation kernel now has an indexed and hyperlinked on-line API reference,
+generated from header file comments. (We're using Doxygen.) At the same time,
+the Reference chapter in the manual was deleted.
+
+Distributed simulation can now use the MPI library which is more readily
+available nowadays than PVM. (Code contributed by Eric Wu).
+
+The simulation kernel was made const-correct; because of this, older code
+may need changes (especially where one didn't use the Module_Class_Members()
+macro to define module classes.) There were other changes on the simulation
+kernel to make it cleaner.
+
+cGate::setDisplayString() was fixed: changes are now immediately reflected
+in the Tkenv graphics as they should. cModule's display string methods were
+reorganized: the displayString(int type) method was split into displayString()
+and displayStringAsParent(), eliminating the type parameter. Similar change
+was made to the set...() methods. (Old methods remained but are now
+deprecated.)  All setDisplayString() methods are now compatible with
+auto-layouted modules (randomly placed modules won't jump around in Tkenv
+after each display update).
+
+New methods: opp_nextrand(long& seed); opp_strlen(..); opp_strprettytrunc(..);
+opp_mkindexedname(..) (the latter was formerly called indexedname()).
+fullName() no longer uses a static buffer; with fullPath(), it is possible
+to avoid static buffers by using the new fullPath(buffer,buflen) method.
+
+In NED, an expression may now refer to a submodule parameter with the following
+syntax: submod.par or submod[index].par. A limitation is that the index
+might not be an expression itself.
+
+Foundations of a simulation kernel regression test suite have been laid
+down. The test/ subdirectory contains a few initial test cases that rely
+on the new opp_test tool. The test tool can be very well used to build
+model tests, too. Also, as tests tend to be compact and easy to write, the
+test tool is also excellent for experimenting with OMNeT++ library classes.
+See doc/opp_test.txt for details.
+
+The Envir library has been extended with a plugin mechanism: one can now
+plug in code that actually handles recording output vectors (e.g. one can
+write them to database instead of files, apply filtering before writing
+them out, or send them to a simulation controller app) without having
+to modify the user interface library, the simulation kernel or existing models.
+Similar mechanisms exist for output scalars and snapshots. The new
+include/envirext.h header contains the interfaces the plugins have to
+conform to: cOutputVectorManager, cOutputScalarManager, cSnapshotManager.
+
+Tkenv's plugin handling was improved: plugins are searched in the directories
+in OMNETPP_PLUGIN_PATH (set to ./plugins by default). DLL file names that are
+looked for now correctly depend on the platform (*.dll on windows, .so* on
+Unix).
+
+For the default output vector mechanism (vec files), number precision was
+increased to 9 digits (fprintf format changed).
+
+The module parameter change logging feature is no longer supported.
+
+Size limitations on omnetpp.ini were removed (only max line length=1024 chars
+remained).
+
+ChangeLogs are now GNU-style, with the most recent entries at the top.
+
+Exit codes of simulation programs were made more natural: 0 if the simulation
+terminated normally, 1 otherwise. Also, SIGTERM and SIGINT signals are now
+handled more gracefully: they call finish() before terminating the simulation
+(Unix only).
+
+In GNED, regexp find/replace now understands the \1,\2,... notation in replace
+strings. Backwards search was implemented in the Find/Replace dialogs of GNED
+and Tkenv. Fixed Plove's problems with tabs/spaces in vector files and
+slashes/backslashes on Windows, and also GNED's problems with command-line
+arguments.
+
+The makefiles now use a new Perl-based dependency generator which works on all
+platforms. opp_makemake: added -L option, and removed Makefile.in from the
+'depend' target.
+
+
+In the OMNeT++ 2.1 release (May 2001)
+-------------------------------------
+This release is devoted to making OMNeT++ easier to install, easier
+to use and easier to learn. Most important, there is now a binary package
+for Windows. The install package comes with Tcl/Tk, Gnuplot and some
+Unix utilities (grep, awk) bundled, and in addition to the OMNeT++ programs
+and libraries compiled with MSVC, it also contains prebuilt executables
+of the sample simulations. To shorten the learning curve, the package
+contains Nick van Foreest's Queueing Tutorial. Some MSVC integration stuff
+(AppWizard, macro to add a NED file to the project) was also added.
+
+Changes in the source distribution: it now includes the Tutorial and
+the sources of the MSVC integration components. To facilitate creating
+binary distributions, omnetpp.h and the other simulation kernel headers
+have been moved out of src/sim/, to a new include/ directory. There was no
+change on the simulation kernel itself.
+
+Further enhancements: Plove can now be built as a single executable with
+compiled-in Tcl code; on Windows, Plove and GNED can now be compiled as GUI
+apps (using WinMain() instead of main()). I added makefiles for Win95/98/ME
+(although I couldn't test them). Borland C++ is no longer supported:
+I removed the old project files (*.ide), but added back (unsupported)
+Makefile.bc's.
+
+
+In the OMNeT++ 2.0 patch 1 (March 2001)
+---------------------------------------
+Fixes build issues with Cygwin, PVM, and static libs under Unix.
+
+
+In the OMNeT++ 2.0 final version (February 2001)
+------------------------------------------------
+There are a number of enhancements mainly on the GUI parts, GNED and Tkenv,
+but the simulation API remains fully compatible. Bugs that were reported
+since the 2.0b5 release have largely been fixed. All those who cared to
+report bugs and suggested features -- thanks!
+
+In cQueue, a number of methods were made virtual to enable customizing the
+class (e.g. adding statistics for maintaining average queue length, etc.).
+Some bugfixes on cQueue, cArray and cBag. I also added the OMNETPP_VERSION
+symbol to the sim header files (currently #defined as 0x0200).
+
+Tkenv was enhanced quite a bit. Now you can now open module output windows for
+all modules (not only for simple modules), and the window will accumulate
+ev<< output from that module and all submodules. (This feature is especially
+useful for tracing dynamically created modules). Now you can search for text
+in all module windows (^F Find, F3/^N Find next). Hotkeys were assigned to the
+run commands too (F4 Step, F5 Run, F6 Fast, F7 Express, F8 Stop), and the
+behaviour of the "step within module" command (^F4) was refined. I added a
+Performance status bar (it displays events/sec, simulated sec/sec,
+events/simulated sec readings). Another toolbar shows (among others) the number
+of message objects currently in existence -- this feature may help you discover
+the most common kind of memory leaks: forgetting to delete messages.
+Display string handling was improved: modules in a module vector may now be
+positioned individually, and submodule display strings may use the parent
+module's parameters, too. See src/tkenv/ChangeLog for details.
+
+The most important addition to GNED is its new, experimental XML support (needs
+the TclXML-1.2 package). XML will play a much more significant role in future
+releases of OMNeT++, as a universal data exchange format. Many smaller
+enhancements: GNED now accepts NED file names as command line arguments;
+.gnedrc was introduced; more & better Properties dialogs (Channel, Connection,
+Module, etc. Properties); GNED is more careful now when you want to exit the
+program; the File menu now has a Save all item. Plus a number of other fixes
+to improve the robustness and reliability of the code.
+
+A short section was added to the manual about parallel simulation in general.
+
+
+In the OMNeT++ 2.0 beta 5 version (June 2000)
+---------------------------------------------
+Fixed the errors/warnings that occurred when compiling 2.0b4 with gcc 2.95.2.
+
+
+In the OMNeT++ 2.0 beta 4 version (May 2000)
+--------------------------------------------
+This is release is a preparation to the 2.0 final release: most of the changes
+improve on the ISO compliance, cleanliness, portability or quality of the code
+and fix bugs, but there are a number of new features too.
+
+Steps toward better ISO compliance: the source was made 'const char *'-correct,
+and the TRUE/FALSE #defines were replaced by the true/false C++ keywords.
+Also, nearly all '-Wall' gcc warnings were eliminated from the source.
+
+Now it is possible to create DLLs from the libraries on Windows. This wasn't
+as easy as I thought, because there are fundamental conceptual differences
+between Windows DLLs and Unix shared objects. (For me it seems like the Unix
+approach is a lot more flexible.) The MSVC makefiles were further refined
+using a contribution from Balazs Kelemen.
+
+Improvements on the simulation library: Multi-stage module initialization
+support via cModule's initialize(int stage) and int numInitStages() functions.
+The send...() functions now have versions which take cGate* pointers.
+sum() and sqrSum() members added to the statistics classes (cStdDev and
+subclasses); isNumeric() member added to cPar; remove(cObject *) added to
+cArray. Also, three functions were added to cModule to facilitate navigating
+the module hierarchy: int findSubmodule(...), cModule *submodule(...) and
+cModule *moduleByRelativePath(...).
+
+New Cmdenv/Tkenv features: you may link more than one user interfaces into the
+simulation executable, and you can select one at runtime with the
+[General]/user-interface=Tkenv (or =Cmdenv) ini file option or the -u Tkenv
+(or -u Cmdenv) command-line argument to the simulation executable.
+The per-module extra stack size needed by the user interface libraries
+can now be configured from the ini file: [Cmdenv]/extra-stack= and
+[Tkenv]/extra-stack= options.
+
+The setDisplayString() sim.library functions are now properly handled by Tkenv,
+so you can change the network graphics at runtime. Module parameters in display
+strings (e.g. in "p=$xpos,$ypos;i=router") are also implemented finally.
+However, implementing the message appearance customization feature (message
+display strings) was left for next releases.
+
+In NEDC (and GNED), fixed the ?: operator and changed its precedence to bind
+looser than || and &&. Changed nedc-generated code to suppress warnings about
+unused variables (which are normal anyway in machine-generated code); this
+could only be done for MSVC and Borland C++ because gcc seems to lack such a
+pragma.
+
+Unfortunately I didn't get a chance to further refine GNED. It would really
+help to have contributors to GNED development, so if you're interested, please
+write! (Basically only Tcl/Tk programming is required [no need to touch the
+C++ part], and I could give any support needed.)
+
+Makefiles change: the 'install-local' target was eliminated: the new-built
+libraries and programs are immediately copied to the lib/ and bin/ subdirs.
+
+Several other smaller changes like fixed PVM execution; improved error
+handling, bugfix related to wrong transmissionFinishes() behavior, etc; see the
+sim/ChangeLog file.
+
+
+In the OMNeT++ 2.0 beta 3 version (Jan 2000)
+--------------------------------------------
+License change: you can now elect to use GPL for the whole OMNeT++ package.
+
+Compiling with MSVC is now supported. Makefile.vc files have been added for
+system components, and project files for sample simulatons. No DLL support yet.
+MSVC support required a number or small changes in the sources too.
+
+The documentation was significantly expanded and reorganized. RefMan got merged
+into the User Manual, and the new User Manual now contains a lot of background
+information, new hints and techniques, references to other simulation packages,
+etc. New sections include in-depth analyis of handleMessage() and activity(),
+and a comparison with Parsec.
+
+GNED has been further enhanced: you can create submodules by dragging a module
+type from the tree view to the canvas; submodule names can be edited in-place;
+there are dialogs to edit submodule, connection, channel, etc. specifications
+directly.
+
+A new sample called Demo was added which works as a GUI shell to the other
+sample simulations, and also demonstrates how you can link several simulation
+models into a single executable. The other samples were cleaned up a bit too
+(e.g. indentation & commenting made more consistent).
+
+Some API changes were made to improve the clarity of the code. See API_CHANGES
+in the doc/ directory.
+
+TVEnv was removed from the distribution.
+
+
+In the OMNeT++ 2.0 beta 1 and 2 versions (Sep,Nov 1999)
+-------------------------------------------------------
+
+License conditions have been alleviated: from this release on, one can elect
+to use GPL for the base components of OMNeT++.
+
+The configure script has been replaced by GNU Autoconf. The makefiles have been
+brushed up (more standard symbol names, autodepend, version number in lib names,
+etc). Cygwin is now fully supported. DOS+BC3.1 support has been removed for
+lack of interest. File names longer than 8+3 are now used within the package.
+
+Most of the effort since the last release was put into GNED. As a result,
+GNED can now directly read/write NED files, so you can use it to work on your
+existing NED sources. Moreover, GNED is now a fully two-way tool: you can edit
+compound modules in graphic or in NED source form, and switch to the other view
+any time. The GUI has been improved too: toolbar icons, tooltips, NED syntax
+highlight. GNED is still in beta and there's some missing functionality.
+
+Tkenv's user interface has also undergone some beautifying and bugfixing:
+now it has toolbar icons, tooltips, etc.
+
+OMNETPP_BITMAP_PATH can now contain a list of directories; it includes "." and
+"./bitmaps" by default, so individual simulation models can have their own
+icons in their own directories.
+
+Smaller enhancements were made to the simulation library. Some of them are:
+dynamic simple modules can now be created and booted in one step by using
+cModuleType's createScheduleInit() function; callInitialize() and callFinish()
+was added to the module classes (for compound modules they work recursively);
+behavior of cancelEvent() slightly changed. cMessage now has isScheduled()
+and isSelfMessage() member functions; a "context pointer" was also added to
+cMessage to facilitate writing modules which use a large number of self
+messages concurrently.
+
+See the ChangeLog in the directory of the individual components for details
+on what has been changed/fixed/improved.
+
+Contributions have been added. They include NED syntax highlight for Emacs,
+and recipes and sample code to use Octave with OMNeT++.
+
+Which is less visible to you, the development has moved to use CVS.
+
+
+In version of Feb, 1999 (OMNeT++ 1.1)
+-------------------------------------
+
+handleMessage() support added as alternative to activity(). Finite
+State Machines (FSMs) are now also supported. They are demonstrated
+in the fifo2 sample simulation.
+
+The cPacket class and the protocol.h header was added; its aim is
+to standardize on protocol models. Negative message kind values
+are now reserved.
+
+Added contributed howto about using OMNeT++ on NT with CYGWIN. Also
+added contributed report on using message subclassing.
+
+The way of writing custom inspectors has been redesigned to make it
+more flexible. Also, Tkenv now has a plugin interface.
+
+Several bugfixes and smaller improvements: Tkenv message inspector
+redesigned; bugs in the ini file reader and the statistics classes
+were fixed; vsscanf() was eliminated; the makefiles are now created
+from makefile.in files; wait(), receive() and surroundings were
+optimized; bug in GNED bug fixed etc.
+
+
+In version of Aug, 1998 (OMNeT++ 1.0)
+-------------------------------------
+
+Data collection by output vectors can be configured in the ini file
+(ie. OPNET 'probes'). Display strings can now be specified in the ini file
+as an alternative to embedding them in ned files.
+
+GNED has been totally rewritten. Now it supports colors, icon selection
+etc. and correctly generates display strings. Cut/copy/paste capability.
+
+A models/support library added with several base/utility classes and modules.
+
+Ported to Windows 95/NT. Borland C++ 5.0 project files are included.
+
+Numerous smaller improvements on Plove and Tkenv. Possibility
+to make standalone simulation executables with Tkenv's TCL script
+parts compiled into the executable.
+
+To-do list and coding conventions (style guide) has been added to the
+docs; please stick to it. Tkenv is now better documented; and so is the
+cKSplit class.
+
+As usually, additions and changes in the User Manual are marked with
+(new) in the text. It does not necessarily mean the feature documented
+there is new; most probably only the documentation is.
+
+As usually, you're welcome to hack on the code and send in patches!
+GNED is a very good target to start at. If you plan to do development,
+you can sign up on the OMNeT++ mailing list and exchange ideas with
+others.
+
+
+In version of July, 1998
+------------------------
+
+Documentation now includes quickstart reference for OPNET users.
+Additions to the User Manual are marked with (new!) in the text.
+
+Tkenv has been improved significantly. Better animation: message names
+are displayed and message kind is color-coded. New connection inspector
+shows a connection path graphically. Module inspector has been redesigned
+in notepad-style. Right-click popup menus in inspector windows.
+Variables can be changed at run-time by cWatch inspectors. You can now
+use the menu and play with the inspectors while simulation is running.
+Several smaller improvements.
+
+Routing support through the cTopology class. Other new classes are
+cWeightedStdDev, cLinkedList. Direct message encapsulation support.
+cPar can now store void* pointers. Output scalar file added which
+accumulates results from several simulation runs. Several refinements
+on the class library, more informative error messages.
+
+Improved makemake script supports large models which span across
+multiple directories. Plove made more intuitive with mc-like key bindings
+and right-click popup menus.
+
+
+In version of June 5, 1998
+--------------------------
+
+Documentation now comes also in HTML. We now have an LSM entry.
+
+Tkenv made the default user interface.
+
+Network graphics (module icons, connection arrows etc) and message
+flow animation has been added to Tkenv. Usefulness of Tkenv dramatically
+improved. Default graphics for models originally written without
+graphics (no modifications needed).
+
+By default, libraries are now dynamically linked which drastically reduces
+executable sizes. You can revert to static linking by editing in `configure'.
+You can load shared objects (e.g simple module code) at run-time
+(-l command-line option).
+
+Source directory tree changed to be more 'unix-like'.
+
+New histogram class with user-defined and equal-frequency cells added
+(thanks to Gabor Lencse), existing ones cleaned up and significantly
+enhanced.
+
+Wildcards (*,?) can be used in omnetpp.ini to supply values to several
+model parameters at a time. Ini file inclusion and multiple ini files
+support (via multiple -f command-line options) added. Total stack size
+for the coroutines can now be given in the omnetpp.ini file.
+
+Several bug fixes and minor improvements on Plove, GNED etc.
+
+
+Version of May, 1998
+--------------------
+Wasn't publicly announced.
+
+
+In version of March, 1998
+-------------------------
+
+An new interactive tool, Plove has been added. Plove is for analyzing
+and plotting output vector files. Plove uses gnuplot to do the actual
+work. In addition to viewing, you can save the gnuplot graphs to files
+(postscript, latex, pbm etc) with a click. Filtering the results
+before plotting (averaging, truncation, smoothing, etc) is possible.
+Some filters are built in, and you can easily create new filters or
+modify the existing ones.
+
+Portability: Unix and (with some limitations) Win95/NT
+
+
+In version of February, 1998
+----------------------------
+
+Type checking has been added to the NED language and the compiler.
+New operators have also been added (like binary and/or/xor, shifting etc).
+
+Now it is not necessary to declare module parameters and gates in .cc files
+(Module..End stuff can be left out).
+
+A new example program, HCube was added. It simulates an arbitrary-size
+hypercube network with a simple deflection routing.
+
+A configur script was added that -- on Unix platforms -- finds the
+installation directories of Tcl/Tk, X, PVM and Turbo Vision, and
+customizes the makefiles accordingly.
+
+The Jar compiler has been renamed to NEDC because the name 'Jar' was
+used by other software (a DOS archiver; Java tar on Solaris etc.)
+
+Some scripts in util/ have also been renamed.
+
+Now it is possible to specify values with time units (s,ms,us,m,h,d etc.)
+in omnetpp.ini.
+
+Misc improvements: some bugs fixed; some error messages in the sim. kernel
+made more informative etc.
+
+
+In version of December, 1997
+----------------------------
+
+A graphical model editor (GNED) is here. It's written entirely in Tcl/Tk.
+Try it. It is the first, simple version; there's more to come.
+
+The way of defining simple modules has been simplified a lot. Check out the
+manual or see the example programs!
+
+A new example program (fifo) was added that models a single-server queue and
+also demonstrates how to derive a simple module from another one.
+
+Important: the [All runs] ini file section has been renamed to [Parameters] to
+reduce misunderstandings.
+
+
+In version of October 15, 1997
+------------------------------
+
+Several member functions (and even classes) have been renamed for the sake
+of a more readable code as well as consistency in naming and style. The utils
+directory contains a Unix script (convert) to upgrade your files.
+
+The cKSplit class was added -- another, experimental on-line distribution
+approximation method.
+
+Several bugfixes and improvements, updated manual.
+
+The arg.list to the constructor of the histogram classes has changed --
+beware, the compiler might not warn you!
+
+
+In version of September 15, 1997
+--------------------------------
+
+Tkenv has been developed upon a lot -- try it with the improved Token Ring
+example!
+
+Parallel execution via PVM has been tested and significantly improved.
+Syncpoints (a tool for synchronization) were added. See the user manual
+for details. Go ahead and do Parallel Discrete Event Simulation (PDES)
+with OMNeT++!
+
+The implementation of the message queue (Future Event Set) has become more
+efficient: the underlying data structure has been changed to heap.
+
+Most important change in the simulation class library: cQueue's interface
+has changed. See the manual or the source code.
+
+Most important change in the ini file: The [General]/number-of-runs option
+has been replaced by the [Cmdenv]/runs-to-execute option and the
+-r command-line switch.
+
+Check the version.log files for the numerous other changes. Many bugfixes
+and code cleanups were made.

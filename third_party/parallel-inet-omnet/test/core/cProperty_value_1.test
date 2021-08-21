@@ -1,0 +1,87 @@
+%description:
+Tests cProperty keys and values
+
+%global:
+#include <string.h>
+#define PRINTINFO     ev << prop->info() << "\n";
+#define PRINTKEY(k)   ev << "key(" << k << "): has=" << (prop->containsKey(k)?"yes":"no") << " len=" << (prop->containsKey(k) ? prop->getNumValues(k) : -1) << "\n";
+
+%activity:
+//__asm int 3;
+cProperty *prop;
+prop = new cProperty("foo"); PRINTINFO;
+
+prop->addKey(""); PRINTINFO;
+PRINTKEY("");
+prop->setValue("", 2, "zwei"); PRINTINFO;
+prop->setValue("", 4, "vier"); PRINTINFO;
+PRINTKEY("");
+
+prop->addKey("fookey"); PRINTINFO;
+prop->setValue("fookey", 1, "eins"); PRINTINFO;
+prop->setValue("fookey", 0, "zero"); PRINTINFO;
+prop->setValue("fookey", 2, NULL); PRINTINFO;
+prop->addKey("barkey"); PRINTINFO;
+prop->addKey("bazkey"); PRINTINFO;
+
+prop->setNumValues("fookey", 10); PRINTINFO;
+prop->setNumValues("fookey", 2); PRINTINFO;
+prop->setValue("fookey", 9, "neun"); PRINTINFO;
+
+PRINTKEY("");
+PRINTKEY("fookey");
+PRINTKEY("bazkey");
+PRINTKEY("nope");
+PRINTKEY(NULL);
+
+prop->erase("barkey"); PRINTINFO;
+prop->erase("fookey"); PRINTINFO;
+prop->erase(""); PRINTINFO;
+
+PRINTKEY("");
+PRINTKEY("fookey");
+PRINTKEY("bazkey");
+PRINTKEY("nope");
+
+prop->addKey("fookey"); PRINTINFO;
+prop->setValue("fookey", 3, "drei"); PRINTINFO;
+
+PRINTKEY("fookey");
+
+delete prop;
+
+ev << "." << endl;
+
+%contains: stdout
+@foo
+@foo()
+key(): has=yes len=0
+@foo(,,zwei)
+@foo(,,zwei,,vier)
+key(): has=yes len=5
+@foo(,,zwei,,vier;fookey=)
+@foo(,,zwei,,vier;fookey=,eins)
+@foo(,,zwei,,vier;fookey=zero,eins)
+@foo(,,zwei,,vier;fookey=zero,eins,)
+@foo(,,zwei,,vier;fookey=zero,eins,;barkey=)
+@foo(,,zwei,,vier;fookey=zero,eins,;barkey=;bazkey=)
+@foo(,,zwei,,vier;fookey=zero,eins,,,,,,,,;barkey=;bazkey=)
+@foo(,,zwei,,vier;fookey=zero,eins;barkey=;bazkey=)
+@foo(,,zwei,,vier;fookey=zero,eins,,,,,,,,neun;barkey=;bazkey=)
+key(): has=yes len=5
+key(fookey): has=yes len=10
+key(bazkey): has=yes len=0
+key(nope): has=no len=-1
+key(0): has=yes len=5
+@foo(,,zwei,,vier;fookey=zero,eins,,,,,,,,neun;bazkey=)
+@foo(,,zwei,,vier;bazkey=)
+@foo(bazkey=)
+key(): has=no len=-1
+key(fookey): has=no len=-1
+key(bazkey): has=yes len=0
+key(nope): has=no len=-1
+@foo(bazkey=;fookey=)
+@foo(bazkey=;fookey=,,,drei)
+key(fookey): has=yes len=4
+.
+

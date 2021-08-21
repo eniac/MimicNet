@@ -1,0 +1,17 @@
+%description:
+Test display string inheritance.
+
+%file: test.ned
+
+import testlib.Dump;
+
+network Test {
+    @display(",foo");  // missing tagname
+    submodules:
+        dump: Dump;
+}
+
+%exitcode: 1
+
+%contains: stdout
+missing tag name in ",foo".

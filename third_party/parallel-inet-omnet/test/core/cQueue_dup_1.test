@@ -1,0 +1,60 @@
+%description:
+check cQueue::operator=
+
+%module: Queues
+
+class Queues : public cSimpleModule
+{
+  public:
+    Queues() : cSimpleModule(16384) { }
+    virtual void activity();
+    void fillQueue(cQueue& q);
+    void output(cQueue& q, const char *label);
+};
+
+Define_Module(Queues);
+
+void Queues::fillQueue(cQueue& q)
+{
+    cMsgPar *parm = NULL;
+    parm = new cMsgPar("1");
+    q.insert(parm);
+    parm = new cMsgPar("3");
+    q.insert(parm);
+    parm = new cMsgPar("2");
+    q.insert(parm);
+}
+
+void Queues::output(cQueue& q, const char *label)
+{
+    ev << label << q.getName() << ": len=" << q.length() << ", contents:";
+    while (!q.empty())
+        ev << " " << q.pop()->getName();
+    ev << endl;
+}
+
+void Queues::activity()
+{
+    cQueue initial("initial");
+    cQueue copy("copy");
+
+    fillQueue(initial);
+    copy = initial;
+    cQueue *dupped = initial.dup();
+
+    output(initial, "");
+    output(copy, "");
+    output(*dupped, "dupped ");
+
+    initial.clear();
+    copy.clear();
+    delete dupped;
+
+    ev << ".\n";
+}
+
+%contains: stdout
+initial: len=3, contents: 1 3 2
+copy: len=3, contents: 1 3 2
+dupped initial: len=3, contents: 1 3 2
+.

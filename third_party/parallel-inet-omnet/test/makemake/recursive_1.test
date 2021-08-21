@@ -1,0 +1,27 @@
+%description:
+Test the -r (recursive) option. It should visit every subdirectory.
+
+%file: top.msg
+message Top {}
+
+%file: a/a.msg
+message A {}
+
+%file: b/b.msg
+message B {}
+
+%testprog: work -h classes
+%ignore-exitcode: 1
+%file: buildspec
+all:
+	$(OPP_MAKEMAKE) -r -La -Lb -laaa -lbbb
+	cd a && $(OPP_MAKEMAKE) -a -o aaa
+	cd b && $(OPP_MAKEMAKE) -a -o bbb
+
+%contains: stdout
+class A
+%contains: stdout
+class B
+%contains: stdout
+class Top
+

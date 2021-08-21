@@ -1,0 +1,96 @@
+Name	Type	Description
+SB		// mandatory first line of an eventlog file
+v	integer	
+rid	string	
+b	integer	
+SE		// optional last line of an eventlog file
+e	boolean	
+c	integer	
+m	string	
+BU		// display a bubble message
+id	integer	
+txt	string	
+MB		// beginning of a call to another module
+sm	integer	
+tm	integer	
+m	string	
+ME		// end of a call to another module
+MC		// creating a module
+id	integer	
+c	string	
+t	string	
+pid	integer	
+n	string	
+cm	boolean	
+MD		// deleting a module
+id	integer	
+MR		// reparenting a module
+id	integer	
+p	integer	
+GC		// gate created
+m	integer	
+g	integer	
+n	string	
+i	integer	
+o	boolean	
+GD		// gate deleted
+m	integer	
+g	integer	
+CC		// creating a connection
+sm	integer	
+sg	integer	
+dm	integer	
+dg	integer	
+CD		// deleting a connection
+sm	integer	
+sg	integer	
+CS		// a connection display string change
+sm	integer	
+sg	integer	
+d	string	
+MS		// a module display string change
+id	integer	
+d	string	
+E		// an event that is processing a message
+#	event number	
+t	simulation time	
+m	integer	
+ce	event number	
+msg	integer	
+KF		
+p	int64	
+c	string	
+s	string	
+abstract		// base class for entries referring to a message
+id	integer	
+tid	integer	
+eid	integer	
+etid	integer	
+c	string	
+n	string	
+k	short	
+p	short	
+l	int64	
+er	boolean	
+d	string	
+pe	event number	
+CE		// canceling an event caused by a self message
+BS		// beginning to send a message
+ES		// prediction of the arrival of a message
+t	simulation time	
+is	boolean	
+SD		// sending a message directly to a destination gate
+sm	integer	
+dm	integer	
+dg	integer	
+pd	simulation time	
+td	simulation time	
+SH		// sending a message through a connection identified by its source module and gate id
+sm	integer	
+sg	integer	
+pd	simulation time	
+td	simulation time	
+CM		// creating a message
+CL		// cloning a message either via the copy constructor or dup
+cid	integer	
+DM		// deleting a message

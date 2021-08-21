@@ -1,0 +1,33 @@
+%description:
+Test double-to-long conversions:
+- fraction part gets truncated
+
+The rest is inconsistent:
+- when converting a negative double to unsigned long, the result may be
+  (MAX_ULONG-x) or zero (newer gcc [4.0>=?] yields zero)
+- if doesn't fit into a long, result is MAX_LONG (gcc), or something else (msvc)
+
+%activity:
+
+#define PRINT(x) {d=(double)x; l=(long)d; ul=(unsigned long)d; ev << "d=" << d << ", l=" << l << ", ul=" << ul << endl;}
+
+double d;
+long l;
+unsigned long ul;
+
+PRINT(3.01)
+PRINT(3.99)
+
+PRINT(-3.01)
+PRINT(-3.99)
+
+/// overflows seemingly produce inconsistent results on linux/gcc and msvc :(
+// PRINT(1e100)
+// PRINT(-1e100
+
+%contains-regex: stdout
+d=3.01, l=3, ul=3
+d=3.99, l=3, ul=3
+d=-3.01, l=-3, ul=(0|4294967293|18446744073709551613)
+d=-3.99, l=-3, ul=(0|4294967293|18446744073709551613)
+

@@ -1,0 +1,59 @@
+%description:
+Tests MatchExpression class.
+
+%includes:
+#include "matchexpression.h"
+#include "matchableobject.h"
+
+%global:
+
+// global vars
+static bool dottedpath;
+static bool fullstring;
+static bool casesensitive;
+
+static void match(const char *pattern, cObject *obj)
+{
+    ev << pattern << " | (" << obj->getClassName() << ")" << obj->getName() << " --> ";
+    try {
+        MatchExpression me(pattern, dottedpath, fullstring, casesensitive);
+        MatchableObjectAdapter matchobj(MatchableObjectAdapter::FULLNAME, obj);
+        bool result = me.matches(&matchobj);
+        ev << (result?"true":"false") << "\n";
+    } catch (std::exception& e) {
+        ev << "ERROR: " << e.what() << "\n";
+    }
+}
+
+
+%activity:
+
+dottedpath = true;
+fullstring = true;
+casesensitive = true;
+
+cPacket *msg = new cPacket("hello");
+msg->setKind(42);
+msg->setBitLength(999);
+
+match("hello", msg);
+match("he* AND *lo", msg);
+match("bubu", msg);
+match("kind(42)", msg);
+match("kind(41)", msg);
+match("bitLength({990..1000})", msg);
+match("bitLength({980..990})", msg);
+
+ev << "done\n";
+
+%exitcode: 0
+
+%contains: stdout
+hello | (cPacket)hello --> true
+he* AND *lo | (cPacket)hello --> true
+bubu | (cPacket)hello --> false
+kind(42) | (cPacket)hello --> true
+kind(41) | (cPacket)hello --> false
+bitLength({990..1000}) | (cPacket)hello --> true
+bitLength({980..990}) | (cPacket)hello --> false
+done

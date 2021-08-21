@@ -1,0 +1,49 @@
+%description:
+Test that registered functions work in NED at all; the functions
+themselves are tested elsewhere (NED_functions_1.test)
+
+%file: test.ned
+
+simple Test
+{
+    parameters:
+        @isNetwork(true);
+        int    p1 = length("Hello");
+        bool   p2 = contains("Hello", "ell");
+        string p3 = tail("Hello", 3);
+        int    p4 = int("12");
+        double p5 = double(7.5);
+}
+
+%file: test.cc
+
+#include <omnetpp.h>
+
+namespace @TESTNAME@ {
+
+class Test : public cSimpleModule
+{
+  public:
+    Test() : cSimpleModule(16384) { }
+    virtual void activity();
+};
+
+Define_Module(Test);
+
+void Test::activity()
+{
+    for (int i=0; i<getNumParams(); i++)
+        ev << par(i).getName() << "=" << par(i).str() << endl;
+    ev << ".\n";
+}
+
+}; //namespace
+
+%contains: stdout
+p1=5
+p2=true
+p3="llo"
+p4=12
+p5=7.5
+.
+

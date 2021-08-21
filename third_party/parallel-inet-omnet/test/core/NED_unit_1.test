@@ -1,0 +1,53 @@
+%description:
+Positive test cases for assignments with units in NED.
+The complete list of 4 * 4 = 16 test cases are covered by this
+and the negative test cases in NED_unit_n*.
+
+%file: test.ned
+
+// unit cases: not provided, SI, non SI, unknown
+simple Test
+{
+    parameters:
+        @isNetwork(true);
+        double p01 = 1;                       // not provided - not provided
+
+        double p06 @unit(s) = 2s;             // SI           - SI
+        double p07 @unit(s) = 2min;           // SI           - non SI
+
+        double p10 @unit(min) = 3s;           // non SI       - SI
+        double p11 @unit(min) = 3min;         // non SI       - non SI
+
+        double p16 @unit(unknown) = 4unknown; // unknown      - unknown
+}
+
+%file: test.cc
+
+#include <omnetpp.h>
+
+namespace @TESTNAME@ {
+
+class Test : public cSimpleModule
+{
+  public:
+    Test() : cSimpleModule(16384) { }
+    virtual void activity();
+};
+
+Define_Module(Test);
+
+void Test::activity()
+{
+    for (int i=0; i<getNumParams(); i++)
+        ev << par(i).getName() << "=" << par(i).doubleValue() << "\n";
+}
+
+}; //namespace
+
+%contains: stdout
+p01=1
+p06=2
+p07=120
+p10=0.05
+p11=3
+p16=4

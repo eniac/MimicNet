@@ -1,0 +1,23 @@
+%description:
+Test channel type's compliance to its channel interfaces: missing parameter
+
+%file: test.ned
+
+channelinterface IChannel
+{
+    parameters:
+        int p1;
+}
+
+channel Foo like IChannel
+{
+}
+
+network Test
+{
+}
+
+%exitcode: 1
+
+%contains: stdout
+channel type has no parameter `p1', required by interface `IChannel'

@@ -1,0 +1,45 @@
+%description:
+Test "like" modules with typename given in the ini file,
+using the "typename" config key.
+
+%file: test.ned
+
+import testlib.Dump;
+
+moduleinterface IFooModule { }
+module Compound1 like IFooModule { }
+module Compound2 like IFooModule { }
+
+network Test
+{
+    submodules:
+        a: <> like IFooModule;
+        b[3]: <> like IFooModule;
+        dump: Dump;
+}
+
+%exitcode: 0
+
+%inifile: test.ini
+[General]
+#debug-on-errors = true
+network = Test
+cmdenv-express-mode = false
+Test.a.typename = Compound1
+Test.b[0].typename = Compound1
+Test.b[*].typename = Compound2
+
+%contains: stdout
+module Test: Test {
+    parameters:
+        @isNetwork
+    submodules:
+        module Test.a: Compound1 {
+        }
+        module Test.b[0]: Compound1 {
+        }
+        module Test.b[1]: Compound2 {
+        }
+        module Test.b[2]: Compound2 {
+        }
+}

@@ -1,0 +1,75 @@
+%description:
+Copying and assignment for messages: struct and class members
+
+%file: test.msg
+
+namespace @TESTNAME@;
+
+struct MyStruct
+{
+    int bb;
+}
+
+class MyClass
+{
+    int bb;
+}
+
+class ::cQueue;
+
+message Base
+{
+    MyStruct ms;
+    MyClass mc;
+    cQueue q;
+}
+
+message MyMessage extends Base
+{
+    MyStruct ms2;
+    MyClass mc2;
+    cQueue q2;
+};
+
+%includes:
+#include "test_m.h"
+
+%global:
+void print(const char *what, MyMessage& x)
+{
+   ev << what << ":";
+   ev << x.getMs().bb << ":" << x.getMc().getBb() << ":"
+      << x.getQ().getName() << ":" << x.getQ().length() << ":";
+   ev << x.getMs2().bb << ":" << x.getMc2().getBb() << ":"
+      << x.getQ2().getName() << ":" << x.getQ2().length();
+   ev << "." << endl;
+}
+
+%activity:
+
+// set up tester classes
+MyMessage x;
+x.getMs().bb=11;
+x.getMc().setBb(12);
+x.getQ().setName("q"); x.getQ().insert(new cMessage);
+x.getMs2().bb=21;
+x.getMc2().setBb(22);
+x.getQ2().setName("q2"); x.getQ2().insert(new cMessage);x.getQ2().insert(new cMessage);
+
+print("x", x);
+
+// copy constructor
+MyMessage x1(x);
+print("x1(x)",x1);
+
+// assigment
+MyMessage x2;
+x2 = x;
+print("x2=x",x2);
+
+%contains: stdout
+x:11:12:q:1:21:22:q2:2.
+x1(x):11:12:q:1:21:22:q2:2.
+x2=x:11:12:q:1:21:22:q2:2.
+
+

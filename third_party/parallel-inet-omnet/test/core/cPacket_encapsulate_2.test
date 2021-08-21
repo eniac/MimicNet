@@ -1,0 +1,23 @@
+%description:
+Tests message length behaviour with cPacket.encapsulate().
+
+%activity:
+cPacket *payload = new cPacket;
+payload->setBitLength(128);
+
+cPacket *frame = new cPacket;
+frame->setBitLength(32);
+
+frame->encapsulate(payload);
+ev << frame->getBitLength() << endl;
+
+frame->decapsulate();
+ev << frame->getBitLength() << endl;
+
+ev << payload->getBitLength() << endl;
+
+%contains: stdout
+160
+32
+128
+

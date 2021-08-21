@@ -1,0 +1,13 @@
+%description:
+Tests scenario generation
+
+%inifile: omnetpp.ini
+[Config Bogus]
+*.a = ${a=1,2,korte}
+constraint = $bubu > 1
+
+%extraargs: -g -x Bogus
+
+%exitcode: 1
+%contains: stderr
+Cannot evaluate constraint expression: unknown iteration variable: $bubu

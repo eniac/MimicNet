@@ -1,0 +1,114 @@
+%description:
+Test gate inheritance for modules.
+
+%file: test.ned
+
+import testlib.Dump;
+
+module Base
+{
+    gates:
+        input in1;
+        input in2a[];
+        input in2b[];
+        input in3a[2];
+        input in3b[2];
+        input in3c[2];
+    connections allowunconnected:
+}
+
+module Derived extends Base
+{
+    gates:
+        in1;     // nop
+        in2a[];  // keep zero
+        in2b[1]; // set
+        in3a[];  // keep
+        in3b[1]; // shrink
+        in3c[3]; // grow
+        input in4a[];
+        input in4b[2];
+}
+
+network Test
+{
+    submodules:
+        base: Base;
+        derived: Derived;
+        base2: Base {
+            gates:
+                in1;
+                in2a[];
+                in2b[1];
+                in3a[];
+                in3b[1];
+                in3c[3];
+        }
+        derived2: Derived {
+            gates:
+                in1;
+                in2a[1];
+                in2b[];
+                in3a[];
+                in3b[3];
+                in3c[1];
+        }
+        dump: Dump;
+    connections allowunconnected:
+}
+
+%contains: stdout
+module Test: Test {
+    parameters:
+        @isNetwork
+    submodules:
+        module Test.base: Base {
+            gates:
+                in1: not connected
+                in3a[0]: not connected
+                in3a[1]: not connected
+                in3b[0]: not connected
+                in3b[1]: not connected
+                in3c[0]: not connected
+                in3c[1]: not connected
+        }
+        module Test.derived: Derived {
+            gates:
+                in1: not connected
+                in2b[0]: not connected
+                in3a[0]: not connected
+                in3a[1]: not connected
+                in3b[0]: not connected
+                in3c[0]: not connected
+                in3c[1]: not connected
+                in3c[2]: not connected
+                in4b[0]: not connected
+                in4b[1]: not connected
+        }
+        module Test.base2: Base {
+            gates:
+                in1: not connected
+                in2b[0]: not connected
+                in3a[0]: not connected
+                in3a[1]: not connected
+                in3b[0]: not connected
+                in3c[0]: not connected
+                in3c[1]: not connected
+                in3c[2]: not connected
+        }
+        module Test.derived2: Derived {
+            gates:
+                in1: not connected
+                in2a[0]: not connected
+                in2b[0]: not connected
+                in3a[0]: not connected
+                in3a[1]: not connected
+                in3b[0]: not connected
+                in3b[1]: not connected
+                in3b[2]: not connected
+                in3c[0]: not connected
+                in4b[0]: not connected
+                in4b[1]: not connected
+        }
+}
+

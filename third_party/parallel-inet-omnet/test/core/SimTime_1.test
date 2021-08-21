@@ -1,0 +1,49 @@
+%description:
+SimTime: check scaling
+
+%global:
+// make protected SimTime::resetScale() accessible via subclassing
+class SimTimeExt : SimTime {
+  public: static void reset() {resetScale();}
+};
+
+%activity:
+
+for (int i=-18; i<=0; i++)
+{
+    SimTimeExt::reset();
+    SimTime::setScaleExp(i);
+
+    const char *u="";
+    if (SimTime::getScaleExp()==SIMTIME_S)  u =  "s";
+    if (SimTime::getScaleExp()==SIMTIME_MS) u = "ms";
+    if (SimTime::getScaleExp()==SIMTIME_US) u = "us";
+    if (SimTime::getScaleExp()==SIMTIME_NS) u = "ns";
+    if (SimTime::getScaleExp()==SIMTIME_PS) u = "ps";
+    if (SimTime::getScaleExp()==SIMTIME_FS) u = "fs";
+    ev.printf("%d: scale=%" INT64_PRINTF_FORMAT "d %s\n", i, SimTime::getScale(), u);
+}
+ev << ".\n";
+
+%contains: stdout
+-18: scale=1000000000000000000
+-17: scale=100000000000000000
+-16: scale=10000000000000000
+-15: scale=1000000000000000 fs
+-14: scale=100000000000000
+-13: scale=10000000000000
+-12: scale=1000000000000 ps
+-11: scale=100000000000
+-10: scale=10000000000
+-9: scale=1000000000 ns
+-8: scale=100000000
+-7: scale=10000000
+-6: scale=1000000 us
+-5: scale=100000
+-4: scale=10000
+-3: scale=1000 ms
+-2: scale=100
+-1: scale=10
+0: scale=1 s
+.
+

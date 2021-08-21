@@ -1,0 +1,41 @@
+%description:
+check empty/NULL string, empty/NULL delimiters
+
+%activity:
+
+const char *token;
+
+{
+    cStringTokenizer tok("");
+    while ((token = tok.nextToken())!=NULL)
+        ev << ":" << token;
+    ev << ".\n";
+}
+
+{
+    cStringTokenizer tok(NULL);
+    while ((token = tok.nextToken())!=NULL)
+        ev << ":" << token;
+    ev << ".\n";
+}
+
+{
+    cStringTokenizer tok("bla bla", "");
+    while ((token = tok.nextToken())!=NULL)
+        ev << ":" << token;
+    ev << ".\n";
+}
+
+{
+    cStringTokenizer tok("bla bla", NULL);
+    while ((token = tok.nextToken())!=NULL)
+        ev << ":" << token;
+    ev << ".\n";
+}
+
+
+%contains: stdout
+.
+.
+:bla:bla.
+:bla:bla.

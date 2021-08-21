@@ -1,0 +1,29 @@
+%description:
+Double to int64 cast. The conversion of the below number to long long type
+returns different result if the program is running under valgrind.
+This may result in a different fingerprint.
+
+The issue is really 64 vs 80-bit internal floating-point arithmetic.
+Valgrind only supports 64-bit one, while most compilers do 80 bits.
+
+%includes:
+#include <stdio.h>
+
+%activity:
+
+char *x = "\x19\x6d\xb2\x9a\xba\x7e\x15\x40";
+double d = *(double *)x;
+ev.printf("\ndouble: %.20f", d);
+ev.printf("\nlong long:%lld \n", (long long)(d*(1e12)));
+
+// We have seen two kind of results:
+//  double: 5.37375871385599968022
+//  long long:5373758713855
+// and
+//  double: 5.37375871385599970000
+//  long long:5373758713856
+
+%contains-regex: stdout
+double: 5\.373758713855999[0-9]+
+long long:537375871385[56]
+

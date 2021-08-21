@@ -1,0 +1,57 @@
+%description:
+Check that rng seeding works properly.
+IMPORTANT: FOR (b),(c),... VERSIONS OF THIS TEST, take the (a),
+change the runs-to-execute parameter -- result should be the same,
+only in different order.
+
+%activity:
+for (int i=0; i<ev.getNumRNGs(); i++)
+{
+    // note: the intRand() calls cannot be put into the ev<< statement directly, because
+    // different compilers evaluate them in different order (see c++-evalorder_1.test)
+    unsigned long r1 = getRNG(i)->intRand();
+    unsigned long r2 = getRNG(i)->intRand();
+    ev << "ev.rng-" << i << ": ";
+    ev << r2 << "  " << r1 << ", drawn " << getRNG(i)->getNumbersDrawn() << "\n";
+}
+
+%inifile: test.ini
+[General]
+network = Test
+cmdenv-express-mode = false
+num-rngs = 3
+repeat = 5
+
+# Runs occurring more than once should get the same seeds every time.
+cmdenv-runs-to-execute = 0,1,4,2,0,4,0
+
+%contains-regex: stdout
+.*General-0.*
+ev.rng-0: 2546248239  2357136044, drawn 2
+ev.rng-1: 4282876139  1791095845, drawn 2
+ev.rng-2: 794921487  1872583848, drawn 2
+.*General-1.*
+ev.rng-0: 303761048  2365658986, drawn 2
+ev.rng-1: 3868139694  4153361530, drawn 2
+ev.rng-2: 236996814  953453411, drawn 2
+.*General-4.*
+ev.rng-0: 1916507803  662124363, drawn 2
+ev.rng-1: 2608511152  3340206418, drawn 2
+ev.rng-2: 3959502168  2207369835, drawn 2
+.*General-2.*
+ev.rng-0: 4069378761  3834805130, drawn 2
+ev.rng-1: 976413892  327741615, drawn 2
+ev.rng-2: 47736148  3751350723, drawn 2
+.*General-0.*
+ev.rng-0: 2546248239  2357136044, drawn 2
+ev.rng-1: 4282876139  1791095845, drawn 2
+ev.rng-2: 794921487  1872583848, drawn 2
+.*General-4.*
+ev.rng-0: 1916507803  662124363, drawn 2
+ev.rng-1: 2608511152  3340206418, drawn 2
+ev.rng-2: 3959502168  2207369835, drawn 2
+.*General-0.*
+ev.rng-0: 2546248239  2357136044, drawn 2
+ev.rng-1: 4282876139  1791095845, drawn 2
+ev.rng-2: 794921487  1872583848, drawn 2
+

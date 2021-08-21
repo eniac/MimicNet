@@ -1,0 +1,17 @@
+%description:
+Test the compiler: type casts between integer types, 32/64 bits
+Should pass both on 32 and 64 bit architectures
+
+%activity:
+
+unsigned int x = 0xffffffff; ev<<"x="<<x<<"\n";
+long ll = (int)x;            ev<<"ll="<<ll<<"\n";
+int64 i64 = ll;              ev<<"i64="<<i64<<"\n";
+uint64 ui64 = i64;           ev<<"ui64="<<ui64<<"\n";
+
+%contains: stdout
+x=4294967295
+ll=-1
+i64=-1
+ui64=18446744073709551615
+

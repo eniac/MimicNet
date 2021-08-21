@@ -1,0 +1,105 @@
+%description:
+Test parameter inheritance for modules.
+
+%file: test.ned
+
+import testlib.Dump;
+
+module Base
+{
+    parameters:
+        int p1a;
+        int p1b;
+        int p1c;
+        int p2a = default(2);
+        int p2b = default(2);
+        int p2c = default(2);
+}
+
+module Derived extends Base
+{
+    parameters:
+        p1a;
+        p1b = default(1);
+        p2a;
+        p2b = default(2);
+}
+
+network Test
+{
+    submodules:
+        base: Base;
+        derived: Derived;
+
+        base2: Base {
+            p1a;
+            p1b = default(10);
+            p1c = 10;
+            p2a;
+            p2b = default(20);
+            p2c = 20;
+        }
+        derived2: Derived {
+            p1a;
+            p1b = default(10);
+            p1c = 10;
+            p2a;
+            p2b = default(20);
+            p2c = 20;
+        }
+        dump: Dump;
+}
+
+%inifile: test.ini
+[General]
+network = Test
+cmdenv-express-mode = false
+cmdenv-event-banners = false
+**.p1a = 1000
+**.base.p1b = 1001
+**.base.p1c = 1002
+**.derived.p1c = 1
+
+%contains: stdout
+module Test: Test {
+    parameters:
+        @isNetwork
+    submodules:
+        module Test.base: Base {
+            parameters:
+                p1a = 1000
+                p1b = 1001
+                p1c = 1002
+                p2a = 2
+                p2b = 2
+                p2c = 2
+        }
+        module Test.derived: Derived {
+            parameters:
+                p1a = 1000
+                p1b = 1
+                p1c = 1
+                p2a = 2
+                p2b = 2
+                p2c = 2
+        }
+        module Test.base2: Base {
+            parameters:
+                p1a = 1000
+                p1b = 10
+                p1c = 10
+                p2a = 2
+                p2b = 20
+                p2c = 20
+        }
+        module Test.derived2: Derived {
+            parameters:
+                p1a = 1000
+                p1b = 10
+                p1c = 10
+                p2a = 2
+                p2b = 20
+                p2c = 20
+        }
+}
+

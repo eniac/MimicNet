@@ -1,0 +1,6 @@
+*_m.cc
+*_m.h
+*.o
+src/out
+src/libinet.so
+.vscode/settings.json

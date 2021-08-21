@@ -1,0 +1,89 @@
+%description:
+Tests that a handleMessage() module can delete itself, and execution of that module
+stops immediately. Simulation of other modules continue. Scheduled events for
+deleted simple module are discarded.
+
+%file: test.ned
+
+simple Node
+{
+}
+
+simple Suicide
+{
+}
+
+network Test
+{
+    submodules:
+        node: Node;
+        suicide: Suicide;
+}
+
+%file: test.cc
+
+#include <omnetpp.h>
+
+namespace @TESTNAME@ {
+
+class Node : public cSimpleModule
+{
+  public:
+    Node() : cSimpleModule(16384) { }
+    virtual void activity();
+};
+
+Define_Module(Node);
+
+void Node::activity()
+{
+    for (int i=0; i<5; i++)
+    {
+        bool exists = (getParentModule()->getSubmodule("suicide") != NULL);
+        ev << "t=" << simTime()  << ": exists=" << exists << endl;
+        wait(1);
+    }
+}
+
+class Suicide : public cSimpleModule
+{
+  public:;
+    virtual void initialize();
+    virtual void handleMessage(cMessage *msg);
+};
+
+Define_Module(Suicide);
+
+void Suicide::initialize()
+{
+    scheduleAt(1.0, new cMessage("msg"));
+}
+
+void Suicide::handleMessage(cMessage *msg)
+{
+    scheduleAt(simTime()+1.0, msg);
+    ev << "before deleteModule\n";
+    deleteModule();
+    ev << "after deleteModule\n";
+}
+
+}; //namespace
+
+%inifile: test.ini
+[General]
+network = Test
+cmdenv-express-mode = false
+cmdenv-event-banners = false
+
+%contains: stdout
+t=0: exists=1
+before deleteModule
+t=1: exists=0
+t=2: exists=0
+t=3: exists=0
+t=4: exists=0
+
+%not-contains: stdout
+after deleteModule
+
+

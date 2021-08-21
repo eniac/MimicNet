@@ -1,0 +1,70 @@
+%description:
+Test literals in NED.
+
+%file: test.ned
+
+simple Test
+{
+    parameters:
+        @isNetwork(true);
+        string s1 = "hello";
+        string s2 = "";
+
+        bool b1 = true;
+        bool b2 = false;
+
+        volatile double n3 = 5;
+        volatile double n4 = 3.1415;
+        volatile double n5 = 6.01e23;
+
+        double nc3 = 5;
+        double nc4 = 3.1415;
+        double nc5 = 6.01e23;
+
+}
+
+%file: test.cc
+
+#include <omnetpp.h>
+
+namespace @TESTNAME@ {
+
+class Test : public cSimpleModule
+{
+  public:
+    Test() : cSimpleModule(16384) { }
+    virtual void activity();
+};
+
+Define_Module(Test);
+
+void Test::activity()
+{
+    for (int i=0; i<getNumParams(); i++)
+    {
+        ev << cPar::getTypeName(par(i).getType()) << " " << par(i).getName() << "=";
+        switch (par(i).getType()) {
+          case cPar::STRING: ev << par(i).stringValue(); break;
+          case cPar::LONG:   ev << par(i).longValue(); break;
+          case cPar::DOUBLE: ev << par(i).doubleValue(); break;
+          case cPar::BOOL:   ev << (par(i).boolValue() ? "true" : "false"); break;
+          case cPar::XML:    ev << "some xml"; break; // unused in this test
+        }
+        ev << "/" << par(i).str() << endl;
+    }
+}
+
+}; //namespace
+
+%contains-regex: stdout
+string s1=hello/"hello"
+string s2=/""
+bool b1=true/true
+bool b2=false/false
+double n3=5/5
+double n4=3\.1415/3\.1415
+double n5=6\.0?1e\+0?23/6.01e\+0?23
+double nc3=5/5
+double nc4=3\.1415/3\.1415
+double nc5=6\.01e\+0?23/6\.01e\+0?23
+

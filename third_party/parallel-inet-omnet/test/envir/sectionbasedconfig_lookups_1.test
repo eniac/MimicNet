@@ -1,0 +1,131 @@
+%description:
+Tests SectionBasedConfiguration's accelerated lookup implementation.
+
+Strategy: generate a long inifile with random contents, and perform
+random lookups against it. Accelerated lookups should yield the same
+results as naive, linear lookups.
+
+%includes:
+#include <fstream>
+#include "inifilereader.h"
+#include "sectionbasedconfig.h"
+#include "lcgrandom.h"
+#include "patternmatcher.h"
+
+%global:
+
+enum State {ALPHA, WILDCARD, DOT};
+
+static std::string generateKey(LCGRandom& rng)
+{
+    std::string key;
+    State state = rng.next01()<0.5 ? ALPHA : WILDCARD;
+    while (true)
+    {
+        if (strchr(key.c_str(),'.') && state==DOT && rng.next01()<0.2)
+            break;
+        if (state==DOT) {
+            key += ".";
+            state = rng.next01()<0.5 ? ALPHA : WILDCARD;
+        } else if (state==ALPHA) {
+            key += (rng.draw(2) ? "a" : "foo");
+            state = rng.next01()<0.5 ? DOT : WILDCARD;
+        } else if (state==WILDCARD) {
+            key += (rng.draw(2) ? "*" : "**");
+            state = rng.next01()<0.5 ? DOT : ALPHA;
+        }
+    }
+    return key;
+}
+
+static std::string generateName(LCGRandom& rng)
+{
+    std::string result;
+    while (result.empty() || rng.next01() >= 0.2)
+        result += (rng.draw(2) ? "a" : "foo");
+    return result;
+}
+
+static std::string generatePath(LCGRandom& rng)
+{
+    std::string result;
+    while (result.empty() || rng.next01() >= 0.2)
+        result += (result.empty()?"":".") + generateName(rng);
+    return result;
+}
+
+static const char *lookupFromInifile(InifileReader *ini, const char *module, const char *param)
+{
+    std::string fullpath = std::string(module)+"."+param;
+    int sectionId = 0;  // there's only one section
+    int n = ini->getNumEntries(sectionId);
+    for (int i=0; i<n; i++)
+    {
+        const InifileReader::KeyValue& entry = ini->getEntry(sectionId, i);
+        PatternMatcher pattern(entry.getKey(), true, true, true);
+        if (pattern.matches(fullpath.c_str()))
+            return entry.getValue();
+    }
+    return NULL;
+}
+
+%activity:
+
+// write the file
+LCGRandom rng;
+const char *filename = "{}_test.ini";
+std::fstream f(filename, std::ios::out);
+f << "[General]\n";
+for (int i=0; i<200; i++)
+    f << generateKey(rng) << " = " << i << "\n";
+f.close();
+
+// load the file
+InifileReader *ini = new InifileReader();
+ini->readFile(filename);
+
+SectionBasedConfiguration cfg;
+cfg.setConfigurationReader(ini);
+cfg.activateConfig("General");
+
+// test lookup with random keys
+int maxvalue = 0;
+int numerrors = 0;
+for (int i=0; i<2000; i++)
+{
+    std::string module = generatePath(rng);
+    std::string param = generateName(rng);
+
+    // look up the parameter both ways
+    const char *value1 = cfg.getParameterValue(module.c_str(), param.c_str(), false);
+    const char *value2 = lookupFromInifile(ini, module.c_str(), param.c_str());
+    if (!value1) value1="";
+    if (!value2) value2="";
+
+    // and compare them
+    if (strcmp(value1, value2)!=0)
+    {
+        ev << "ERROR: module=" << module << "  param=" << param
+           << "; value="<< value1 <<", correct=" << value2 << "\n";
+        numerrors++;
+    }
+
+    int value2asnum = atoi(value2);
+    if (maxvalue<value2asnum)
+        maxvalue = value2asnum;
+}
+
+ev << "lines actually used in the inifile: " << maxvalue << "\n";
+ev << "errors found: " << numerrors << "\n";
+ev << ".\n";
+
+%exitcode: 0
+
+%not-contains: stdout
+ERROR
+
+%contains: stdout
+lines actually used in the inifile: 85
+errors found: 0
+.
+

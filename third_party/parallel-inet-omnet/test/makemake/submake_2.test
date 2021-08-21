@@ -1,0 +1,37 @@
+%description:
+Test -d option; subdirs link independent dlls and load them dynamically.
+
+NOTE: to link with the dlls, we would need to add this to the toplevel makefile:
+    -Lone -La/two -La/b/three -lone -ltwo -lthree
+However, we wouldn't be able to start the program because the dlls are not in the path
+
+%file: top.msg
+message Top {}
+
+%file: one/one.msg
+message One {}
+
+%file: a/two/two.msg
+message Two {}
+
+%file: a/b/three/three.msg
+message Three {}
+
+%testprog: work -l one/one -l a/two/two -l a/b/three/three -h classes
+%ignore-exitcode: 1
+%file: buildspec
+all:
+	$(OPP_MAKEMAKE) -d one -da/two -da/b/three
+	cd one && $(OPP_MAKEMAKE) --make-so -pONE -o one
+	cd a/two && $(OPP_MAKEMAKE) --make-so -pTWO -o two
+	cd a/b/three && $(OPP_MAKEMAKE) --make-so -pTHREE -o three
+
+%contains: stdout
+class Top
+%contains: stdout
+class One
+%contains: stdout
+class Two
+%contains: stdout
+class Three
+

@@ -1,0 +1,56 @@
+%description:
+Tests that ev<< output gets printed in Cmdenv, even unterminated lines.
+ev buffer should be flushed before each "context switch" (event, finish, etc)
+
+*** KNOWN TO FAIL IN 3.0 ***
+
+%module: Module
+
+class Module : public cSimpleModule
+{
+  public:
+    Module() : cSimpleModule(32768) { }
+    virtual void initialize();
+    virtual void activity();
+    virtual void finish();
+};
+
+Define_Module(Module);
+
+void Module::initialize()
+{
+    ev << "initialize line 1" << endl;
+    ev << "initialize unterminated line";
+}
+
+void Module::activity()
+{
+    ev << "activity line 1" << endl;
+    ev << "activity unterminated line 1";
+
+    wait(1);
+
+    ev << "ENDL\n";
+    ev << "activity unterminated line 2";
+}
+
+void Module::finish()
+{
+    ev << "finish line 1" << endl;
+    ev << "finish unterminated line";
+}
+
+%exitcode: 1
+
+%contains-regex: stdout
+initialize line 1
+initialize unterminated line
+.*
+activity line 1
+activity unterminated line 1
+.*
+ENDL
+activity unterminated line 2
+.*
+finish line 1
+finish unterminated line

@@ -1,0 +1,90 @@
+2014-06-30  ------ omnetpp-4.5 released ------
+
+2014-02-13  ------ omnetpp-4.4.1 released ------
+
+2013-12-20  ------ omnetpp-4.4 released ------
+
+2013-09-12  ------ omnetpp-4.3.1 released ------
+
+2013-04-02  ------ omnetpp-4.3 released ------
+
+2013-02-08  ------ omnetpp-4.3rc1 released ------
+
+2012-03-13  ------ omnetpp-4.2.2 released ------
+
+2012-01-17  ------ omnetpp-4.2.1 released ------
+
+2011-10-28  ------ omnetpp-4.2 released ------
+
+2011-09-11  ------ omnetpp-4.2rc1 released ------
+
+2011-05-05  ------ omnetpp-4.2b2 released ------
+
+2011-02-23  ------ omnetpp-4.2b1 released ------
+
+2010-06-11  ------ omnetpp-4.1 released ------
+
+2010-05-31  ------ omnetpp-4.1rc2 released ------
+
+2010-04-20  ------ omnetpp-4.1b4 released ------
+
+2010-03-14  ------ omnetpp-4.1b3 released ------
+
+2009-03-12  ------ omnetpp-4.0 released ------
+
+2009-02-27  ------ omnetpp-4.0rc2 released ------
+
+2008-12-12  ------ omnetpp-4.0rc1 released ------
+
+2006-10-21  ------ omnetpp-3.3 released ------
+
+2006-01-12  ------ omnetpp-3.2p1 released ------
+
+2005-10-19  ------ omnetpp-3.2 released ------
+
+2005-03-31  ------ omnetpp-3.1 released ------
+
+2004-12-29  ------ omnetpp-3.0 released ------
+
+2004-11-23  ------ omnetpp-3.0b1 released ------
+
+2004-11-03  ------ omnetpp-3.0a9 released ------
+
+2004-10-04  ------ omnetpp-3.0a8 released ------
+
+2004-09-24  ------ omnetpp-3.0a7 released ------
+
+2004-07-22  ------ omnetpp-3.0a6 released ------
+
+2004-06-07  ------ omnetpp-3.0a5 released ------
+
+2004-05-15  ------ omnetpp-3.0a4 released ------
+
+2004-03-22  ------ omnetpp-3.0a3 released ------
+
+2004-03-03  ------ omnetpp-3.0a2 released ------
+
+2004-02-04  ------ omnetpp-3.0pre1 released ------
+
+2003-06-16  ------ omnetpp-2.3 released ------
+
+2003-03-15  ------ omnetpp-2.3b2 released ------
+
+2003-02-15  ------ omnetpp-2.3b1 released ------
+
+2002-05-04  ------ omnetpp-2.2 released ------
+
+2002-02-24  Andras Varga
+
+	* opp_test.pl: To make it easier to create new test cases from
+        existing ones, removed %name from test file syntax; now test name
+        is derived from the file name. Cleaned up error handling.
+        Changed some command-line switches. Introduced {} as synonim for
+        @TESTNAME@. Improved reporting.
+
+        * runtest: accepts command-line args
+
+2002-02-14  Ulrich Kaage  <kaage@int.uni-karlsruhe.de>
+
+	* runtest: Create directory work if it doesn't exist.
+

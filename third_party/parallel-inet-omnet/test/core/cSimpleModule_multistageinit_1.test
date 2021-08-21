@@ -1,0 +1,109 @@
+%description:
+Basic test for multi-stage initialization.
+
+Tests that:
+- a compound module has its initialize() function called before all its submodules have.
+- initialize(0) is called for all modules, then initialize(1), initialize(2), etc.
+
+%file: test.ned
+
+simple Module
+{
+}
+
+module A
+{
+    submodules:
+        a1: Module;
+        a2: Module;
+}
+
+network Test
+{
+    submodules:
+        b1: A;
+        b2: Module;
+        b3: A;
+}
+
+%file: test.cc
+
+#include <omnetpp.h>
+
+namespace @TESTNAME@ {
+
+class Module : public cSimpleModule
+{
+  public:
+    virtual void initialize(int stage);
+    virtual int numInitStages() const; // NOTE THE const MODIFIER!!!
+
+    virtual void handleMessage(cMessage *msg);
+};
+
+Define_Module(Module);
+
+int Module::numInitStages() const
+{
+    return 3;
+}
+
+void Module::initialize(int stage)
+{
+    ev << "   " << getFullPath() << ": initialize stage=" << stage << " called" << endl;
+    if (stage==2)
+    {
+        cMessage *msg = new cMessage();
+        scheduleAt(1.0, msg);
+    }
+}
+
+void Module::handleMessage(cMessage *msg)
+{
+   ev << "handleMessage() at " << simTime() << endl;
+   delete msg;
+}
+
+}; //namespace
+
+%contains: stdout
+Initializing module Test, stage 0
+Initializing module Test.b1, stage 0
+Initializing module Test.b1.a1, stage 0
+   Test.b1.a1: initialize stage=0 called
+Initializing module Test.b1.a2, stage 0
+   Test.b1.a2: initialize stage=0 called
+Initializing module Test.b2, stage 0
+   Test.b2: initialize stage=0 called
+Initializing module Test.b3, stage 0
+Initializing module Test.b3.a1, stage 0
+   Test.b3.a1: initialize stage=0 called
+Initializing module Test.b3.a2, stage 0
+   Test.b3.a2: initialize stage=0 called
+Initializing module Test.b1.a1, stage 1
+   Test.b1.a1: initialize stage=1 called
+Initializing module Test.b1.a2, stage 1
+   Test.b1.a2: initialize stage=1 called
+Initializing module Test.b2, stage 1
+   Test.b2: initialize stage=1 called
+Initializing module Test.b3.a1, stage 1
+   Test.b3.a1: initialize stage=1 called
+Initializing module Test.b3.a2, stage 1
+   Test.b3.a2: initialize stage=1 called
+Initializing module Test.b1.a1, stage 2
+   Test.b1.a1: initialize stage=2 called
+Initializing module Test.b1.a2, stage 2
+   Test.b1.a2: initialize stage=2 called
+Initializing module Test.b2, stage 2
+   Test.b2: initialize stage=2 called
+Initializing module Test.b3.a1, stage 2
+   Test.b3.a1: initialize stage=2 called
+Initializing module Test.b3.a2, stage 2
+   Test.b3.a2: initialize stage=2 called
+
+%not-contains: stdout
+stage=3
+
+%contains: stdout
+handleMessage() at 1
+

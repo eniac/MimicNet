@@ -1,0 +1,24 @@
+%description:
+Test that the simulation exits gracefully if there's an error while building the network.
+ - exit code must be 1 (not zero and different from crash exit code):
+ - nothing should be printed after "End" message and the error message (Note "$")
+
+%file: test.ned
+network Test {
+    types:
+        module Node { gates: inout g; }
+    submodules:
+        node[5]: Node;
+    connections:
+        node[1].g <--> node[1000].g;
+}
+
+%exitcode: 1
+
+%contains-regex: stdout
+No submodule `node\[1000\]' to be connected.*
+
+End\.$
+
+%contains-regex: stderr
+^$

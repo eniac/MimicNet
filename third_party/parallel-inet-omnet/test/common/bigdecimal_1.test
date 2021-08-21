@@ -1,0 +1,86 @@
+%description:
+Tests the BigDecimal::parse() method
+
+%includes:
+
+#include "bigdecimal.h"
+
+%global:
+
+static void parseAndPrint(const char *text)
+{
+    ev << "'" << text << "'";
+    ev << " ==> ";
+    try {
+        BigDecimal d = BigDecimal::parse(text);
+        ev << "intVal=" << d.getIntValue() << ", scale=" << d.getScale() <<"\n";
+    } catch (std::exception& e) {
+        ev << "ERROR: " << e.what() << "\n";
+    }
+}
+
+%activity:
+
+#define T(x) parseAndPrint(x)
+
+ev << "\n";
+
+// positive cases
+T("123456789012345678");
+T("123456789012345.678");
+T("123456789012.345678");
+T("123456789.012345678");
+T("123456.789012345678");
+T("123.456789012345678");
+T("0.123456789012345678");
+
+T("+123456789012345678");
+T("-123456789012345678");
+T(" 123456789012345678");
+
+T("NaN");
+T("nan");
+T("NAN");
+T("-1.#IND");
+T("+Inf");
+T("+infinity");
+T("+1.#INF");
+T("-Inf");
+T("-infinity");
+T("-1.#INF");
+T("Inf");
+
+// negative cases
+T("12345678901234567890"); // overflow
+T("");
+T("  ");
+
+ev << ".\n";
+
+
+%contains: stdout
+'123456789012345678' ==> intVal=123456789012345678, scale=0
+'123456789012345.678' ==> intVal=123456789012345678, scale=-3
+'123456789012.345678' ==> intVal=123456789012345678, scale=-6
+'123456789.012345678' ==> intVal=123456789012345678, scale=-9
+'123456.789012345678' ==> intVal=123456789012345678, scale=-12
+'123.456789012345678' ==> intVal=123456789012345678, scale=-15
+'0.123456789012345678' ==> intVal=123456789012345678, scale=-18
+'+123456789012345678' ==> intVal=123456789012345678, scale=0
+'-123456789012345678' ==> intVal=-123456789012345678, scale=0
+' 123456789012345678' ==> intVal=123456789012345678, scale=0
+'NaN' ==> intVal=0, scale=2147483647
+'nan' ==> intVal=0, scale=2147483647
+'NAN' ==> intVal=0, scale=2147483647
+'-1.#IND' ==> intVal=0, scale=2147483647
+'+Inf' ==> intVal=1, scale=2147483647
+'+infinity' ==> intVal=1, scale=2147483647
+'+1.#INF' ==> intVal=1, scale=2147483647
+'-Inf' ==> intVal=-1, scale=2147483647
+'-infinity' ==> intVal=-1, scale=2147483647
+'-1.#INF' ==> intVal=-1, scale=2147483647
+'Inf' ==> intVal=1, scale=2147483647
+'12345678901234567890' ==> ERROR: BigDecimal: arithmetic overflow while parsing '12345678901234567890'
+'' ==> ERROR: BigDecimal: invalid number syntax ''
+'  ' ==> ERROR: BigDecimal: invalid number syntax '  '
+.

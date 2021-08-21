@@ -1,0 +1,88 @@
+%description:
+Test "disabled" parameter of channels
+
+%file: test.ned
+
+channel MyConn extends ned.DatarateChannel
+{
+    parameters:
+        delay = 0.004s;
+        ber = 0.1;
+}
+
+simple Node1
+{
+    gates:
+        output out;
+}
+
+simple Node2
+{
+    gates:
+        input in;
+}
+
+network Test
+{
+    submodules:
+        node1: Node1;
+        node2: Node2;
+    connections:
+        node1.out --> MyConn --> node2.in;
+}
+
+%file: test.cc
+
+#include <omnetpp.h>
+
+namespace @TESTNAME@ {
+
+class Node1 : public cSimpleModule
+{
+  public:
+    Node1() : cSimpleModule(16384) { }
+    virtual void activity();
+};
+
+Define_Module(Node1);
+
+void Node1::activity()
+{
+    // set channel to disabled
+    cDatarateChannel *chan = check_and_cast<cDatarateChannel *>(gate("out")->getChannel());
+    chan->setDisabled(true);
+
+    // send packets
+    for (int i=0; i<5; i++)
+    {
+        cPacket *pkt = new cPacket("pkt");
+        pkt->setBitLength(10);
+        send(pkt, "out");
+        wait(1);
+    }
+    ev << "done\n";
+}
+
+class Node2 : public cSimpleModule
+{
+    int errors[5];
+
+  public:
+    virtual void handleMessage(cMessage *msg);
+};
+
+Define_Module(Node2);
+
+void Node2::handleMessage(cMessage *msg)
+{
+    ev << "received " << msg->getName() << "\n";
+    delete msg;
+}
+
+}; //namespace
+
+%not-contains: stdout
+received
+
+%contains: stdout
+done

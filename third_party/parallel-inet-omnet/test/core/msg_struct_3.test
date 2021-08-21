@@ -1,0 +1,52 @@
+%description:
+Check simple field types in structs are initialized to zero
+
+%file: test.msg
+
+namespace @TESTNAME@;
+
+struct MyStruct
+{
+    bool b;
+    char c;
+    short s;
+    unsigned short us;
+    int i;
+    unsigned int ui;
+    long l;
+    unsigned long ul;
+    double d;
+};
+
+%includes:
+#include "test_m.h"
+
+%activity:
+
+// print everything as number because who knows how '\0' in cc[] is treated by <<
+#define PRINT(X) ev << #X << ":" << (double)X << endl
+
+MyStruct x;
+
+// scalars
+PRINT(x.b);
+PRINT(x.c);
+PRINT(x.s);
+PRINT(x.us);
+PRINT(x.i);
+PRINT(x.ui);
+PRINT(x.l);
+PRINT(x.ul);
+PRINT(x.d);
+
+%contains: stdout
+x.b:0
+x.c:0
+x.s:0
+x.us:0
+x.i:0
+x.ui:0
+x.l:0
+x.ul:0
+x.d:0
+

@@ -1,0 +1,35 @@
+%description:
+Check struct as struct member
+
+%file: test.msg
+
+namespace @TESTNAME@;
+
+struct Base
+{
+    int bb;
+}
+
+
+struct MyStruct
+{
+    Base b;
+    char c;
+};
+
+%includes:
+#include "test_m.h"
+
+%activity:
+
+#define PRINT(X) ev << #X << ":" << X << endl
+
+MyStruct x;
+
+x.b.bb = 11; PRINT(x.b.bb);
+x.c = 'x'; PRINT(x.c);
+
+%contains: stdout
+x.b.bb:11
+x.c:x
+

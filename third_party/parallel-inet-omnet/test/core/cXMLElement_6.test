@@ -1,0 +1,60 @@
+%description:
+Check cXMLElement attributes and node content
+
+%file: test.xml
+
+<foo>
+    <bar></bar>
+    <bar>some  text</bar>
+    <bar>  some  text</bar>
+    <bar>some  text  </bar>
+    <bar>  </bar>
+    <bar>
+    </bar>
+    <bar>&amp;&gt;&lt;&quot;</bar>
+
+    <bar id="15"/>
+    <bar color="red" weight="12"/>
+    <bar color="  red" weight="12  "/>
+    <bar att=""/>
+    <bar att="  "/>
+    <bar att="&amp;&gt;&lt;&quot;"/>
+</foo>
+
+%global:
+
+static void printNode(cXMLElement *node)
+{
+    ev << node->getTagName() << ":";
+    ev << "\"" << node->getNodeValue() << "\",";
+    ev << (node->hasAttributes() ? "has attrs" : "no attrs") << ",";
+    cXMLAttributeMap map = node->getAttributes();
+    for (cXMLAttributeMap::iterator i=map.begin(); i!=map.end(); i++)
+        ev << " " << i->first << "=\"" << i->second << "\"/\""
+           << node->getAttribute(i->first.c_str()) << "\"";
+    ev << " nothing=" << (!node->getAttribute("nothing") ? "NULL" : node->getAttribute("nothing"));
+    ev << ".\n";
+}
+
+%activity:
+cXMLElement *root = ev.getXMLDocument("test.xml");
+for (cXMLElement *child=root->getFirstChild(); child; child=child->getNextSibling())
+    printNode(child);
+
+%contains: stdout
+bar:"",no attrs, nothing=NULL.
+bar:"some  text",no attrs, nothing=NULL.
+bar:"  some  text",no attrs, nothing=NULL.
+bar:"some  text  ",no attrs, nothing=NULL.
+bar:"  ",no attrs, nothing=NULL.
+bar:"
+    ",no attrs, nothing=NULL.
+bar:"&><"",no attrs, nothing=NULL.
+bar:"",has attrs, id="15"/"15" nothing=NULL.
+bar:"",has attrs, color="red"/"red" weight="12"/"12" nothing=NULL.
+bar:"",has attrs, color="  red"/"  red" weight="12  "/"12  " nothing=NULL.
+bar:"",has attrs, att=""/"" nothing=NULL.
+bar:"",has attrs, att="  "/"  " nothing=NULL.
+bar:"",has attrs, att="&><""/"&><"" nothing=NULL.
+
+

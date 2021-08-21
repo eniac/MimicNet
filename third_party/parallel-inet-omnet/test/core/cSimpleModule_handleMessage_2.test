@@ -1,0 +1,38 @@
+%description:
+If there are no events at all.
+
+%module: Module
+
+class Module : public cSimpleModule
+{
+  public:
+    virtual void initialize();
+    virtual void handleMessage(cMessage *msg);
+    virtual void finish();
+};
+
+Define_Module(Module);
+
+void Module::initialize()
+{
+   ev << "initialize()\n";
+}
+
+void Module::handleMessage(cMessage *msg)
+{
+   ev << "handleMessage()\n";
+   delete msg;
+}
+
+void Module::finish()
+{
+   ev << "finish()\n";
+}
+
+%contains-regex: stdout
+initialize\(\)
+.*finish\(\)
+
+%not-contains: stdout
+handleMessage()
+

@@ -1,0 +1,39 @@
+%description:
+Basic cWeightedStdDev test: for integer weights it should yield the same
+results as cStdDev with collect() called those many times.
+
+Note: there might be a small difference in getStddev() values between the two
+for smaller N's, because cStdDev uses the "N-1" formula, while cWeigtedStdDev
+uses the "N" formula (N-1 gets nasty in the weighted case).
+
+%global:
+void print(cStdDev& s)
+{
+    ev << "n=" << s.getCount() << " w=" << s.getWeights()
+       << " sum=" << s.getSum() << " sqrsum=" << s.getSqrSum()
+       << " min=" << s.getMin() << " max=" << s.getMax()
+       << " mean=" << s.getMean() << " stddev=" << s.getStddev()
+       << " var=" << s.getVariance() << endl;
+}
+
+%activity:
+
+cStdDev s;
+cWeightedStdDev ws;
+
+for (int i=0; i<100000; i++)
+{
+    double d = dblrand() - 0.2;
+    int weight = intuniform(0,5);
+    for (int j=0; j<weight; j++) s.collect(d);
+    ws.collect2(d, weight);
+}
+
+print(s);
+print(ws);
+ev << "." << endl;
+
+%contains-regex: stdout
+n=250550 w=250550 sum=74855.5 sqrsum=43314.5 min=-0.199997 max=0.799978 mean=0.298765 stddev=0.289167 var=0.0836177
+n=83354 w=250550 sum=24975.3 sqrsum=14455.6 min=-0.199997 max=0.799978 mean=0.298765 stddev=0.289169 var=0.0836186
+.

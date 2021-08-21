@@ -1,0 +1,75 @@
+%description:
+Test display string inheritance.
+
+Cases during display string merging:
+ add tag
+ add tagarg
+ set (overwrite) tagarg
+ delete (unset) tagarg
+
+
+%file: test.ned
+
+import testlib.Dump;
+
+module Base {
+    @display("aa=aaa1,aaa2,,aaa4;bb=bbb1,bbb2");
+}
+
+module AddTag extends Base {
+    @display("cc=CCC1,,CCC3");  // add
+}
+
+module AddTagArg extends Base {
+    @display("aa=,,,,AAA5,AAA6;bb=,,BBB3");  // add tagarg
+}
+
+module Overwrite extends Base {
+    @display("aa=AAA1,,,AAA4;bb=,BBB2");  // overwrite tagarg
+}
+
+module Unset extends Base {
+    @display("aa=,-;bb=-,-");  // delete tagarg
+}
+
+network Test {
+  submodules:
+    dump: Dump;
+    base : Base;
+    addtag: AddTag;
+    addtagarg: AddTagArg;
+    overwrite: Overwrite;
+    unset: Unset;
+}
+
+
+%exitcode: 0
+
+%contains: stdout
+module Test: Test {
+    parameters:
+        @isNetwork
+    submodules:
+        module Test.base: Base {
+            parameters:
+                @display(aa=aaa1,aaa2,,aaa4;bb=bbb1,bbb2)
+        }
+        module Test.addtag: AddTag {
+            parameters:
+                @display(cc=CCC1,,CCC3;aa=aaa1,aaa2,,aaa4;bb=bbb1,bbb2)
+        }
+        module Test.addtagarg: AddTagArg {
+            parameters:
+                @display(aa=aaa1,aaa2,,aaa4,AAA5,AAA6;bb=bbb1,bbb2,BBB3)
+        }
+        module Test.overwrite: Overwrite {
+            parameters:
+                @display(aa=AAA1,aaa2,,AAA4;bb=bbb1,BBB2)
+        }
+        module Test.unset: Unset {
+            parameters:
+                @display(aa=aaa1,,,aaa4)
+        }
+}
+
+

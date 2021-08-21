@@ -1,0 +1,71 @@
+%description:
+Check xmldoc("filename.xml") and xmldoc("filename.xml", "pathexpr") functionality
+
+%file: test.xml
+
+<foo id="1">
+    <foo id="2" color="red">one</foo>
+    <foo id="3">
+        <bar id="3" color="yellow">
+            <baz id="5" color="green" weight="heavy">six</baz>
+        </bar>
+    </foo>
+</foo>
+
+%global:
+
+#ifdef _MSC_VER
+#pragma warning(disable:4786)
+#endif
+
+
+%file: test.ned
+
+simple Simple
+{
+    parameters:
+        @isNetwork(true);
+        xml xmlconfig1;
+        xml xmlconfig2;
+}
+
+%file: test.cc
+
+#include <string.h>
+#include <omnetpp.h>
+
+namespace @TESTNAME@ {
+
+class Simple : public cSimpleModule
+{
+  public:
+    Simple() : cSimpleModule(16384) { }
+    virtual void activity();
+};
+
+Define_Module(Simple);
+
+void Simple::activity()
+{
+    cXMLElement *node1 = par("xmlconfig1");
+    ASSERT(node1);
+    ev << "<" << node1->getTagName() << " id='" << node1->getAttribute("id") << "'>\n";
+
+    cXMLElement *node2 = par("xmlconfig2");
+    ASSERT(node2);
+    ev << "<" << node2->getTagName() << " id='" << node2->getAttribute("id") << "'>\n";
+}
+
+}; //namespace
+
+%inifile: test.ini
+[General]
+network = Simple
+cmdenv-express-mode = false
+
+*.xmlconfig1 = xmldoc("test.xml")
+*.xmlconfig2 = xmldoc("test.xml","foo/foo[1]//*[@color='green']")
+
+%contains-regex: stdout
+<foo id='1'>
+<baz id='5'>

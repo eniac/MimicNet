@@ -1,0 +1,15 @@
+%description:
+Tests if encapsulated message can be retrieved with cPacket.encapsulate().
+
+%activity:
+cPacket *payload = new cPacket;
+cPacket *frame = new cPacket;
+
+frame->encapsulate(payload);
+cPacket *payload2 = frame->decapsulate();
+
+ev << "payload==payload2: " << (payload==payload2) << endl;
+
+%contains: stdout
+payload==payload2: 1
+

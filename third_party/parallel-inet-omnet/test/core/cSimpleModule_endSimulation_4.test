@@ -1,0 +1,35 @@
+%description:
+endSimulation() from finish() is an error
+
+%module: Module
+
+class Module : public cSimpleModule
+{
+  public:
+    Module() : cSimpleModule(32768) { };
+    virtual void activity();
+    virtual void finish();
+};
+
+Define_Module(Module);
+
+void Module::activity()
+{
+    wait(1.0);
+}
+
+void Module::finish()
+{
+    ev << "finish called\n";
+    endSimulation();
+    ev << "after endSimulation\n";
+}
+
+%exitcode: 1
+
+%contains: stdout
+finish called
+
+%not-contains: stdout
+after endSimulation
+

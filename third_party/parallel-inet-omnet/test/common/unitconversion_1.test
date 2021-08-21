@@ -1,0 +1,220 @@
+%description:
+Tests the UnitConversion class
+
+%includes:
+#include "unitconversion.h"
+
+%global:
+
+static void parseAndPrint(const char *text, const char *expectedUnit=NULL)
+{
+    ev << "'" << text << "'";
+    if (expectedUnit) ev << " (as " << expectedUnit << ")";
+    ev << " ==> ";
+    try {
+        double d = UnitConversion::parseQuantity(text, expectedUnit);
+        ev << d << "\n";
+    } catch (std::exception& e) {
+        ev << "ERROR: " << e.what() << "\n";
+    }
+}
+
+%activity:
+
+const char *expectedUnits[] = {NULL, "s", "ms", "W", "bogomips"};
+
+#define P(x) parseAndPrint(x, expectedUnits[i])
+
+for (int i=0; i<5; i++)
+{
+    ev << "\n";
+
+    // bad syntax
+    P(""); //E
+    P("  "); //E
+    P("2 33"); //E
+    P("2 33 "); //E
+    P("2 33s "); //E
+    P("1.5s 33"); //E
+    P("1s 99 kbps"); //E
+    P("1s 1min 99 kbps"); //E
+    P("1s 99 bogomips"); //E
+    P("3 bogomips 99"); //E
+    P("3 bogomips 3 gallons"); //E
+
+    // plain number
+    P("3.14");
+    P("6e23");
+    P(" 3.14 ");
+
+    P("1.5s");
+    P(" 1.5s ");
+    P(" 1.5 s ");
+
+    P("1500ms");
+
+    P("64 kbps");
+    P("64000 bps");
+
+    P(" 200mW");
+    P(" 1W 100mW");
+
+    P("99 bogomips");
+
+    P("1h 0.1s");
+    P("1h 2min 2s 520ms");
+    P("1s 550ms 700us ");
+    P(" 1s 550ms 700us ");
+    P("17s 71ggg");
+}
+ev << ".\n";
+
+%subst: /e\+00+/e+0/
+%subst: /6e\+0+23/6e\+23/
+
+%contains: stdout
+'' ==> ERROR: Syntax error parsing quantity '': must begin with a number
+'  ' ==> ERROR: Syntax error parsing quantity '  ': must begin with a number
+'2 33' ==> ERROR: Syntax error parsing quantity '2 33': garbage after first number
+'2 33 ' ==> ERROR: Syntax error parsing quantity '2 33 ': garbage after first number
+'2 33s ' ==> ERROR: Syntax error parsing quantity '2 33s ': garbage after first number
+'1.5s 33' ==> ERROR: syntax error parsing quantity '1.5s 33': missing unit
+'1s 99 kbps' ==> ERROR: error in quantity '1s 99 kbps': unit 'kbps' (kilobit/sec) does not match 's' (second)
+'1s 1min 99 kbps' ==> ERROR: error in quantity '1s 1min 99 kbps': unit 'kbps' (kilobit/sec) does not match 'min' (minute)
+'1s 99 bogomips' ==> ERROR: error in quantity '1s 99 bogomips': unit 'bogomips' does not match 's' (second)
+'3 bogomips 99' ==> ERROR: syntax error parsing quantity '3 bogomips 99': missing unit
+'3 bogomips 3 gallons' ==> ERROR: error in quantity '3 bogomips 3 gallons': unit 'gallons' does not match 'bogomips'
+'3.14' ==> 3.14
+'6e23' ==> 6e+23
+' 3.14 ' ==> 3.14
+'1.5s' ==> ERROR: Cannot convert unit 's' (second) to none
+' 1.5s ' ==> ERROR: Cannot convert unit 's' (second) to none
+' 1.5 s ' ==> ERROR: Cannot convert unit 's' (second) to none
+'1500ms' ==> ERROR: Cannot convert unit 'ms' (millisecond) to none
+'64 kbps' ==> ERROR: Cannot convert unit 'kbps' (kilobit/sec) to none
+'64000 bps' ==> ERROR: Cannot convert unit 'bps' (bit/sec) to none
+' 200mW' ==> ERROR: Cannot convert unit 'mW' (milliwatt) to none
+' 1W 100mW' ==> ERROR: Cannot convert unit 'mW' (milliwatt) to none
+'99 bogomips' ==> ERROR: Cannot convert unit 'bogomips' to none
+'1h 0.1s' ==> ERROR: Cannot convert unit 's' (second) to none
+'1h 2min 2s 520ms' ==> ERROR: Cannot convert unit 'ms' (millisecond) to none
+'1s 550ms 700us ' ==> ERROR: Cannot convert unit 'us' (microsecond) to none
+' 1s 550ms 700us ' ==> ERROR: Cannot convert unit 'us' (microsecond) to none
+'17s 71ggg' ==> ERROR: error in quantity '17s 71ggg': unit 'ggg' does not match 's' (second)
+
+'' (as s) ==> ERROR: Syntax error parsing quantity '': must begin with a number
+'  ' (as s) ==> ERROR: Syntax error parsing quantity '  ': must begin with a number
+'2 33' (as s) ==> ERROR: Syntax error parsing quantity '2 33': garbage after first number
+'2 33 ' (as s) ==> ERROR: Syntax error parsing quantity '2 33 ': garbage after first number
+'2 33s ' (as s) ==> ERROR: Syntax error parsing quantity '2 33s ': garbage after first number
+'1.5s 33' (as s) ==> ERROR: syntax error parsing quantity '1.5s 33': missing unit
+'1s 99 kbps' (as s) ==> ERROR: error in quantity '1s 99 kbps': unit 'kbps' (kilobit/sec) does not match 's' (second)
+'1s 1min 99 kbps' (as s) ==> ERROR: error in quantity '1s 1min 99 kbps': unit 'kbps' (kilobit/sec) does not match 'min' (minute)
+'1s 99 bogomips' (as s) ==> ERROR: error in quantity '1s 99 bogomips': unit 'bogomips' does not match 's' (second)
+'3 bogomips 99' (as s) ==> ERROR: syntax error parsing quantity '3 bogomips 99': missing unit
+'3 bogomips 3 gallons' (as s) ==> ERROR: error in quantity '3 bogomips 3 gallons': unit 'gallons' does not match 'bogomips'
+'3.14' (as s) ==> ERROR: Cannot convert unit none to 's' (second)
+'6e23' (as s) ==> ERROR: Cannot convert unit none to 's' (second)
+' 3.14 ' (as s) ==> ERROR: Cannot convert unit none to 's' (second)
+'1.5s' (as s) ==> 1.5
+' 1.5s ' (as s) ==> 1.5
+' 1.5 s ' (as s) ==> 1.5
+'1500ms' (as s) ==> 1.5
+'64 kbps' (as s) ==> ERROR: Cannot convert unit 'kbps' (kilobit/sec) to 's' (second)
+'64000 bps' (as s) ==> ERROR: Cannot convert unit 'bps' (bit/sec) to 's' (second)
+' 200mW' (as s) ==> ERROR: Cannot convert unit 'mW' (milliwatt) to 's' (second)
+' 1W 100mW' (as s) ==> ERROR: Cannot convert unit 'mW' (milliwatt) to 's' (second)
+'99 bogomips' (as s) ==> ERROR: Cannot convert unit 'bogomips' to 's' (second)
+'1h 0.1s' (as s) ==> 3600.1
+'1h 2min 2s 520ms' (as s) ==> 3722.52
+'1s 550ms 700us ' (as s) ==> 1.5507
+' 1s 550ms 700us ' (as s) ==> 1.5507
+'17s 71ggg' (as s) ==> ERROR: error in quantity '17s 71ggg': unit 'ggg' does not match 's' (second)
+
+'' (as ms) ==> ERROR: Syntax error parsing quantity '': must begin with a number
+'  ' (as ms) ==> ERROR: Syntax error parsing quantity '  ': must begin with a number
+'2 33' (as ms) ==> ERROR: Syntax error parsing quantity '2 33': garbage after first number
+'2 33 ' (as ms) ==> ERROR: Syntax error parsing quantity '2 33 ': garbage after first number
+'2 33s ' (as ms) ==> ERROR: Syntax error parsing quantity '2 33s ': garbage after first number
+'1.5s 33' (as ms) ==> ERROR: syntax error parsing quantity '1.5s 33': missing unit
+'1s 99 kbps' (as ms) ==> ERROR: error in quantity '1s 99 kbps': unit 'kbps' (kilobit/sec) does not match 's' (second)
+'1s 1min 99 kbps' (as ms) ==> ERROR: error in quantity '1s 1min 99 kbps': unit 'kbps' (kilobit/sec) does not match 'min' (minute)
+'1s 99 bogomips' (as ms) ==> ERROR: error in quantity '1s 99 bogomips': unit 'bogomips' does not match 's' (second)
+'3 bogomips 99' (as ms) ==> ERROR: syntax error parsing quantity '3 bogomips 99': missing unit
+'3 bogomips 3 gallons' (as ms) ==> ERROR: error in quantity '3 bogomips 3 gallons': unit 'gallons' does not match 'bogomips'
+'3.14' (as ms) ==> ERROR: Cannot convert unit none to 'ms' (millisecond)
+'6e23' (as ms) ==> ERROR: Cannot convert unit none to 'ms' (millisecond)
+' 3.14 ' (as ms) ==> ERROR: Cannot convert unit none to 'ms' (millisecond)
+'1.5s' (as ms) ==> 1500
+' 1.5s ' (as ms) ==> 1500
+' 1.5 s ' (as ms) ==> 1500
+'1500ms' (as ms) ==> 1500
+'64 kbps' (as ms) ==> ERROR: Cannot convert unit 'kbps' (kilobit/sec) to 'ms' (millisecond)
+'64000 bps' (as ms) ==> ERROR: Cannot convert unit 'bps' (bit/sec) to 'ms' (millisecond)
+' 200mW' (as ms) ==> ERROR: Cannot convert unit 'mW' (milliwatt) to 'ms' (millisecond)
+' 1W 100mW' (as ms) ==> ERROR: Cannot convert unit 'mW' (milliwatt) to 'ms' (millisecond)
+'99 bogomips' (as ms) ==> ERROR: Cannot convert unit 'bogomips' to 'ms' (millisecond)
+'1h 0.1s' (as ms) ==> 3.6001e+06
+'1h 2min 2s 520ms' (as ms) ==> 3.72252e+06
+'1s 550ms 700us ' (as ms) ==> 1550.7
+' 1s 550ms 700us ' (as ms) ==> 1550.7
+'17s 71ggg' (as ms) ==> ERROR: error in quantity '17s 71ggg': unit 'ggg' does not match 's' (second)
+
+'' (as W) ==> ERROR: Syntax error parsing quantity '': must begin with a number
+'  ' (as W) ==> ERROR: Syntax error parsing quantity '  ': must begin with a number
+'2 33' (as W) ==> ERROR: Syntax error parsing quantity '2 33': garbage after first number
+'2 33 ' (as W) ==> ERROR: Syntax error parsing quantity '2 33 ': garbage after first number
+'2 33s ' (as W) ==> ERROR: Syntax error parsing quantity '2 33s ': garbage after first number
+'1.5s 33' (as W) ==> ERROR: syntax error parsing quantity '1.5s 33': missing unit
+'1s 99 kbps' (as W) ==> ERROR: error in quantity '1s 99 kbps': unit 'kbps' (kilobit/sec) does not match 's' (second)
+'1s 1min 99 kbps' (as W) ==> ERROR: error in quantity '1s 1min 99 kbps': unit 'kbps' (kilobit/sec) does not match 'min' (minute)
+'1s 99 bogomips' (as W) ==> ERROR: error in quantity '1s 99 bogomips': unit 'bogomips' does not match 's' (second)
+'3 bogomips 99' (as W) ==> ERROR: syntax error parsing quantity '3 bogomips 99': missing unit
+'3 bogomips 3 gallons' (as W) ==> ERROR: error in quantity '3 bogomips 3 gallons': unit 'gallons' does not match 'bogomips'
+'3.14' (as W) ==> ERROR: Cannot convert unit none to 'W' (watt)
+'6e23' (as W) ==> ERROR: Cannot convert unit none to 'W' (watt)
+' 3.14 ' (as W) ==> ERROR: Cannot convert unit none to 'W' (watt)
+'1.5s' (as W) ==> ERROR: Cannot convert unit 's' (second) to 'W' (watt)
+' 1.5s ' (as W) ==> ERROR: Cannot convert unit 's' (second) to 'W' (watt)
+' 1.5 s ' (as W) ==> ERROR: Cannot convert unit 's' (second) to 'W' (watt)
+'1500ms' (as W) ==> ERROR: Cannot convert unit 'ms' (millisecond) to 'W' (watt)
+'64 kbps' (as W) ==> ERROR: Cannot convert unit 'kbps' (kilobit/sec) to 'W' (watt)
+'64000 bps' (as W) ==> ERROR: Cannot convert unit 'bps' (bit/sec) to 'W' (watt)
+' 200mW' (as W) ==> 0.2
+' 1W 100mW' (as W) ==> 1.1
+'99 bogomips' (as W) ==> ERROR: Cannot convert unit 'bogomips' to 'W' (watt)
+'1h 0.1s' (as W) ==> ERROR: Cannot convert unit 's' (second) to 'W' (watt)
+'1h 2min 2s 520ms' (as W) ==> ERROR: Cannot convert unit 'ms' (millisecond) to 'W' (watt)
+'1s 550ms 700us ' (as W) ==> ERROR: Cannot convert unit 'us' (microsecond) to 'W' (watt)
+' 1s 550ms 700us ' (as W) ==> ERROR: Cannot convert unit 'us' (microsecond) to 'W' (watt)
+'17s 71ggg' (as W) ==> ERROR: error in quantity '17s 71ggg': unit 'ggg' does not match 's' (second)
+
+'' (as bogomips) ==> ERROR: Syntax error parsing quantity '': must begin with a number
+'  ' (as bogomips) ==> ERROR: Syntax error parsing quantity '  ': must begin with a number
+'2 33' (as bogomips) ==> ERROR: Syntax error parsing quantity '2 33': garbage after first number
+'2 33 ' (as bogomips) ==> ERROR: Syntax error parsing quantity '2 33 ': garbage after first number
+'2 33s ' (as bogomips) ==> ERROR: Syntax error parsing quantity '2 33s ': garbage after first number
+'1.5s 33' (as bogomips) ==> ERROR: syntax error parsing quantity '1.5s 33': missing unit
+'1s 99 kbps' (as bogomips) ==> ERROR: error in quantity '1s 99 kbps': unit 'kbps' (kilobit/sec) does not match 's' (second)
+'1s 1min 99 kbps' (as bogomips) ==> ERROR: error in quantity '1s 1min 99 kbps': unit 'kbps' (kilobit/sec) does not match 'min' (minute)
+'1s 99 bogomips' (as bogomips) ==> ERROR: error in quantity '1s 99 bogomips': unit 'bogomips' does not match 's' (second)
+'3 bogomips 99' (as bogomips) ==> ERROR: syntax error parsing quantity '3 bogomips 99': missing unit
+'3 bogomips 3 gallons' (as bogomips) ==> ERROR: error in quantity '3 bogomips 3 gallons': unit 'gallons' does not match 'bogomips'
+'3.14' (as bogomips) ==> ERROR: Cannot convert unit none to 'bogomips'
+'6e23' (as bogomips) ==> ERROR: Cannot convert unit none to 'bogomips'
+' 3.14 ' (as bogomips) ==> ERROR: Cannot convert unit none to 'bogomips'
+'1.5s' (as bogomips) ==> ERROR: Cannot convert unit 's' (second) to 'bogomips'
+' 1.5s ' (as bogomips) ==> ERROR: Cannot convert unit 's' (second) to 'bogomips'
+' 1.5 s ' (as bogomips) ==> ERROR: Cannot convert unit 's' (second) to 'bogomips'
+'1500ms' (as bogomips) ==> ERROR: Cannot convert unit 'ms' (millisecond) to 'bogomips'
+'64 kbps' (as bogomips) ==> ERROR: Cannot convert unit 'kbps' (kilobit/sec) to 'bogomips'
+'64000 bps' (as bogomips) ==> ERROR: Cannot convert unit 'bps' (bit/sec) to 'bogomips'
+' 200mW' (as bogomips) ==> ERROR: Cannot convert unit 'mW' (milliwatt) to 'bogomips'
+' 1W 100mW' (as bogomips) ==> ERROR: Cannot convert unit 'mW' (milliwatt) to 'bogomips'
+'99 bogomips' (as bogomips) ==> 99
+'1h 0.1s' (as bogomips) ==> ERROR: Cannot convert unit 's' (second) to 'bogomips'
+'1h 2min 2s 520ms' (as bogomips) ==> ERROR: Cannot convert unit 'ms' (millisecond) to 'bogomips'
+'1s 550ms 700us ' (as bogomips) ==> ERROR: Cannot convert unit 'us' (microsecond) to 'bogomips'
+' 1s 550ms 700us ' (as bogomips) ==> ERROR: Cannot convert unit 'us' (microsecond) to 'bogomips'
+'17s 71ggg' (as bogomips) ==> ERROR: error in quantity '17s 71ggg': unit 'ggg' does not match 's' (second)
+.

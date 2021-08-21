@@ -1,0 +1,46 @@
+%description:
+Check that channel parameters can be set from the ini file
+
+%file: test.ned
+
+import testlib.Dump;
+
+module Node {
+    gates:
+        input in[];
+        output out[];
+        inout g[];
+    connections allowunconnected:
+}
+
+network Test {
+    submodules:
+        dump: Dump;
+        n1: Node;
+        n2: Node;
+    connections:
+        n1.out++ --> {delay=default(0s);} --> n2.in++;
+}
+
+%inifile: test.ini
+[General]
+network = Test
+cmdenv-express-mode = false
+
+Test.n1.out[0].channel.delay = 5s
+
+%contains: stdout
+module Test: Test {
+    parameters:
+        @isNetwork
+    submodules:
+        module Test.n1: Node {
+            gates:
+                out[0]: --> n2.in[0], (ned.DelayChannel)channel disabled=false delay=5
+        }
+        module Test.n2: Node {
+            gates:
+                in[0]: <-- n1.out[0], (ned.DelayChannel)channel disabled=false delay=5
+        }
+}
+

@@ -1,0 +1,109 @@
+%description:
+Tests that NED connection parameters get properly set.
+
+%file: test.ned
+
+import ned.*;
+
+simple Gen
+{
+    gates:
+        output out[];
+}
+
+simple Sink
+{
+    gates:
+        input in[];
+}
+
+network Test
+{
+    submodules:
+        gen: Gen {
+            gates:
+                out[8];
+        }
+        sink: Sink {
+            gates:
+                in[8];
+        }
+    connections:
+        gen.out[0] --> sink.in[0];
+        gen.out[1] --> {  delay = 0.004s; } --> sink.in[1];
+        gen.out[2] --> {  ber = 0.001; } --> sink.in[2];
+        gen.out[3] --> {  datarate = 64000bps; } --> sink.in[3];
+        gen.out[4] --> {  delay = 0.004s; ber = 0.001; } --> sink.in[4];
+        gen.out[5] --> {  delay = 0.004s; datarate = 64000bps; } --> sink.in[5];
+        gen.out[6] --> {  ber = 0.001; datarate = 64000bps; } --> sink.in[6];
+        gen.out[7] --> {  delay = 0.004s; ber = 0.001; datarate = 64000bps; } --> sink.in[7];
+}
+
+%file: test.cc
+
+#include <omnetpp.h>
+
+namespace @TESTNAME@ {
+
+class Gen : public cSimpleModule
+{
+  public:
+    Gen() : cSimpleModule(16384) { }
+    virtual void activity();
+};
+
+Define_Module(Gen);
+
+void Gen::activity()
+{
+    for (int i=0; i<gateSize("out"); i++)
+    {
+        ev << i << ":";
+        cGate *g = gate("out",i);
+        cChannel *ch = g->getChannel();
+        if (ch)
+            ev << ch->getClassName();
+        if (dynamic_cast<cDelayChannel *>(ch))
+        {
+            cDelayChannel *sch = check_and_cast<cDelayChannel *>(ch);
+            ev << " disabled=" << sch->isDisabled();
+            if (sch->getDelay() != 0)  ev << " delay=" << sch->getDelay();
+        }
+        if (dynamic_cast<cDatarateChannel *>(ch))
+        {
+            cDatarateChannel *sch = check_and_cast<cDatarateChannel *>(ch);
+            ev << " disabled=" << sch->isDisabled();
+            if (sch->getDelay() != 0)  ev << " delay=" << sch->getDelay();
+            if (sch->getDatarate())  ev << " datarate=" << sch->getDatarate();
+            if (sch->getBitErrorRate())  ev << " ber=" << sch->getBitErrorRate();
+            if (sch->getPacketErrorRate())  ev << " per=" << sch->getPacketErrorRate();
+        }
+        ev << endl;
+    }
+}
+
+class Sink : public cSimpleModule
+{
+  public:
+    virtual void handleMessage(cMessage *msg);
+};
+
+Define_Module(Sink);
+
+void Sink::handleMessage(cMessage *msg)
+{
+    delete msg;
+}
+
+}; //namespace
+
+%contains: stdout
+0:
+1:cDelayChannel disabled=0 delay=0.004
+2:cDatarateChannel disabled=0 ber=0.001
+3:cDatarateChannel disabled=0 datarate=64000
+4:cDatarateChannel disabled=0 delay=0.004 ber=0.001
+5:cDatarateChannel disabled=0 delay=0.004 datarate=64000
+6:cDatarateChannel disabled=0 datarate=64000 ber=0.001
+7:cDatarateChannel disabled=0 delay=0.004 datarate=64000 ber=0.001
+

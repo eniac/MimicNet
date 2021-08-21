@@ -1,0 +1,154 @@
+%description:
+Test that functions implementing random variates from different
+distributions only use the given RNG.
+
+Some functions are called with several different argument sets:
+this is because the impl. chooses different generation methods
+for different parameter values.
+
+No RNG mapping is set up for this test. (Module RNGs map one-to-one
+to physical RNGs).
+
+%global:
+
+// store numDrawn in array
+void storeNumDrawn(unsigned long *numDrawn)
+{
+    for (int rng=0; rng<ev.getNumRNGs(); rng++)
+    {
+        numDrawn[rng] = ev.getRNG(rng)->getNumbersDrawn();
+    }
+}
+
+// check that only the given RNG was used, others have remained intact
+void checkNumDrawn(unsigned long *oldnumDrawn, int usedrng, const char *label)
+{
+    for (int rng=0; rng<ev.getNumRNGs(); rng++)
+    {
+        if (rng!=usedrng && oldnumDrawn[rng]!=ev.getRNG(rng)->getNumbersDrawn())
+            ev.printf("ERROR: %s with rng=%d also changed rng=%d\n", label,usedrng,rng);
+    }
+    if (oldnumDrawn[usedrng]==ev.getRNG(usedrng)->getNumbersDrawn())
+        ev.printf("ERROR: %s with rng=%d did NOT change rng=%d\n", label,usedrng,usedrng);
+}
+
+%activity:
+
+#define CHECKNUMDRAWN(f) ev.printf("checking %s\n",#f); storeNumDrawn(numDrawn); f; checkNumDrawn(numDrawn,rng,#f);
+
+unsigned long *numDrawn = new unsigned long[ev.getNumRNGs()];
+
+for (int rng=0; rng<=2; rng++)
+{
+    ev.printf("RNG=%d:\n",rng);
+
+    CHECKNUMDRAWN(uniform(1.0, 2.0, rng));
+    CHECKNUMDRAWN(exponential(1.0, rng));
+    CHECKNUMDRAWN(normal(1.0, 1.0, rng));
+    CHECKNUMDRAWN(truncnormal(1.0, 1.0, rng));
+    CHECKNUMDRAWN(gamma_d(0.5, 2.0, rng));
+    CHECKNUMDRAWN(gamma_d(2.0, 2.0, rng));
+    CHECKNUMDRAWN(beta(1.0, 1.0, rng));
+    CHECKNUMDRAWN(erlang_k(1, 1.0, rng));
+    CHECKNUMDRAWN(chi_square(1, rng));
+    CHECKNUMDRAWN(chi_square(2, rng));
+    CHECKNUMDRAWN(student_t(1, rng));
+    CHECKNUMDRAWN(cauchy(1.0, 2.0, rng));
+    CHECKNUMDRAWN(triang(1.0, 2.0, 3.0, rng));
+    CHECKNUMDRAWN(lognormal(1.0, 1.0, rng));
+    CHECKNUMDRAWN(weibull(1.0, 2.0, rng));
+    CHECKNUMDRAWN(pareto_shifted(1.0, 2.0, 3.0, rng));
+
+    CHECKNUMDRAWN(intuniform(0, 10, rng));
+    CHECKNUMDRAWN(bernoulli(0.3, rng));
+    CHECKNUMDRAWN(binomial(10, 0.3, rng));
+    CHECKNUMDRAWN(geometric(0.3, rng));
+    CHECKNUMDRAWN(negbinomial(10, 0.3, rng));
+    //CHECKNUMDRAWN(hypergeometric(1, 2, 2, rng));
+    CHECKNUMDRAWN(poisson(1.0, rng));
+    CHECKNUMDRAWN(poisson(35.0, rng));
+}
+ev << "finished\n";
+
+%inifile: test.ini
+[General]
+network = Test
+cmdenv-express-mode = false
+num-rngs = 10
+
+%contains-regex: stdout
+checking uniform\(1.0, 2.0, rng\)
+checking exponential\(1.0, rng\)
+checking normal\(1.0, 1.0, rng\)
+checking truncnormal\(1.0, 1.0, rng\)
+checking gamma_d\(0.5, 2.0, rng\)
+checking gamma_d\(2.0, 2.0, rng\)
+checking beta\(1.0, 1.0, rng\)
+checking erlang_k\(1, 1.0, rng\)
+checking chi_square\(1, rng\)
+checking chi_square\(2, rng\)
+checking student_t\(1, rng\)
+checking cauchy\(1.0, 2.0, rng\)
+checking triang\(1.0, 2.0, 3.0, rng\)
+checking lognormal\(1.0, 1.0, rng\)
+checking weibull\(1.0, 2.0, rng\)
+checking pareto_shifted\(1.0, 2.0, 3.0, rng\)
+checking intuniform\(0, 10, rng\)
+checking bernoulli\(0.3, rng\)
+checking binomial\(10, 0.3, rng\)
+checking geometric\(0.3, rng\)
+checking negbinomial\(10, 0.3, rng\)
+checking poisson\(1.0, rng\)
+checking poisson\(35.0, rng\)
+RNG=1:
+checking uniform\(1.0, 2.0, rng\)
+checking exponential\(1.0, rng\)
+checking normal\(1.0, 1.0, rng\)
+checking truncnormal\(1.0, 1.0, rng\)
+checking gamma_d\(0.5, 2.0, rng\)
+checking gamma_d\(2.0, 2.0, rng\)
+checking beta\(1.0, 1.0, rng\)
+checking erlang_k\(1, 1.0, rng\)
+checking chi_square\(1, rng\)
+checking chi_square\(2, rng\)
+checking student_t\(1, rng\)
+checking cauchy\(1.0, 2.0, rng\)
+checking triang\(1.0, 2.0, 3.0, rng\)
+checking lognormal\(1.0, 1.0, rng\)
+checking weibull\(1.0, 2.0, rng\)
+checking pareto_shifted\(1.0, 2.0, 3.0, rng\)
+checking intuniform\(0, 10, rng\)
+checking bernoulli\(0.3, rng\)
+checking binomial\(10, 0.3, rng\)
+checking geometric\(0.3, rng\)
+checking negbinomial\(10, 0.3, rng\)
+checking poisson\(1.0, rng\)
+checking poisson\(35.0, rng\)
+RNG=2:
+checking uniform\(1.0, 2.0, rng\)
+checking exponential\(1.0, rng\)
+checking normal\(1.0, 1.0, rng\)
+checking truncnormal\(1.0, 1.0, rng\)
+checking gamma_d\(0.5, 2.0, rng\)
+checking gamma_d\(2.0, 2.0, rng\)
+checking beta\(1.0, 1.0, rng\)
+checking erlang_k\(1, 1.0, rng\)
+checking chi_square\(1, rng\)
+checking chi_square\(2, rng\)
+checking student_t\(1, rng\)
+checking cauchy\(1.0, 2.0, rng\)
+checking triang\(1.0, 2.0, 3.0, rng\)
+checking lognormal\(1.0, 1.0, rng\)
+checking weibull\(1.0, 2.0, rng\)
+checking pareto_shifted\(1.0, 2.0, 3.0, rng\)
+checking intuniform\(0, 10, rng\)
+checking bernoulli\(0.3, rng\)
+checking binomial\(10, 0.3, rng\)
+checking geometric\(0.3, rng\)
+checking negbinomial\(10, 0.3, rng\)
+checking poisson\(1.0, rng\)
+checking poisson\(35.0, rng\)
+finished
+%not-contains: stdout
+ERROR:
+

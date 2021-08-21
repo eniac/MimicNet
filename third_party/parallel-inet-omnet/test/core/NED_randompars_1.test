@@ -1,0 +1,47 @@
+%description:
+Test random module parameters
+
+%file: test.ned
+
+simple Test
+{
+    parameters:
+        @isNetwork(true);
+        volatile double p0 = truncnormal(10, 3);
+        volatile double p1 = 1+truncnormal(10, 3);
+        double c0 = exponential(1);
+        double c1 = 1+exponential(1);
+}
+
+%file: test.cc
+
+#include <omnetpp.h>
+
+namespace @TESTNAME@ {
+
+class Test : public cSimpleModule
+{
+  public:
+    Test() : cSimpleModule(16384) { }
+    virtual void activity();
+};
+
+Define_Module(Test);
+
+void Test::activity()
+{
+    for (int i=0; i<getNumParams(); i++)
+    {
+        double p2 = par(i).doubleValue();
+        double p1 = par(i).doubleValue();
+        ev << par(i).getName() << ":" << (par(i).isExpression()?0:1) << ":" << p1 << "," << p2 << endl;
+    }
+}
+
+}; //namespace
+
+%contains-regex: stdout
+p0:0:12\.5577,12\.6543
+p1:0:8\.75301,13\.1597
+c0:1:0\.795875,0\.795875
+c1:1:1\.89856,1\.89856

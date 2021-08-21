@@ -1,0 +1,37 @@
+%description:
+Subclassing cOwnedObject: *must* take ownership of members subclassed from cOwnedObject,
+and destructor must call drop().
+
+%global:
+
+class Noisy : public cOwnedObject
+{
+  public:
+    Noisy(const char *name=NULL) : cOwnedObject(name) {ev << "noisy born\n";}
+    ~Noisy() {ev << "noisy died\n";}
+};
+
+class X2 : public cOwnedObject
+{
+  public:
+    Noisy y;
+
+    X2() : cOwnedObject() {take(&y);}
+    ~X2() {drop(&y);}
+};
+
+%activity:
+
+X2 *x = new X2();
+x->y.setName("yname");
+delete x;
+
+%contains-regex: stdout
+noisy born.*
+noisy died
+
+%not-contains-regex: stdout
+noisy died.*
+noisy died
+
+

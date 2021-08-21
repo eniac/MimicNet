@@ -1,0 +1,127 @@
+%description:
+Test reference to:
+     parent module parameter,
+     local submodule parameter,
+     other submodule's parameter
+from
+     module parameter assignment,
+     gatesize assignment,
+     module vector size expression
+
+%file: test.ned
+
+import testlib.Dump;
+
+module Node
+{
+    parameters:
+        int p;
+        int a = default(111);
+        int b = default(222);
+        int c = default(333);
+    gates:
+        input ga[];
+        input gb[];
+        input gc[];
+    connections allowunconnected:
+}
+
+module Nil
+{
+}
+
+network Test
+{
+    parameters:
+        int p = 1;
+    submodules:
+        n: Node {
+            parameters:
+                p = 2;
+        }
+        m: Node {
+            parameters:
+                p = 3;
+                // from parameter assignment:
+                a = p;      // parent module's parameter
+                b = this.p; // local submodule's parameter
+                c = n.p;    // other submodule's parameter
+            gates:
+                // from gate vector size:
+                ga[p];      // parent module's parameter
+                gb[this.p]; // local submodule's parameter
+                gc[n.p];    // other submodule's parameter
+        };
+
+        // from module vector size:
+        ma[p]: Nil;      // parent module's parameter
+        mb[this.p]: Nil; // parent submodule's parameter, too
+        mc[n.p]: Nil;    // other submodule's parameter
+
+        // from ini file
+        ini: Node;
+
+        dump: Dump;
+
+    connections allowunconnected:
+}
+
+%file: test.cc
+
+%inifile: test.ini
+[General]
+network = Test
+cmdenv-express-mode = false
+cmdenv-event-banners = false
+
+*.ini.p = 4
+*.ini.a = p      # parent module's parameter
+*.ini.b = this.p # local submodule's parameter
+*.ini.c = n.p    # other submodule's parameter
+
+#Note: default params will be assigned automatically
+
+%contains: stdout
+module Test: Test {
+    parameters:
+        @isNetwork
+        p = 1
+    submodules:
+        module Test.n: Node {
+            parameters:
+                p = 2
+                a = 111
+                b = 222
+                c = 333
+        }
+        module Test.m: Node {
+            parameters:
+                p = 3
+                a = 1
+                b = 3
+                c = 2
+            gates:
+                ga[0]: not connected
+                gb[0]: not connected
+                gb[1]: not connected
+                gb[2]: not connected
+                gc[0]: not connected
+                gc[1]: not connected
+        }
+        module Test.ma[0]: Nil {
+        }
+        module Test.mb[0]: Nil {
+        }
+        module Test.mc[0]: Nil {
+        }
+        module Test.mc[1]: Nil {
+        }
+        module Test.ini: Node {
+            parameters:
+                p = 4
+                a = 1
+                b = 4
+                c = 2
+        }
+}
+

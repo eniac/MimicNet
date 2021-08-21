@@ -1,0 +1,84 @@
+%description:
+Test mean and variance of random variates from different distributions.
+This doesn't guarantee that the shape of the distributions is also OK,
+but at least it's a guard against simple programming errors.
+
+Test 1: discrete distributions
+Test 2: continuous distributions
+
+FIXME: These tests are very fragile. They depend on the floating-point
+arithmetic and the default printing of doubles being EXACTLY THE SAME
+on all machines. They also break if anything changes in the underlying
+RNGs.
+
+!!! THIS TEST IS CURRENTLY OUT OF ORDER (%contains always matches) !!!
+The dist/ dir can be used to test the functions.
+
+%activity:
+
+#define MEAN_AND_VARIANCE(f) \
+ {\
+   cStdDev s; for (int i=0; i<numrepl; i++) s.collect(f); \
+   ev.printf("%s: m=%lg v=%lg\n", #f, s.getMean(), s.getVariance()); \
+ }
+
+int rng=0;
+int numrepl=10000;
+
+// uniform(a,b): m=(a+b)/2
+MEAN_AND_VARIANCE(uniform(0,1,rng));   // m=0.5
+MEAN_AND_VARIANCE(uniform(-5,5,rng));  // m=0
+ev << endl;
+
+// exponential(mean)
+MEAN_AND_VARIANCE(exponential(1.0,rng));  // m: same as arg.
+MEAN_AND_VARIANCE(exponential(0.01,rng));
+MEAN_AND_VARIANCE(exponential(5.0,rng));
+ev << endl;
+
+// normal(mean,stddev): variance=sqrt(stddev)
+MEAN_AND_VARIANCE(normal(0,1,rng));
+MEAN_AND_VARIANCE(normal(0,4,rng));
+MEAN_AND_VARIANCE(normal(-1,4,rng));
+ev << endl;
+
+MEAN_AND_VARIANCE(truncnormal(0,1,rng));
+MEAN_AND_VARIANCE(truncnormal(0,4,rng));
+MEAN_AND_VARIANCE(truncnormal(100,1,rng));
+MEAN_AND_VARIANCE(truncnormal(-1,1,rng));
+ev << endl;
+
+// TBD:  gamma_d (double alpha, double beta, int rng=0)
+// TBD:  beta (double alpha1, double alpha2, int rng=0)
+
+// erlang_k(k,m): if (k==1) --> exponential()
+MEAN_AND_VARIANCE(erlang_k(1,1));     // same as exponential
+MEAN_AND_VARIANCE(erlang_k(1,0.01));  // same as exponential
+MEAN_AND_VARIANCE(erlang_k(1,5));     // same as exponential
+MEAN_AND_VARIANCE(erlang_k(2,1));
+MEAN_AND_VARIANCE(erlang_k(5,1));
+MEAN_AND_VARIANCE(erlang_k(5,10));
+ev << endl;
+
+// TBD:  chi_square (unsigned int k, int rng=0)
+// TBD:  student_t (unsigned int i, int rng=0)
+// TBD:  cauchy (double a, double b, int rng=0)
+
+// mean = 1/3*(a+b+c)
+MEAN_AND_VARIANCE(triang(0,0.5,1));
+MEAN_AND_VARIANCE(triang(0,0,1));
+MEAN_AND_VARIANCE(triang(0,1,1));
+MEAN_AND_VARIANCE(triang(0,0.1,1));
+MEAN_AND_VARIANCE(triang(0,0.9,1));
+MEAN_AND_VARIANCE(triang(-1,4,5));
+ev << endl;
+
+// TBD:  lognormal (double m, double s, int rng=0)
+MEAN_AND_VARIANCE(lognormal(0,1));
+
+// TBD:  weibull (double a, double b, int rng=0)
+// TBD:  pareto_shifted (double a, double b, double c, int rng=0)
+
+%contains: stdout
+uniform
+

@@ -1,0 +1,54 @@
+%description:
+Test that exceptions in listeners work OK (leaves modules in a good state.)
+
+E.g. if notificationSP doesn't get reset to zero, that would cause
+a secondary exception or crash later in the shutdown phase.
+
+%file: test.ned
+
+simple Test
+{
+    @isNetwork(true);
+    @signal[dummy](type="double");
+}
+
+%file: test.cc
+
+#include <omnetpp.h>
+
+namespace @TESTNAME@ {
+
+class BogusListener : public cListener
+{
+  public:
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, double d) {
+        throw std::runtime_error("problem!");
+    }
+};
+
+class Test : public cSimpleModule
+{
+  public:
+    Test() : cSimpleModule(16384) { }
+    virtual void activity();
+};
+
+Define_Module(Test);
+
+void Test::activity()
+{
+    BogusListener *listener = new BogusListener();
+    EV << "Before\n";
+    simsignal_t dummySignal = registerSignal("dummy");
+    subscribe(dummySignal, listener);
+    emit(dummySignal, 3.1415);
+    EV << "After\n";
+}
+
+}; //namespace
+
+%exitcode: 1
+
+%contains-regex: stdout
+Error.* std::runtime_error: problem!
+

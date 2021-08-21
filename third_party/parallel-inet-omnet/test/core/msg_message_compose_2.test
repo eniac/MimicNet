@@ -1,0 +1,55 @@
+%description:
+Check static array of structs as message member
+
+%file: test.msg
+
+namespace @TESTNAME@;
+
+struct MyStruct
+{
+    int bb;
+}
+
+message MyMessage
+{
+    MyStruct b[3];
+    char c;
+};
+
+%includes:
+#include "test_m.h"
+
+%activity:
+
+#define PRINT(X) ev << #X << ":" << X << endl
+
+MyMessage x;
+
+// access
+x.getB(0).bb=10;
+x.getB(1).bb=11;
+x.getB(2).bb=12;
+x.setC('x');
+
+PRINT(x.getB(0).bb);
+PRINT(x.getB(1).bb);
+PRINT(x.getB(2).bb);
+PRINT(x.getC());
+ev << "-" << endl;
+
+// assigment
+x.setB(0,x.getB(2));
+PRINT(x.getB(0).bb);
+PRINT(x.getB(1).bb);
+PRINT(x.getB(2).bb);
+
+%contains: stdout
+x.getB(0).bb:10
+x.getB(1).bb:11
+x.getB(2).bb:12
+x.getC():x
+-
+x.getB(0).bb:12
+x.getB(1).bb:11
+x.getB(2).bb:12
+

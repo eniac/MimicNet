@@ -1,0 +1,222 @@
+#!/usr/bin/env perl
+#
+# Generates a makefile that executes several simulation runs, and
+# optionally invokes "make" as well.
+#
+# Author: Andras Varga
+#
+
+use Cwd;
+use Config;
+use IO::File; # for temp files
+use POSIX qw(tmpnam);
+
+#TODO: ha nincs -u, rakja bele
+#TODO: ha nincs -r, talalja ki
+#TODO: tamogassa a -r1,2 szintaxist is (space nelkul!)
+
+sub makeMakefile();
+
+$ARG0 = $0;
+$originalArgs = $ARG0 . " " . join(" ", @ARGV);
+
+$tempfilename = "";
+
+$verbose = 0;
+@simProg = "";
+@simProgArgs = ();
+$jOption = "";
+$makefileToExport = "";
+
+makeMakefile();
+exit 0;
+
+
+sub usage()
+{
+    my $prog = $ARG0;
+    $prog =~ s|^.*[/\\]||;
+
+    print <<END
+$prog: Generate a makefile that executes several simulation runs, and
+optionally invokes "make" as well.
+
+Usage: $prog [options] <simprog> [simprog-options]
+
+Should be called with the full command (simulation program with args)
+to be executed, and the output is a Makefile that contains one target
+per run. This program basically expands the -r option; for example, a
+simulation command line containing -r 0..2,8,10 will generate 5 commands
+with the -r 0, -r 1, -r 2, -r 8 and -r 10 options, respectively. It is possible
+to take advantage of multiple CPUs or cores by using the -j make option
+(GNU Make specific).
+
+Options:
+    -h, --help            This help text
+    -V                    Verbose
+    --export <filename>   Write a makefile but do not run it; recommended
+                          name is Runfile
+    -j<number>            Make use of multiple CPUs; this options gets passed
+                          to the "make" program without being looked at
+    --                    Denotes end of options (everything after that is
+                          treated as part of the simulation command line)
+END
+}
+
+sub makeMakefile()
+{
+    #
+    # process command line args
+    #
+    while (@ARGV)
+    {
+        my $arg = shift @ARGV;
+        if ($arg eq "-h" || $arg eq "--help") {
+            usage();
+            exit(1);
+        }
+        elsif ($arg eq "-V") {
+            $verbose = 1;
+        }
+        elsif ($arg =~ "^-j") {
+            $jOption = $arg;
+        }
+        elsif ($arg eq "--export") {
+            $makefileToExport = shift @ARGV;
+        }
+        elsif ($arg eq "--") {
+            $arg = shift @ARGV;
+            $simProg = $arg;
+            push(@simProgArgs, @ARGV);
+            last;  # end of options
+        }
+        elsif ($arg =~ /^-/) {
+            error("unrecognized option $arg");
+        }
+        else {
+            # process non-option args; first one is the simulation program, then its args
+            $simProg = $arg;
+            push(@simProgArgs, @ARGV);
+            last;  # end of options
+        }
+    }
+
+    if (!$simProg) {
+        error("simulation program not specified");
+    }
+
+    # find -r option
+    $runNumIndex = "";  # index of the argument of the -r option in the args list
+    my $i = 0;
+    foreach my $arg (@simProgArgs) {
+        if ($arg eq "-r") {
+            $runNumIndex = $i+1;
+        }
+        $i++;
+    }
+    if ($runNumIndex eq "") {
+        error("-r option must be specified");
+    }
+
+
+    # expand run numbers to @runNumbers
+    if ($runNumIndex eq "") {
+        @runNumbers = 0;  # default run
+    }
+    else {
+        @runNumbers = ();
+        my $runSpec = $simProgArgs[$runNumIndex];
+        foreach my $r (split(",", $runSpec)) {
+            if ($r =~ /^\d+$/) {
+                push(@runNumbers, $r);
+            }
+            elsif ($r =~ /^(\d+)(\.\.|-)(\d+)$/) {
+                my $from = $1;
+                my $to = $3;
+                for (my $i=$from; $i<=$to; $i++) {
+                    push(@runNumbers, $i);
+                }
+            }
+            else {
+                error("unrecognized run number spec: $r");
+            }
+        }
+        print "-r $runSpec expands to: " . join(" ", @runNumbers) . "\n" if $verbose;
+    }
+
+    # generate makefile
+    $banner  = "#\n";
+    $banner .= "# This makefile was generated with the following command:\n";
+    $banner .= "# $originalArgs\n";
+    $banner .= "#\n";
+
+    $targetList = "";
+    $rules = "";
+    $prefix = "r";
+    foreach my $i (@runNumbers) {
+        $targetList .= " $prefix$i";
+        $rules .= "$prefix$i:\n";
+        $simProgArgs[$runNumIndex] = $i if ($runNumIndex);
+        $rules .= "\t$simProg " . join(" ", @simProgArgs) . "\n\n";
+    }
+
+    $content = "$banner\n" . ".PHONY: $targetList\n\n" . "all: $targetList\n\n" . $rules;
+
+    if ($makefileToExport) {
+        $filename = $makefileToExport;
+    }
+    else {
+        # try new temporary filenames until we get one that didn't already exist
+        # http://docstore.mik.ua/orelly/perl/cookbook/ch07_06.htm
+        # see also END block below
+        do { $tempfilename = tmpnam() }
+            until IO::File->new($tempfilename, O_RDWR|O_CREAT|O_EXCL);
+        $filename = $tempfilename;
+    }
+
+    open(OUT, ">$filename");
+    print OUT $content;
+    close OUT;
+
+    print "$filename created\n" if $verbose;
+
+    if (!$makefileToExport) {
+        # invoke make
+        $makeProg = $ENV{MAKE} ? $ENV{MAKE} : "make";
+        $jOption = $jOption ? " $jOption" : "";
+        $makeCommand = "$makeProg$jOption -f $filename";
+        print "running $makeCommand...\n" if $verbose;
+        runprog($makeCommand);
+        print "done\n" if $verbose;
+    }
+}
+
+# provide an END block so that when we exit or die, it automatically deletes
+# the temporary file. Note: the END block ALWAYS gets invoked, even if control
+# doesn't get here during the normal program flow!
+END {
+    if ($tempfilename) {
+        print "deleting $tempfilename\n" if $verbose;
+        unlink($tempfilename) or die "Couldn't unlink $tempfilename: $!"
+    }
+}
+
+sub runprog
+{
+    my $cmd = shift;
+    system($cmd);
+}
+
+sub error($)
+{
+    my($text) = @_;
+    print STDERR "$ARG0: error: $text\n";
+    exit(1);
+}
+
+sub warning($)
+{
+    my($text) = @_;
+    print STDERR "$ARG0: warning: $text\n";
+}
+

@@ -1,0 +1,33 @@
+%description:
+Check string fields in messages
+
+%file: test.msg
+
+namespace @TESTNAME@;
+
+message MyMessage
+{
+    string s1;
+    string s2 = "test";
+};
+
+%includes:
+#include "test_m.h"
+
+%activity:
+
+MyMessage x;
+ev << "s1:" << x.getS1() << endl;
+ev << "s2:" << x.getS2() << endl;
+
+const char *p = "alice";
+x.setS1(p);
+x.setS2(p);
+ev << "s1:" << x.getS1() << ":" << (x.getS1()==p ? "shallow" : "deep") << endl;
+ev << "s2:" << x.getS2() << ":" << (x.getS2()==p ? "shallow" : "deep") << endl;
+
+%contains: stdout
+s1:
+s2:test
+s1:alice:deep
+s2:alice:deep

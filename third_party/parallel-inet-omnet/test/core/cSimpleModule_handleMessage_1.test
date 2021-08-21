@@ -1,0 +1,39 @@
+%description:
+Basic test for cSimpleModule.handleMessage().
+
+%module: Module
+
+class Module : public cSimpleModule
+{
+  public:
+    virtual void initialize();
+    virtual void handleMessage(cMessage *msg);
+    virtual void finish();
+};
+
+Define_Module(Module);
+
+void Module::initialize()
+{
+   ev << "initialize() at " << simTime() << endl;
+   cMessage *msg = new cMessage();
+   scheduleAt(15.0, msg);
+}
+
+void Module::handleMessage(cMessage *msg)
+{
+   ev << "handleMessage() at " << simTime() << endl;
+   delete msg;
+}
+
+void Module::finish()
+{
+   ev << "finish() at " << simTime() << endl;
+}
+
+%contains-regex: stdout
+initialize\(\) at 0
+.*handleMessage\(\) at 15
+.*finish\(\) at 15
+
+

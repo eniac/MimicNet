@@ -1,0 +1,193 @@
+2014-06-30  ------ omnetpp-4.5 released ------
+
+2014-02-13  ------ omnetpp-4.4.1 released ------
+
+2013-12-20  ------ omnetpp-4.4 released ------
+
+2013-09-12  ------ omnetpp-4.3.1 released ------
+
+2013-04-02  ------ omnetpp-4.3 released ------
+
+2013-02-08  ------ omnetpp-4.3rc1 released ------
+
+2012-01-14  Andras Varga
+
+	* added named connections support (both explicit connection name, and
+	@defaultname channel type property; see the manual for details)
+
+2012-03-13  ------ omnetpp-4.2.2 released ------
+
+2012-01-17  ------ omnetpp-4.2.1 released ------
+
+2011-10-28  ------ omnetpp-4.2 released ------
+
+2011-09-11  ------ omnetpp-4.2rc1 released ------
+
+2011-05-05  ------ omnetpp-4.2b2 released ------
+
+2011-04-20  Andras Varga
+
+	* "type-name" per-object config option has been renamed to "typename",
+	for consistency with NED. (It is now an exception to the rule that
+	all per-object options have a hyphen in their names.)
+
+2011-04-19  Andras Varga
+
+	* implemented "typename" patterns, a way of assigning type to
+	parametric submodule types without using parameters. The syntax
+	is like deep parameter assignments, where the last component of
+	the pattern is ".typename". Rules are the same as with deep param
+	assignments: the innermost matching pattern with a non-default
+	value will be effective; and default value can be overridden,
+	i.e. the outermost pattern with a default(...) value will be the
+	actual default (that becomes effective when the inifile does not
+	specify a value via **.type-name). "typename" is not accepted in the
+	body of the parametric submodule itself, because the value expression
+	would have to be evaluated in the context of a submodule that
+	does not exist yet.
+
+	Example:
+	  network Net {
+	      parameters:
+	          server.tcp.typename = "TCP_NSC";
+	          host*.tcp.typename = default("TCP_lwIP");
+	      submodule:
+	          server: StandardHost {...}
+	          ...
+	  }
+
+2011-04-08  Andras Varga
+
+	* implemented conditional submodules, see nedxml/ChangeLog for details
+
+2011-02-23  ------ omnetpp-4.2b1 released ------
+
+2010-02-17  Andras Varga
+
+	* fix: deep parameter assignments containing parameter references
+	or the "index" operator were evaluated in the wrong context (in the
+	context of the module whose parameter was assigned, instead of the
+	context where the expression occurred in the code).
+
+2010-06-11  ------ omnetpp-4.1 released ------
+
+2010-05-31  ------ omnetpp-4.1rc2 released ------
+
+2010-04-20  ------ omnetpp-4.1b4 released ------
+
+2010-04-19  Andras Varga
+
+	* implemented submodule @dynamic property: submodules declared dynamic
+	(with @dynamic() or @dynamic(true)) will not be instantiated
+	automatically, it is expected that they will be created at runtime
+	by other modules. However, they can still be graphically edited in the
+	IDE, and the ini file editor can provide content assist for setting
+	their parameters.
+
+2010-03-14  ------ omnetpp-4.1b3 released ------
+
+2009-01-27 Andras Varga
+
+	* fix: when subclassing from a compound module, parameter assignments
+	in the super type's "submodules" block did not take effect
+
+2009-xx-xx Andras Varga
+
+	* INCOMPATIBLE NED SEMANTICS CHANGE 4.0:
+            fixed parameter values CANNOT be overwritten from subclasses or submodule sections
+                 (this is for consistency with pattern assignments)
+
+2009-03-12  ------ omnetpp-4.0 released ------
+
+2009-02-27  ------ omnetpp-4.0rc2 released ------
+
+2008-12-12  ------ omnetpp-4.0rc1 released ------
+
+	* Netbuilder was basically reimplemented for OMNeT++ 4.0.
+
+2006-10-21  ------ omnetpp-3.3 released ------
+
+2006-01-12  ------ omnetpp-3.2p1 released ------
+
+2005-10-19  ------ omnetpp-3.2 released ------
+
+2005-09-12  Andras Varga
+
+	* fix in loadnedfile.cc [reported by Johnny Lai]
+
+2005-08-08  Andras Varga
+
+	* cnednetworkbuilder.cc: assign submodule parameters, gatesizes etc
+	in that submodule's context (use cContextSwitcher); same for network.
+	This is mainly needed for ModNameParamResolver to work correctly
+	($MODULE_NAME etc for XPath expressions are taken from the module
+	in context).
+
+2005-08-07  Andras Varga
+
+	* cnednetworkbuilder.cc: don't look for module type if module vector
+	size is zero
+
+2005-07-26  Andras Varga
+
+	* cnednetworkbuilder.cc: didn't check gate directions on connecting
+
+2005-04-08  Andras Varga
+
+	* cnednetworkbuilder.cc: background display strings were not set
+	properly
+
+2005-03-31  ------ omnetpp-3.1 released ------
+
+2005-03-19  Andras Varga
+
+	* cnednetworkbuilder.cc: didn't handle connection display strings
+
+2005-01-06  Andras Varga
+
+	* cnednetworkbuilder.cc/.h: implemented "connections nocheck"
+
+2004-12-29  ------ omnetpp-3.0 released ------
+
+2004-12-10  Andras Varga
+
+	* cnednetworkbuilder.cc/.h: several fixes in expression evaluation code
+
+2004-11-23  ------ omnetpp-3.0b1 released ------
+
+2004-11-03  ------ omnetpp-3.0a9 released ------
+
+2004-10-04  ------ omnetpp-3.0a8 released ------
+
+2004-09-24  ------ omnetpp-3.0a7 released ------
+
+2004-07-22  ------ omnetpp-3.0a6 released ------
+
+2004-06-24
+
+	* loadned.cc: added support for "xml" NED parameter type
+
+2004-06-07  ------ omnetpp-3.0a5 released ------
+
+2004-05-15  ------ omnetpp-3.0a4 released ------
+
+2004-03-22  ------ omnetpp-3.0a3 released ------
+
+2004-03-03  ------ omnetpp-3.0a2 released ------
+
+2004-02-10  Andras Varga
+
+	* cnednetworkbuilder.cc: support for multiple conditional gatesizes and
+	parameters sections; fixes in expr handling
+
+2004-02-09  Andras Varga
+
+	* loading of simple module interfaces from NED files made possible
+
+	* fixed bug in "sizeof" handling
+
+2004-02-04  ------ omnetpp-3.0pre1 released ------
+
+2003-11-09  Andras Varga
+
+	* initial checkin of dynamic network building code.

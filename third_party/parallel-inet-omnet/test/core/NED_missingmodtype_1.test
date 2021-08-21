@@ -1,0 +1,28 @@
+%description:
+Test missing C++ module class.
+
+%file: test.ned
+
+simple NotImplemented
+{
+    parameters:
+        double p;
+}
+
+network Test
+{
+    submodules:
+        a: NotImplemented {
+            parameters:
+                p = 100;
+        }
+}
+
+%file: test.cc
+// needed so that linker gets at least one object file
+
+%exitcode: 1
+
+%contains-regex: stdout
+NotImplemented.* not found
+

@@ -1,0 +1,390 @@
+%description:
+Stress test for gate manipulation: create, delete, set size, etc.
+Also tests GateIterator, and all gate access functions in cModule (positive
+test cases only).
+
+Also tests that gate Ids are stable (resize or anything does not change them),
+and unique (Ids of deleted gates do not get reused).
+
+%file: test.ned
+
+simple Node
+{
+}
+
+network Test
+{
+    submodules:
+        node: Node;
+}
+
+%file: test.cc
+
+#include <omnetpp.h>
+
+namespace @TESTNAME@ {
+
+//redefine ASSERT so that checks remain in the code even with NDEBUG defined
+#undef ASSERT
+#define ASSERT(expr) \
+     ((void) ((expr) ? 0 : (opp_error("ASSERT: condition %s false in function %s, %s line %d", \
+                                      #expr, __FUNCTION__, __FILE__, __LINE__), 0)))
+
+
+class Node : public cSimpleModule
+{
+  private:
+    int counter;
+    std::map<std::string,int> gateIds; // name->id map
+    std::set<std::string> currentNames;
+    std::set<std::string> deletedNames;
+    int numGates; // total gate count
+
+  public:
+    Node() : cSimpleModule(16384) { }
+    virtual void activity();
+    void createRandomGate();
+    void deleteRandomGate();
+    void setRandomGateSize();
+    void testGateIterator();
+    void checkAllGateIds();
+    void createTestGate(const char *gatename, cGate::Type type, bool isVector);
+    void checkOneGate(const char *gatename, cGate::Type type, int size=-1, int index=-1);
+    void deleteTestGate(const char *gatename);
+    void setTestGateSize(const char *gatename, int size);
+    std::string chooseRandom(const std::set<std::string>& names);
+};
+
+Define_Module(Node);
+
+void Node::createTestGate(const char *gatename, cGate::Type type, bool isVector)
+{
+    ev << "creating " << gatename << (isVector?"[]":"") << "\n";
+
+    addGate(gatename, type, isVector);
+
+    if (!isVector)
+        numGates += (type==cGate::INOUT) ? 2 : 1;
+
+    currentNames.insert(gatename);
+
+    if (type==cGate::INOUT) {
+        ASSERT(gateType(gatename)==type);
+        std::string namei = std::string(gatename)+"$i";
+        std::string nameo = std::string(gatename)+"$o";
+        gateIds[namei] = gateBaseId(namei.c_str());
+        gateIds[nameo] = gateBaseId(nameo.c_str());
+        checkOneGate(namei.c_str(), cGate::INPUT, isVector ? 0 : -1);
+        checkOneGate(nameo.c_str(), cGate::OUTPUT, isVector ? 0 : -1);
+    }
+    else {
+        gateIds[gatename] = gateBaseId(gatename);
+        checkOneGate(gatename, type, isVector ? 0 : -1);
+    }
+}
+
+void Node::checkOneGate(const char *gatename, cGate::Type type, int size, int index)
+{
+    ASSERT(type!=cGate::INOUT);
+
+    // TODO assert that getGateNames() contains gatename (less $i/$o)
+    ASSERT(hasGate(gatename));
+    ASSERT(gateType(gatename)==type);
+    ASSERT(isGateVector(gatename)==(size!=-1));
+    ASSERT(gateSize(gatename)==(size!=-1 ? size : 1));
+
+    if (size!=0) {
+        ASSERT(hasGate(gatename, index));
+        cGate *g = gate(gatename, index);
+        ASSERT(g != NULL);
+        int id = g->getId();
+        ASSERT(findGate(gatename, index) == id);
+        ASSERT(gate(id) == g);
+        ASSERT(g->getName() == std::string(gatename));
+        ASSERT(g->getType() == type);
+
+        if (size>0) { // is vector
+            ASSERT(g->getIndex() == index);
+            ASSERT(g->size() == size);
+        }
+
+        if (strchr(gatename, '$')) {
+            std::string basename = std::string(gatename, strlen(gatename)-2);
+            ASSERT(gateHalf(basename.c_str(),type,index) == g);
+        }
+    }
+}
+
+void Node::createRandomGate()
+{
+    char gatename[30];
+    sprintf(gatename, "gate%d", counter++);
+
+    switch (intrand(6)) {
+      case 0: createTestGate(gatename, cGate::INPUT,  false); break;
+      case 1: createTestGate(gatename, cGate::OUTPUT, false); break;
+      case 2: createTestGate(gatename, cGate::INOUT,  false); break;
+      case 3: createTestGate(gatename, cGate::INPUT,  true); break;
+      case 4: createTestGate(gatename, cGate::OUTPUT, true); break;
+      case 5: createTestGate(gatename, cGate::INOUT,  true); break;
+    }
+}
+
+void Node::deleteRandomGate()
+{
+    if (!currentNames.empty()) {
+        std::string gatename = chooseRandom(currentNames);
+        deleteTestGate(gatename.c_str());
+    }
+}
+
+void Node::deleteTestGate(const char *gatename)
+{
+    ev << "deleting " << gatename << (isGateVector(gatename)?"[]":"") << "\n";
+
+    int size = isGateVector(gatename) ? gateSize(gatename) : 1;
+    numGates -= size * (gateType(gatename)==cGate::INOUT ? 2 : 1);
+    deleteGate(gatename);
+    currentNames.erase(gatename);
+    deletedNames.insert(gatename);
+
+    ASSERT(hasGate(gatename) == false);
+}
+
+void Node::setRandomGateSize()
+{
+    if (!currentNames.empty()) {
+        std::string gatename = chooseRandom(currentNames);
+        if (isGateVector(gatename.c_str()))
+            setTestGateSize(gatename.c_str(), exponential(5));
+
+        // again
+        gatename = chooseRandom(currentNames);
+        if (isGateVector(gatename.c_str()))
+            setTestGateSize(gatename.c_str(), exponential(30));
+    }
+}
+
+void Node::setTestGateSize(const char *gatename, int size)
+{
+    ev << "resizing " << gatename << "[" << gateSize(gatename) << "] to [" << size << "]\n";
+
+    cGate::Type type = gateType(gatename);
+    int oldSize = gateSize(gatename);
+    setGateSize(gatename, size);
+    numGates += (type==cGate::INOUT ? 2 : 1) * (size - oldSize);
+
+    ASSERT(gateSize(gatename)==size);
+
+    for (int i=0; i<size; i++) {
+        if (type==cGate::INOUT) {
+            checkOneGate((std::string(gatename)+"$i").c_str(), cGate::INPUT, size, i);
+            checkOneGate((std::string(gatename)+"$o").c_str(), cGate::OUTPUT, size, i);
+        }
+        else {
+            checkOneGate(gatename, type, size, i);
+        }
+    }
+}
+
+void Node::testGateIterator()
+{
+    ASSERT(numGates == gateCount());
+
+    int n = 0;
+    std::set<cGate *> visited;
+    for (GateIterator i(this); !i.end(); i++) {
+        cGate *g = i();
+        ASSERT(g!=NULL);
+        ASSERT(gate(g->getId()) == g);
+        ASSERT(visited.count(g)==0);
+        visited.insert(g);
+        ASSERT(visited.count(g)==1);
+        n++;
+    }
+    ASSERT(n == numGates);
+}
+
+void Node::checkAllGateIds()
+{
+    //
+    // check gate IDs:
+    //  1. when a gate still exists, it must be accessible by the same ID (IDs must be stable)
+    //  2. when a gate was deleted, no gate should be accesible at its ID (ie IDs must not be reused)
+    //
+
+    //ev <<"checking " << gateIds.size() << " gates\n";
+    std::map<std::string,int>::iterator it;
+    for (it=gateIds.begin(); it!=gateIds.end(); it++)
+    {
+        const char *gatename = it->first.c_str();
+        int id = it->second;
+
+        bool exists = hasGate(gatename);
+
+        cGate *g = NULL;
+        try { g = gate(id); } catch(std::exception& e) { }
+
+        if (g && id!=g->getId())
+            throw cRuntimeError("gate(id) and g->getId() inconsistent!");
+        if (g && !g->isName(gatename))
+            throw cRuntimeError("found another gate under the same ID -- IDs get reused???");
+
+        if (exists && gateSize(gatename)!=0 && g==NULL)
+            throw cRuntimeError("gate not found by old ID -- IDs change???");
+        if (!exists && g!=NULL)
+            throw cRuntimeError("found a gate with the ID of a deleted gate -- IDs get reused???");
+    }
+}
+
+std::string Node::chooseRandom(const std::set<std::string>& names)
+{
+    int k = intrand(names.size());
+    std::set<std::string>::const_iterator it = names.begin();
+    for (int i=0; i<k; i++)
+        it++;
+    return *it;
+}
+
+void Node::activity()
+{
+    counter = 0;
+    numGates = 0;
+    for (int i=0; i<100; i++)
+    {
+        switch (intrand(3)) {
+            case 0: createRandomGate(); break;
+            case 1: deleteRandomGate(); break;
+            case 2: setRandomGateSize(); break;
+        }
+        testGateIterator();
+        checkAllGateIds();
+    }
+    ev << "done.\n";
+}
+
+
+}; //namespace
+
+%inifile: test.ini
+[General]
+network = Test
+#debug-on-errors = true
+cmdenv-express-mode = false
+
+%contains: stdout
+creating gate0[]
+creating gate1[]
+deleting gate1[]
+deleting gate0[]
+creating gate2
+creating gate3[]
+resizing gate3[0] to [7]
+resizing gate3[7] to [22]
+resizing gate3[22] to [77]
+deleting gate3[]
+creating gate4
+creating gate5[]
+creating gate6[]
+deleting gate5[]
+creating gate7
+creating gate8
+deleting gate7
+deleting gate4
+deleting gate2
+resizing gate6[0] to [3]
+resizing gate6[3] to [18]
+creating gate9
+creating gate10
+creating gate11[]
+deleting gate10
+creating gate12
+creating gate13
+resizing gate11[0] to [69]
+deleting gate12
+deleting gate8
+resizing gate6[18] to [0]
+resizing gate11[69] to [11]
+deleting gate11[]
+deleting gate9
+creating gate14[]
+creating gate15[]
+creating gate16[]
+creating gate17[]
+creating gate18
+resizing gate17[0] to [1]
+resizing gate15[0] to [5]
+deleting gate18
+deleting gate13
+deleting gate15[]
+creating gate19[]
+resizing gate14[0] to [4]
+resizing gate17[1] to [33]
+resizing gate14[4] to [18]
+resizing gate19[0] to [18]
+resizing gate14[18] to [4]
+resizing gate16[0] to [0]
+creating gate20
+resizing gate19[18] to [0]
+resizing gate19[0] to [3]
+deleting gate17[]
+resizing gate6[0] to [9]
+resizing gate16[0] to [76]
+deleting gate6[]
+resizing gate19[3] to [1]
+resizing gate14[4] to [33]
+resizing gate14[33] to [37]
+resizing gate14[37] to [1]
+resizing gate19[1] to [4]
+resizing gate14[1] to [5]
+creating gate21[]
+resizing gate14[5] to [5]
+resizing gate19[4] to [9]
+resizing gate19[9] to [1]
+resizing gate14[5] to [8]
+creating gate22[]
+creating gate23
+resizing gate14[8] to [1]
+creating gate24[]
+resizing gate14[1] to [9]
+deleting gate20
+creating gate25[]
+deleting gate23
+creating gate26
+creating gate27[]
+deleting gate14[]
+creating gate28
+resizing gate25[0] to [15]
+resizing gate22[0] to [30]
+creating gate29
+creating gate30[]
+deleting gate26
+deleting gate28
+creating gate31
+deleting gate21[]
+creating gate32[]
+resizing gate32[0] to [4]
+creating gate33
+deleting gate31
+resizing gate24[0] to [2]
+resizing gate27[0] to [6]
+resizing gate16[76] to [3]
+creating gate34[]
+resizing gate27[6] to [4]
+creating gate35
+resizing gate24[2] to [5]
+deleting gate24[]
+resizing gate27[4] to [2]
+resizing gate25[15] to [15]
+deleting gate34[]
+deleting gate32[]
+resizing gate22[30] to [10]
+resizing gate25[15] to [111]
+deleting gate33
+deleting gate29
+deleting gate27[]
+resizing gate22[10] to [3]
+resizing gate19[1] to [12]
+creating gate36[]
+done.
+

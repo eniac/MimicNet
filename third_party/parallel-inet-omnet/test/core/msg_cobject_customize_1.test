@@ -1,0 +1,65 @@
+%description:
+Customize cOwnedObject-rooted class, abstract fields
+
+%file: test.msg
+
+namespace @TESTNAME@;
+
+class MyClass extends cOwnedObject
+{
+    @customize(true);
+    int b;
+    abstract int i;
+}
+
+%includes:
+#include "objectprinter.h"   // from src/envir
+#include "test_m.h"
+
+%global:
+class MyClass : public MyClass_Base
+{
+  private:
+    int m;
+  public:
+    MyClass(const char *name=NULL) : MyClass_Base(name) {m=0;}
+    MyClass(const MyClass& other) : MyClass_Base() {operator=(other);setName(other.getName());}
+    MyClass& operator=(const MyClass& other) {MyClass_Base::operator=(other); m=other.m; return *this;}
+    virtual cPolymorphic *dup() {return new MyClass(*this);}
+
+    virtual int getI() const {return m;}
+    virtual void setI(int i) {m=i;}
+};
+
+
+Register_Class(MyClass);
+
+%activity:
+
+#define PRINT(X) ev << #X << ":" << X << endl
+
+MyClass x("myclass");
+
+ev << (dynamic_cast<cOwnedObject *>(&x)!=0 ? "cOwnedObject" : "generic") << endl;
+ev << x.getClassName() << ": " << x.getName() << endl;
+
+x.setB(5); PRINT(x.getB());
+x.setI(11); PRINT(x.getI());
+
+ev << ObjectPrinter().printObjectToString(&x);
+
+%contains: stdout
+cOwnedObject
+@TESTNAME@::MyClass: myclass
+x.getB():5
+x.getI():11
+class @TESTNAME@::MyClass {
+    string className = @TESTNAME@::MyClass
+    string fullName = myclass
+    string fullPath = Test.myclass
+    string info = ""
+    string detailedInfo = ""
+    string name = myclass
+    int b = 5
+    int i = 11
+}

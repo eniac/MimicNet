@@ -1,0 +1,42 @@
+%description:
+check basic cOutVector functionality with tuple==1.
+
+%activity:
+// create object
+cOutVector vec("vec");
+
+// record some data
+vec.record( 35 );
+wait(3);
+vec.record( -24 );
+
+// values written in disabled state should be ignored
+vec.disable();
+vec.record( 23.21 );
+wait(1);
+vec.record( 34.47 );
+vec.record( -123 );
+vec.enable();
+
+// record further data
+wait(1);
+vec.record( 0 );
+wait(5);
+vec.record( 38 );
+
+// test statistics
+ev << "received: " << vec.getValuesReceived() << endl;
+ev << "stored: " << vec.getValuesStored() << endl;
+
+
+%contains: test.vec
+vector 0  Test  vec  ETV
+0	1	0	35
+0	2	3	-24
+0	4	5	0
+0	5	10	38
+
+%contains: stdout
+received: 7
+stored: 4
+

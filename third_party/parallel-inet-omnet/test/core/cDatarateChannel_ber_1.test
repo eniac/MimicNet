@@ -1,0 +1,118 @@
+%description:
+Test channel bit error rate in NED by using messages of different lengths
+
+%file: test.ned
+
+channel MyConn extends ned.DatarateChannel
+{
+    parameters:
+        delay = 0.004s;
+        ber = 0.1;
+}
+
+simple Node1
+{
+    gates:
+        output out;
+}
+
+simple Node2
+{
+    gates:
+        input in;
+}
+
+network Test
+{
+    submodules:
+        node1: Node1;
+        node2: Node2;
+    connections:
+        node1.out --> MyConn --> node2.in;
+}
+
+%file: test.cc
+
+#include <omnetpp.h>
+
+namespace @TESTNAME@ {
+
+#define NUM_MSGS         2000
+#define BIT_ERROR_RATE   0.1
+
+class Node1 : public cSimpleModule
+{
+  public:
+    Node1() : cSimpleModule(16384) { }
+    virtual void activity();
+};
+
+Define_Module(Node1);
+
+void Node1::activity()
+{
+    // send packets with lengths 0,1,2,3,4
+    for (int len=0; len<5; len++)
+    {
+        for (int i=0; i<NUM_MSGS; i++)
+        {
+            cPacket *pkt = new cPacket();
+            pkt->setBitLength(len);
+            send(pkt, "out");
+            wait(exponential(1.0));
+        }
+    }
+}
+
+
+class Node2 : public cSimpleModule
+{
+    int errors[5];
+
+  public:
+    Node2() : cSimpleModule(16384) { }
+    virtual void activity();
+    virtual void finish();
+};
+
+Define_Module(Node2);
+
+void Node2::activity()
+{
+    for (int i=0; i<5; i++)
+        errors[i] = 0;
+
+    for(;;)
+    {
+        cMessage *msg = receive();
+        cPacket *pkt = check_and_cast<cPacket *>(msg);
+        if (pkt->hasBitError())
+            errors[pkt->getBitLength()]++;
+        delete pkt;
+    }
+}
+
+void Node2::finish()
+{
+    for (int len=0; len<5; len++)
+    {
+        double exp_erate = 1-pow(1-BIT_ERROR_RATE, len);
+        double erate = (double)errors[len] / (double)NUM_MSGS;
+        ev << "msglen: " << len << ", error rate: measured: " << erate << ", expected: " << exp_erate << endl;
+
+        if (fabs(erate-exp_erate) > exp_erate/10)
+            throw cRuntimeError("wrong bit error rate");
+    }
+    ev << "OK\n";
+}
+
+}; //namespace
+
+%contains: stdout
+msglen: 0, error rate: measured: 0, expected: 0
+msglen: 1, error rate: measured: 0.0985, expected: 0.1
+msglen: 2, error rate: measured: 0.1935, expected: 0.19
+msglen: 3, error rate: measured: 0.281, expected: 0.271
+msglen: 4, error rate: measured: 0.3375, expected: 0.3439
+OK
+

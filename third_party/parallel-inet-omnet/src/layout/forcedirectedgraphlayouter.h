@@ -1,0 +1,235 @@
+//==========================================================================
+//  FORCEDIRECTEDGRAPHLAYOUTER.H - part of
+//                     OMNeT++/OMNEST
+//            Discrete System Simulation in C++
+//
+//  Author: Levente Meszaros
+//
+//==========================================================================
+
+/*--------------------------------------------------------------*
+  Copyright (C) 2006-2008 OpenSim Ltd.
+
+  This file is distributed WITHOUT ANY WARRANTY. See the file
+  `license' for details on this and other legal matters.
+*--------------------------------------------------------------*/
+
+#ifndef __FORCEDIRECTEDGRAPHLAYOUTER_H
+#define __FORCEDIRECTEDGRAPHLAYOUTER_H
+
+#include <vector>
+#include <map>
+
+#include "graphlayouter.h"
+#include "forcedirectedembedding.h"
+#include "forcedirectedparameters.h"
+#include "graphcomponent.h"
+
+NAMESPACE_BEGIN
+
+
+/**
+ * XXX
+ */
+class LAYOUT_API ForceDirectedGraphLayouter : public GraphLayouter
+{
+  protected:
+    /**
+     * Time to wait after drawing the actual state of the layouting process.
+     */
+    double debugWaitTime;
+
+    /**
+     * True means all forces will be shown in debug window.
+     */
+    bool showForces;
+
+    /**
+     * True means summa force will be shown in debug window.
+     */
+    bool showSummaForce;
+
+    /**
+     * True means there is at least one movable node.
+     */
+    bool hasMovableNode;
+
+    /**
+     * True means there is at least one fixed node.
+     */
+    bool hasFixedNode;
+
+    /**
+     * True means there is at least one anchored node.
+     */
+    bool hasAnchoredNode;
+
+    /**
+     * True means there is at least one edge to the border.
+     */
+    bool hasEdgeToBorder;
+
+    /**
+     * Use pre embedding to create an initial layout before calling the force directed embedding.
+     */
+    bool preEmbedding;
+
+    /**
+     * Use force directed embedding.
+     */
+    bool forceDirectedEmbedding;
+
+    /**
+     * Use 3d coordinates and return the base plane projection coordinates.
+     * Add springs connected to the base plane.
+     * 0 means do not use 3d coordinates. Higher value means bigger initial 3d coordinates.
+     */
+    double threeDFactor;
+    double threeDCoefficient;
+
+    /**
+     * Various measures calculated before the actual layout.
+     */
+    double expectedEmbeddingWidth;
+    double expectedEmbeddingHeight;
+    double expectedEdgeLength;
+    bool slippery;
+    bool pointLikeDistance;
+
+    // border bodies will be added if there are either
+    // fixed nodes or edges connected to the border
+    // or the width or the height of the bounding box is specified
+    WallBody *topBorder;
+    WallBody *bottomBorder;
+    WallBody *leftBorder;
+    WallBody *rightBorder;
+
+    GraphComponent graphComponent;
+    ForceDirectedEmbedding embedding;
+
+    std::map<std::string, Variable *> anchorNameToVariableMap;
+    std::map<int, IBody *> moduleToBodyMap;
+
+  public:
+    /**
+     * Ctor, dtor
+     */
+    //@{
+    ForceDirectedGraphLayouter();
+    virtual ~ForceDirectedGraphLayouter() {}
+    //@}
+
+    void setParameters();
+
+    /**
+     * Add node that can be moved.
+     */
+    virtual void addMovableNode(int nodeId, double width, double height);
+
+    /**
+     * Add fixed node
+     */
+    virtual void addFixedNode(int nodeId, double x, double y, double width, double height);
+
+    /**
+     * Add node that is anchored to a freely movable anchor point. Nodes anchored
+     * to the same anchor point can only move together. Anchor points are
+     * identified by name, and they need not be predeclared (they are registered
+     * on demand.) Usage: module vectors in ring, matrix, etc. layout.
+     *
+     * offx, offy: offset to anchor point
+     */
+    virtual void addAnchoredNode(int nodeId, const char *anchorname, double offx, double offy, double width, double height);
+
+    /**
+     * Add connection (graph edge)
+     */
+    virtual void addEdge(int srcNodeId, int destNodeId, double preferredLength=0);
+
+    /**
+     * Add connection (graph edge) to enclosing (parent) module
+     */
+    virtual void addEdgeToBorder(int srcNodeId, double preferredLength=0);
+
+    /**
+     * The layouting algorithm.
+     */
+    virtual void execute();
+
+    /**
+     * Extracting the results
+     */
+    virtual void getNodePosition(int nodeId, double& x, double& y);
+
+  protected:
+    void addBody(int nodeId, IBody *body);
+    IBody *findBody(int nodeId);
+    Variable *ensureAnchorVariable(const char *anchorname);
+
+    /**
+     * Adds electric repulsions between bodies. Bodies being part of different connected
+     * subcomponents will have a finite repulsion range determined by default spring repose length.
+     */
+    void addElectricRepulsions();
+
+    /**
+     * Adds springs generating attraction forces.
+     */
+    void addBasePlaneSprings();
+
+    /**
+     * Calculate various expected embedding measures such as width, height, edge length.
+     */
+    void calculateExpectedMeasures();
+
+    /**
+     * Assigns positions to coordinates not yet assigned by some other means.
+     * The size of the random range is determined by the total size of the bodies
+     * and the default spring repose length.
+     */
+    void setRandomPositions();
+
+    /**
+     * Executes pre embedding, it always takes into consideration the bounding box.
+     */
+    void executePreEmbedding();
+
+    /**
+     * Adds border bodies to the force directed embedding.
+     * Adds springs between left-right and top-bottom walls and electric repulsions to other bodies.
+     */
+    void ensureBorders();
+    void addBorderForceProviders();
+
+    /**
+     * Assigns positions to border bodies so that all other bodies are within.
+     */
+    void setBorderPositions();
+
+    /**
+     * Returns the bounding box of the embedding and the size of bigest right and bottom vertex.
+     */
+    Rc getBoundingBox(Rs &rs);
+
+    /**
+     * Scale coordinates.
+     */
+    void scale(Pt pt);
+
+    /**
+     * Translates coordinates.
+     */
+    void translate(Pt pt);
+
+    /**
+     * Draws the current state of the layout to a window.
+     */
+    void debugDraw();
+};
+
+NAMESPACE_END
+
+
+#endif
+
+

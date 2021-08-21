@@ -1,0 +1,1 @@
+mpiexec -n 4 opp_run_release -r 0 -n ../:../../src/ -l ../../src/inet -f LargeNet57_par4.ini -c config1 -u Cmdenv

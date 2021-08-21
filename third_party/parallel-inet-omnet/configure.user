@@ -1,0 +1,213 @@
+# configure.user
+#
+# This file contains additional input for 'configure'. It is read (sourced)
+# during the configuration process. You are free to edit the settings in here.
+#
+# The settings in this file are all optional in the sense that they all
+# have reasonable default values in the configure script.
+#
+
+#
+# Edit here if you want to use a different compiler from the one autodetected
+# by configure. Turns off the compiler autodetection.
+#
+#CC=gcc
+#CXX=g++
+
+#
+# Set to "yes" if you want to use clang/clang++ instead of gcc/g++ when both
+# compiler is installed.
+#
+PREFER_CLANG=no
+
+#
+# Set to "yes" to compile with C++ 11 support enabled (-std=c++11)
+# (warning: Do NOT turn on this on on Windows. The bundled MinGW 4.7.x compiler
+# is not yet ready for C++11 support.)
+#
+USE_CPP11=no
+
+#
+# Compiler optimization switches. There are two sets of switches,
+# and the MODE variable ("debug" or "release") decides which one gets used.
+# (Note: For maximum debugging info use switch -ggdb or -gstabs+3 when using gcc and gdb)
+# With gcc, do NOT use --omit-frame-pointer (it crashes when coroutines and
+# C++ exceptions (throw/catch) are used together)!
+#
+#CFLAGS_DEBUG='-g -Wall'
+#CFLAGS_RELEASE='-O2 -DNDEBUG=1'
+
+#
+# Linker switches used for linking.
+# For example use the -m64 switch to build 64 bit binaies on a 32bit operating system
+# (only if the 64bit libraries are installed of course). You should add the -m64 flag
+# to the CFLAGS_... variables too !!!
+# NOTE: that not all 64 bit libraries may be present on your system (i.e. Tcl/Tk and other
+# libraries may be missing. Use the NO_TCL=yes if you want to skip the Tcl/Tk based parts)
+#
+#LDFLAGS=""
+
+#
+# It is possible to have the Tcl files embedded into the compiled OMNeT++
+# libraries and executables. This can be useful if you want to ship
+# self-contained standalone executables which do not rely on external
+# Tcl scripts. This option is available for Tkenv.
+#
+EMBED_TCL_CODE=yes
+
+#
+# Set to "yes" to enable simulation executables to load NED files dynamically.
+#
+WITH_NETBUILDER=yes
+
+#
+# Set to "yes" to enable the parallel distributed simulation feature.
+#
+WITH_PARSIM=yes
+
+#
+# Set to "yes" to enable SystemC support. (Available only in the commecial version (OMNEST))
+# Please note that SystemC is not supported on MacOS and on the MinGW compiler on Windows.
+#
+SYSTEMC=no
+
+#
+# Set to no if you want to create static OMNeT++ libraries. Can be overriden
+# with "make SHARED_LIBS=no" but then simulation models also need to be built
+# with "make SHARED_LIBS=no"
+#
+SHARED_LIBS=yes
+
+#
+# Compiler and linker options for Tcl/Tk
+#
+# You can explicitly tell 'configure' which compile switches (TK_CFLAGS)
+# and linker switches (TK_LIBS) are needed to build an application with Tcl/Tk.
+# Normally these settings are autodetected by 'configure', so you only need to
+# edit here if autodetection doesn't work.
+#
+# With gcc, settings typically look like this:
+#
+# exaple:TK_CFLAGS="-I/usr/local/include"
+# example:TK_LIBS="-L/usr/local/lib -ltk8.6 -ltcl8.6"
+#
+# /usr/local/include should be replaced with the directory where tcl.h and tk.h
+# live. If they are in two different directories, use two -I switches.
+#
+# /usr/local/lib should be replaced with the directory that contains the Tcl/Tk
+# library files (something like libtcl86.so, libtk8.6.a etc; search for libtcl*
+# and libtk* to find them.) The -l options contain the library names: the
+# library file names, with the leading 'lib' and trailing '.so*' or '.a*' cut
+# off. Sometimes you need to explicitly link with the X11 libraries too, in that
+# case add -lX11 to TK_LIBS.
+#
+# With MinGW I use the following:
+# Note that we are using the "bin" directory as the LIB dir.
+# i.e. directly linking to the DLLs instead of the importlibs in the "lib" directory.
+#
+#TK_CFLAGS="-I/c/Tools/Tcl-8.6.0/include"
+#TK_LIBS="-L/c/Tools/Tcl-8.6.0/bin -ltk84 -ltcl84"
+# or:
+#TK_CFLAGS="-I$MSYS/include/tcl8.6"
+#TK_LIBS="-L$MSYS/bin -ltk86 -ltcl86"
+
+#
+# With Cygwin, you can try:
+# examle:TK_CFLAGS=
+# examle:TK_LIBS="-ltk86 -ltcl86"
+#
+# If commented out, the configure script will try to autodetect it
+#
+# If you don't have Tcl/Tk installed, adding
+#  NO_TCL=true
+# below lets you build just the non-GUI components.
+
+#
+# ZLib is a compression library needed by libxml2 and Tkenv's png support.
+#
+# On MinGW we use the following (dynamically linking against the DLL)
+#
+#ZLIB_CFLAGS="-I/c/Tools/zlib-1.2.3/include"
+#ZLIB_LIBS="-L/c/Tools/zlib-1.2.3/bin -lzlib1"
+# or:
+#ZLIB_CFLAGS="-I$MSYS/include"
+#ZLIB_LIBS="-L$MSYS/lib -lz"
+
+#
+# Compiler flags used to compile JNI code.
+# -fno-strict-aliasing is needed for gcc when using -O2 otherwise Java
+# native calls don't work
+#
+#JAVA_CFLAGS=-fno-strict-aliasing
+
+#
+# Compiler and linker options for MPI (optional component).
+# On LAM/MPI, typing `mpic++ -showme' can give you a hint about MPI_LIBS.
+#
+# If commented out, the configure script will try to autodetect it
+#
+#MPI_CFLAGS="-I /usr/include"
+#MPI_LIBS="-pthread -llammpio -llammpi++ -llamf77mpi -lmpi -llam -laio -laio -lutil"
+#MPI_LIBS="-lmpi++ -lmpi"   #SGI
+
+#
+# Compiler and linker options for Expat (optional component)
+#
+# With MinGW I use the following:
+#   EXPAT_CFLAGS="-I/d/home/tools/expat-1.95.2/Source/lib"
+#   EXPAT_LIBS="-L/d/home/tools/expat-1.95.2/libs -lexpat"
+# If commented out, the configure script will try to autodetect it
+#
+#EXPAT_CFLAGS=
+#EXPAT_LIBS=
+
+#
+# Compiler and linker options for LIBXML (optional component)
+#
+# With MinGW I use the following:
+#  LIBXML_CFLAGS="-I/c/Tools/libxml2-2.6.20.win32/include -I/c/Tools/iconv-1.9.1.win32/include"
+#  LIBXML_LIBS="-L/c/Tools/libxml2-2.6.20.win32/bin -lxml2 -L/c/Tools/iconv-1.9.1.win32/lib -liconv"
+# or:
+#  LIBXML_CFLAGS="-I$MSYS/include"
+#  LIBXML_LIBS="-L$MSYS/bin -lxml2 -L$MSYS/bin -liconv"
+# If commented out, the configure script will try to autodetect it
+#
+
+#
+# Compiler and linker options for Akaroa (optional component)
+#
+# With MinGW I use the following:
+#  AKAROA_CFLAGS="-I/d/home/tools/akaroa-2.7.4/include"
+#  AKAROA_LIBS="-L/d/home/tools/akaroa-2.7.4/lib -lakaroa"
+# If commented out, the configure script will try to autodetect it
+#
+#AKAROA_CFLAGS=
+#AKAROA_LIBS=
+
+#
+# The following OMNETPP_* variables don't need to be touched unless
+# you want to relocate parts of the package (e.g. put libraries to
+# /usr/lib, include files to /usr/include/omnetpp, and so on).
+#
+#OMNETPP_SRC_DIR="$OMNETPP_ROOT/src"
+#OMNETPP_SAMPLES_DIR="$OMNETPP_ROOT/samples"
+#OMNETPP_BIN_DIR="$OMNETPP_ROOT/bin"
+#OMNETPP_INCL_DIR="$OMNETPP_ROOT/include"
+#OMNETPP_LIB_DIR="$OMNETPP_ROOT/lib"
+
+#
+# Some more OMNeT++ variables. They select the programs opp_makemake-generated
+# makefiles will use. (They get default values if commented out.)
+#
+#MSGC="$OMNETPP_BIN_DIR/opp_msgc"
+
+#
+#
+# Override the following setting if you have additional icons somewhere else.
+#
+# OMNETPP_IMAGE_PATH="./images;./bitmaps;$OMNETPP_ROOT/images"
+
+#
+# On MinGW we use the following
+#JDK=/c/Tools/jdk1.6.0
+#SWIG=/c/Tools/swigwin-1.3.31/swig
