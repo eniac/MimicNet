@@ -18,3 +18,6 @@ echo "Using data set ${DATA_PATH}"
 train/intermimic/train_intermimic_${VARIANT}.py ${DATA_PATH} 1.1. &
 python ${TRAIN_SCRIPT} ${DATA_PATH}/in_data.pkl 2 --model_name ${DATA_PATH}/in_model --direction "INGRESS" ${@:4}
 python ${TRAIN_SCRIPT} ${DATA_PATH}/out_data.pkl 2 --model_name ${DATA_PATH}/out_model --direction "EGRESS" ${@:4}
+
+echo "Models are saved as follows:"
+echo "${DATA_PATH}/in_model ${DATA_PATH}/out_model ${DATA_PATH}/intermimic.dat"

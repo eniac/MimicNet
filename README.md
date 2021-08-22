@@ -1,5 +1,4 @@
 MimicNet provides fast performance estimation for data center networks at scale, based on packet-level simulations and machine learning.
-It first trains models using a two-cluster simulation to construct Mimics for approximating data center clusters, and then composes large-scale simulations using Mimics.  
 [Our SIGCOMM 2021 paper](https://dl.acm.org/doi/10.1145/3452296.3472926) describes the details of the system.
 
 # Getting Started
@@ -37,7 +36,7 @@ Run the simulation for the specified protocol and prepare the results
 ```
 ### 3. Train 
 
-Train a pair of internal models that approximates intra-cluster traffic and a feeder that approximates inter-cluster traffic
+Train a pair of internal models for approximating intra-cluster traffic and a feeder model for approximating inter-cluster traffic
 
 ```bash
 # variant is the protocol being simulated
@@ -81,9 +80,12 @@ Run the following command for 1. compile, 2. generate, 3. train, and 4. compose
 
 # Making Changes
 
-Models: run_3_train.sh and run_3_hypertrain.sh need a training script to be provided. In order to use a custom model, the custom training script should be provided here instead.
+### Models
 
-Protocols:
+run_3_train.sh and run_3_hypertrain.sh need a training script to be provided. In order to use a custom model, the custom training script should be provided here instead.
+
+### Protocols
+
 Following files/directories need to be changed/created
 - prepare/Packet.py
 - prepare/extract_features_[protocol].py
