@@ -45,9 +45,9 @@ Train a pair of internal models that approximates intra-cluster traffic and a fe
 ./run_3_train.sh <<VARIANT>> <<TRAIN_SCRIPT>> <<DATA_PATH>>
 ``` 
 
-Optionally run typer-parameter tuning to find optimal hyper-parameters
+Optionally run hyper-parameter tuning to find optimal hyper-parameters
 
-```base
+```bash
 # variant is the protocol being simulated
 # train_script is the script used to train the Mimic models
 # data_path is the location of the prepared results from 2_generate
