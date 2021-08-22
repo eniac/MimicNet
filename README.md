@@ -65,7 +65,7 @@ Compose a large-scale MimicNet simulation using the trained models
 # egress_model is the path to the egress model
 # feeder_model is the path to the feeder model
 # num_clusters is the scale of the simulation 
-./run_4_mimcnet.sh <<VARIANT>> <<INGRESS_MODEL>> <<EGRESS_MODEL>> <<FEEDER_MODEL>> <<NUM_CLUSTERS>>
+./run_4_mimicnet.sh <<VARIANT>> <<INGRESS_MODEL>> <<EGRESS_MODEL>> <<FEEDER_MODEL>> <<NUM_CLUSTERS>>
 ```
 
 ### Run full process
@@ -75,7 +75,7 @@ Run the following command for 1. compile, 2. generate, 3. train, and 4. compose
 ```bash
 # variant is the protocol being simulated
 # num_clusters is the scale of the MimicNet simulation
-./run_all <<VARIANT>> <<NUM_CLUSTERS>>
+./run_all.sh <<VARIANT>> <<NUM_CLUSTERS>>
 ```
 
 # Making Changes
