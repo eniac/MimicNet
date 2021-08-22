@@ -32,6 +32,7 @@ Build simulation libraries
 Run the simulation for the specified protocol and prepare the results
 ```bash
 # variant is the protocol being simulated 
+# Currently supported variants are tcp, dctcp, and homa 
 ./run_2_generate.sh <<VARIANT>>
 ```
 ### 3. Train 
@@ -72,7 +73,6 @@ Compose a large-scale MimicNet simulation using the trained models
 
 To start, run the following command in order to train a Mimic model for a specific variant.
 ```bash
-# Currently supported variants are tcp, dctcp, and homa
 ./run_all <<VARIANT>>
 ```
 
