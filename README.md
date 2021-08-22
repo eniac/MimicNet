@@ -71,9 +71,12 @@ Compose a large-scale MimicNet simulation using the trained models
 
 ### Run full process
 
-To start, run the following command in order to train a Mimic model for a specific variant.
+Run the following command for 1. compile, 2. generate, 3. train, and 4. compose 
+
 ```bash
-./run_all <<VARIANT>>
+# variant is the protocol being simulated
+# num_clusters is the scale of the MimicNet simulation
+./run_all <<VARIANT>> <<NUM_CLUSTERS>>
 ```
 
 # Making Changes

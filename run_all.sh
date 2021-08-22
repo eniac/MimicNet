@@ -3,12 +3,13 @@
 set -e
 set -x
 
-if [[ -z ${1} ]]; then
-    echo "Usage: run_all.sh variant [simulate_options]"
+if [[ -z ${2} ]]; then
+    echo "Usage: run_all.sh variant num_clusters [simulate_options]"
     exit 1
 fi
 
 VARIANT=${1}
+NUM_CLUSTERS=${2}
 
 ./run_1_compile.sh
 
@@ -20,4 +21,4 @@ MODEL_STR=$(./run_3_hypertrain.sh ${VARIANT} train/lstm/train_lstm_${VARIANT}.py
                     ${RESULTS_DIR} tune/hp_configs/lstm_${VARIANT}.json \
                     | tee /dev/fd/7 | tail -n 1)
 
-./run_4_mimicnet.sh ${VARIANT} ${MODEL_STR} ${@:2}
+./run_4_mimicnet.sh ${VARIANT} ${MODEL_STR} ${NUM_CLUSTERS} ${@:3}
