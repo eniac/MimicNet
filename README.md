@@ -1,5 +1,6 @@
-MimicNet is a system that provides fast performance estimation for data center networks at scale with machine learing.  
-MimicNet is based on packet-level simulations. It first trains models using a two-cluster simulation to construct Mimics for approximating data center clusters, and then composes large-scale simulations using Mimics.  
+MimicNet is a system that provides fast performance estimation for data center networks at scale.
+MimicNet is based on packet-level simulations and machine learning.
+It first trains models using a two-cluster simulation to construct Mimics for approximating data center clusters, and then composes large-scale simulations using Mimics.  
 [Our SIGCOMM 2021 paper](https://dl.acm.org/doi/10.1145/3452296.3472926) describes the details of the system.
 
 # Getting Started
