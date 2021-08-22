@@ -438,8 +438,6 @@ void MimicDCN::loadAndScheduleInterMimicTraffic(string file_name, double shape,
         scheduleAt(SimTime(current_time), pre_scheduled_callback);
     }
     interval_fhandle.close();
-
-    std::cout << "Number of inter-mimic flows = " << total_inter_mimic_flows << std::endl;
 }
 
 void MimicDCN::parse_ecmp_seeds() {

@@ -140,8 +140,4 @@ fi
 make -j
 make install
 
-echo "Building MimicNet..."
 pip install msgpack hyperopt
-cd ${MIMICNET_HOME}
-./run_1_compile.sh $1
-

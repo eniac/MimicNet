@@ -4,10 +4,11 @@ set -e
 set -x
 
 if [ $# -lt 4 ]; then
-    echo "Usage ./run_3_hypertrain.sh variant train_script data_path
-                            search_space_file [hyperopt_options]"
+    echo "Usage ./run_3_hypertrain.sh variant train_script data_path search_space_file [hyperopt_options]"
     exit 1
 fi
+
+. /etc/profile.d/mimicnet.sh
 
 VARIANT="${1}"
 TRAIN_SCRIPT="${2}"
