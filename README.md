@@ -7,7 +7,7 @@ MimicNet provides fast performance estimation for data center networks at scale,
 Download script separately or run from outer directory
 ```bash
 # running from outer directory
-./MimicNet/run_0_setup CPU|GPU
+./MimicNet/run_0_setup.sh CPU|GPU
 source /etc/profile.d/mimicnet.sh
 ```
 
