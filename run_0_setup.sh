@@ -104,6 +104,7 @@ conda install -y numpy # putting everything on one line causes a downgrade of py
 conda install -y pyyaml mkl mkl-include setuptools cmake cffi typing h5py
 conda install -y -c mingfeima mkldnn
 conda install -y -c pytorch magma-cuda92
+conda install -y pyyaml==5.4.1 # switch yaml to 5.4.1
 
 
 git clone https://github.com/google/glog.git || true
@@ -120,6 +121,7 @@ git clone --recursive https://github.com/pytorch/pytorch || true
 cd pytorch
 git checkout v0.4.1
 git rm --cached third_party/nervanagpu || true
+git rm --cached third_party/eigen || true
 git submodule update --init --recursive
 cd third_party/pybind11
 python setup.py install
