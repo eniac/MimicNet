@@ -78,7 +78,8 @@ class MimicNetLSTM(nn.Module):
 
     def forward(self, data):
         data = data.view(1, 1, self.input_size)
-        lstm_out, self.hidden_state = self.lstm(data, (self.hidden_state[0].view(self.num_layers, 1, -1), self.hidden_state[1].view(self.num_layers, 1, -1))) ## Qizhen: to tune hidden state
+        data = data.double()
+        lstm_out, self.hidden_state = self.lstm(data, (self.hidden_state[0].view(self.num_layers, 1, -1), self.hidden_state[1].view(self.num_layers, 1, -1)))
 
         X = lstm_out[:,-1,:].view(1, -1)
         l_output = self.linearL(X)
