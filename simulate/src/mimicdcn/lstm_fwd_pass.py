@@ -78,7 +78,6 @@ class MimicNetLSTM(nn.Module):
 
     def forward(self, data):
         data = data.view(1, 1, self.input_size)
-        data = data.double()
         lstm_out, self.hidden_state = self.lstm(data, (self.hidden_state[0].view(self.num_layers, 1, -1), self.hidden_state[1].view(self.num_layers, 1, -1)))
 
         X = lstm_out[:,-1,:].view(1, -1)
@@ -188,7 +187,7 @@ def getValue(model, cong_state, server, agg, agg_intf, tor, delta_t, ewma,
     if DEVSTR == 'cuda':
         data = tensor(data, dtype=torch.double, device=device)
     else:
-        data = torch.from_numpy(data)
+        data = torch.from_numpy(data).double()
 
     pred = model(data)
     if DEBUG:
