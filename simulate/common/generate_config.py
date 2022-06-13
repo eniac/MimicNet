@@ -65,6 +65,7 @@ with open(outfile, "w") as outf:
     outf.write('%s.numClusters = %d\n' % (netname, numClusters))
     outf.write('%s.numCores = %d\n' % (netname, numCores))
     outf.write('%s.degree = %d\n' % (netname, degree))
+    outf.write('%s.serversPerRack = %d\n' % (netname, numOfServersPerRack))
 
     # Assign partitions
     if parallel:

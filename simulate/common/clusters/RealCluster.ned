@@ -19,18 +19,19 @@ module RealCluster like ICluster
 {
     parameters:
         int degree;
+        int serversPerRack;
 
     gates:
         inout port[degree*degree];
 
     submodules:
-        host[degree*4]: FeatureRecordHost {}
+        host[degree*serversPerRack]: FeatureRecordHost {}
         tor[degree]: MyRouter {}
         agg[degree]: MyRouter {}
 
     connections:     
-        for i=0..(degree-1), for j=0..3 {
-            host[i*4+j].ethg++ <--> NormalChannel <--> tor[i].ethg++;
+        for i=0..(degree-1), for j=0..(serversPerRack-1) {
+            host[i*serversPerRack+j].ethg++ <--> NormalChannel <--> tor[i].ethg++;
         }
 
         for i=0..(degree-1), for j=0..(degree-1) {

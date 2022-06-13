@@ -27,12 +27,14 @@ network FatTree
         int numClusters = default(2);
         int numCores = default(4);
         int degree = default(2);
+        int serversPerRack = default(4);
 
     @display("bgb=817,468");
     submodules:
         configurator[numConfigurators]: IPv4NetworkConfigurator { }
         cluster[numClusters]: HomaCluster {
             degree = degree;
+            serversPerRack = serversPerRack;
         }
         core[numCores]: MyRouter { }
 
