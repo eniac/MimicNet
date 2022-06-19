@@ -32,13 +32,17 @@ PYTHON_INCLUDE="`pkg-config --cflags --libs python3`"
 
 NEDPATH="-n ${INET_HOME}/src/:../src/:../common/clusters/:out/:.:../homatransport/src/:../homatransport/src/common/:../homatransport/src/application/:../homatransport/src/transport/:../homatransport/src/dcntopo/:${INET_HOME}/src/nodes/inet/"
 
-USAGE="Usage: ./run.sh Base|RecordEval|RecordAll ingress_model egress_model
-                intermimic_model [-s seed] [-r routing] [-l load]
-                [-a servers_per_rack] [-b degree (# of ToRs/Aggs/AggUplinks)]
-                [-c total_clusters] [-d release|debug] [-k marking_threshold]
-                [-p parallel] [-S simulation_length]
-                [-m include_intra_mimic_traffic]
-                [-n include_inter_mimic_traffic] [-L link_speed]"
+USAGE="Usage: ./run.sh (Base | RecordEval | RecordAll)
+                <ingress_model> <egress_model> <intermimic_model>
+                [-s <seed>] [-r <routing>] [-l <load>] [-L <link_speed>]
+                [-k <marking_threshold>]
+                [-a <servers_per_rack>] [-c <total_clusters>]
+                [-b <degree> /* # of ToRs/Aggs/AggUplinks */]
+                [-d (release | debug)] [-p (off | on) /* parallelism */]
+                [-S <simulation_length>]
+                [-m /* include_intra_mimic_traffic */]
+                [-n /* include_inter_mimic_traffic */]"
+
 
 cleanup() {
     rm -f out/lock
@@ -84,11 +88,11 @@ MARK_THRES=100
 INTRA_MIMIC_FLAG=""
 INTER_MIMIC_FLAG=""
 MODE="release"
-PARALLEL_FLAG=""
+PARALLEL_FLAG="--parallel"
 MIMIC_TYPE="lstm"
 LINK_SPEED=100e6
 
-while getopts "s:r:l:c:a:b:d:p:S:k:mn" opt; do
+while getopts "s:r:l:c:a:b:d:p:L:S:k:mn" opt; do
   case ${opt} in
     s ) # seed
       SEED="$OPTARG"
@@ -124,8 +128,10 @@ while getopts "s:r:l:c:a:b:d:p:S:k:mn" opt; do
     d ) # mode
       MODE="$OPTARG"
       ;;
-    p ) # parallel
-      PARALLEL_FLAG="--parallel"
+    p ) # parallelism
+      if [ "$OPTARG" = "off" ]; then
+        PARALLEL_FLAG=""
+      fi
       ;;
     k ) # marking threshold
       MARK_THRES="$OPTARG"
