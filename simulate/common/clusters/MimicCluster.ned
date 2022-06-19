@@ -21,12 +21,13 @@ module MimicCluster like ICluster
 {
     parameters:
         int degree;
+        int serversPerRack;
 
     gates:
         inout port[degree*degree];
 
     submodules:
-        host[degree*4]: FeatureRecordHost {}
+        host[degree*serversPerRack]: FeatureRecordHost {}
         mimicDCN: MimicDCN {
             num_tors = degree;
             num_aggs = degree;

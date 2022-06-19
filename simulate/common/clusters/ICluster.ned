@@ -17,6 +17,7 @@ moduleinterface ICluster
 {
     parameters:
         int degree;
+        int serversPerRack;
     gates:
         inout port[degree*degree];
 }

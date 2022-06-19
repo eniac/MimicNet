@@ -21,12 +21,13 @@ module MimicHomaCluster like ICluster
 {
     parameters:
         int degree;
+        int serversPerRack;
 
     gates:
         inout port[degree*degree];
 
     submodules:
-        host[degree*4]: HomaHost {
+        host[degree*serversPerRack]: HomaHost {
             hostConfig = xmldoc("config.xml", "/hostConfig");
         }
         mimicDCN: MimicDCN {

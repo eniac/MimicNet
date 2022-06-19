@@ -33,6 +33,13 @@ PROJECT_INCLUDES="-I../common \
 
 NEDPATH="-n ${INET_HOME}/src/:../src/:../common/clusters/:out/:.:../homatransport/src/:../homatransport/src/common/:../homatransport/src/application/:../homatransport/src/transport/:../homatransport/src/dcntopo/:${INET_HOME}/src/nodes/inet/"
 
+USAGE="Usage: ./run.sh (Base | RecordTraining | RecordEval | RecordAll)
+                [-s <seed>] [-r <routing>] [-l <load>] [-L <link_speed>]
+                [-q (DropTailQueue | REDQueue)]
+                [-a <servers_per_rack>] [-c <total_clusters>]
+                [-b <degree> /* # of ToRs/Aggs/AggUplinks */]
+                [-d (release | debug)] [-S <simulation_length>]"
+
 cleanup() {
     rm -f out/lock
     rm -rf out/lock2
@@ -43,12 +50,7 @@ trap cleanup EXIT
 # Parse Args
 
 if [[ "$1" != "Base" && "$1" != "RecordTraining" && "$1" != "RecordEval" && "$1" != "RecordAll" ]]; then
-    echo "Usage: ./run.sh Base|RecordTraining|RecordEval|RecordAll [-s seed] " \
-         "[-r routing] [-l load] [-a servers_per_rack] " \
-         "[-b degree (# of ToRs/Aggs/AggUplinks)] [-c total_clusters] " \
-         "[-d release|debug] [-q queue_policy (DropTailQueue|REDQueue)] " \
-         "[-v tcp_variant (TCPNewReno|TCPWestwood)] [-S simulation_length]"\
-         "[-L link_speed]"
+    echo ${USAGE}
     exit 1
 else
     VARIANT=$1
@@ -60,7 +62,7 @@ SEED=0
 SIMU_LEN=20
 ROUTING="ecmp"
 QUEUE="DropTailQueue"
-TCPVAR="TCPNewReno"
+TCPVAR="Homa"
 CLUSTERS=2
 SERVERS=4
 DEGREE=2
@@ -68,7 +70,7 @@ LOAD=0.70
 MODE="release"
 LINK_SPEED=100e6
 ORIG_ARGS=${@}
-while getopts "s:S:r:l:a:b:c:d:q:v:L:" opt; do
+while getopts "s:S:r:l:a:b:c:d:q:L:" opt; do
   case ${opt} in
     s ) # seed
       SEED="$OPTARG"
@@ -81,9 +83,6 @@ while getopts "s:S:r:l:a:b:c:d:q:v:L:" opt; do
       ;;
     q ) # queue policy
       QUEUE="$OPTARG"
-      ;;
-    v ) # tcp variant
-      TCPVAR="$OPTARG"
       ;;
     l ) # load
       LOAD="$OPTARG"
@@ -108,12 +107,7 @@ while getopts "s:S:r:l:a:b:c:d:q:v:L:" opt; do
       LINK_SPEED="$OPTARG"
       ;;
     \? )
-      echo "Usage: ./run.sh Base|RecordTraining|RecordEval|RecordAll [-s seed] " \
-           "[-r routing] [-l load] [-a servers_per_rack] " \
-           "[-b degree (# of ToRs/Aggs/AggUplinks)] [-c total_clusters] " \
-           "[-d release|debug] [-q queue_policy (DropTailQueue|REDQueue)] " \
-           "[-v tcp_variant (TCPNewReno|TCPWestwood)] [-S simulation_length]" \
-           "[-L link_speed]"
+      echo ${USAGE}
       exit 1
       ;;
   esac
@@ -125,7 +119,7 @@ date +"%Y-%m-%d %T.%6N"
 
 echo -e "\e[34mConfiguration: ${VARIANT}\e[0m"
 
-UNIQUE_NAME="sw${DEGREE}_sv${SERVERS}_l${LOAD}_L${LINK_SPEED}_s${SEED}_q${QUEUE}_v${TCPVAR}_S${SIMU_LEN}"
+UNIQUE_NAME="sw${DEGREE}_sv${SERVERS}_l${LOAD}_L${LINK_SPEED}_s${SEED}_q${QUEUE}_vHoma_S${SIMU_LEN}"
 
 mkdir -p out
 rm -rf out/${UNIQUE_NAME}*
@@ -155,7 +149,6 @@ python ../common/generate_routes.py out/${UNIQUE_NAME}.route \
 # the .cluster file will specify route files
 
 # Configure the queue type and TCP variant
-sed -i "s/<TCP_VARIANT>/${TCPVAR}/" out/${UNIQUE_NAME}.ini
 sed -i "s/<QUEUE_TYPE>/${QUEUE}/" out/${UNIQUE_NAME}.ini
 sed -i "s/<SIMU_LEN>/${SIMU_LEN}/" out/${UNIQUE_NAME}.ini
 

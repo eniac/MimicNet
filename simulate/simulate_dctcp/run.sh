@@ -32,7 +32,12 @@ PROJECT_INCLUDES="-I../common \
 
 NEDPATH="-n ${INET_HOME}/src/:../src/:../common/clusters/:out/:."
 
-USAGE="Usage: ./run.sh Base|RecordTraining|RecordEval|RecordAll [-s seed] [-r routing] [-l load] [-a servers_per_rack] [-b degree (# of ToRs/Aggs/AggUplinks)] [-c total_clusters] [-d release|debug] [-v tcp_variant (TCPNewReno|TCPWestwood|DCTCP)] [-k marking_threshold] [-S simulation_length] [-L link_speed]"
+USAGE="Usage: ./run.sh (Base | RecordTraining | RecordEval | RecordAll)
+                [-s <seed>] [-r <routing>] [-l <load>] [-L <link_speed>]
+                [-k <marking_threshold>]
+                [-a <servers_per_rack>] [-c <total_clusters>]
+                [-b <degree> /* # of ToRs/Aggs/AggUplinks */]
+                [-d (release | debug)] [-S <simulation_length>]"
 
 cleanup() {
     rm -f out/lock
@@ -44,7 +49,7 @@ trap cleanup EXIT
 # Parse Args
 
 if [[ "$1" != "Base" && "$1" != "RecordTraining" && "$1" != "RecordEval" && "$1" != "RecordAll" ]]; then
-    echo $USAGE
+    echo ${USAGE}
     exit 1
 else
     VARIANT=$1
@@ -102,7 +107,7 @@ while getopts "s:S:r:l:a:b:c:d:k:L:" opt; do
       LINK_SPEED="$OPTARG"
       ;;
     \? )
-      echo $USAGE
+      echo ${USAGE}
       exit 1
       ;;
   esac

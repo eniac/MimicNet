@@ -24,6 +24,7 @@ network ApproxFatTree
         int numClusters = default(2);
         int numCores = default(4);
         int degree = default(2);
+        int serversPerRack = default(4);
 
     @display("bgb=817,468");
     submodules:
@@ -31,6 +32,7 @@ network ApproxFatTree
         configurator[numHelpers]: IPv4NetworkConfigurator { }
         cluster[numClusters]: <> like ICluster {
             degree = degree;
+            serversPerRack = serversPerRack;
         }
         core[numCores]: MyRouter { }
 
