@@ -2,28 +2,41 @@ MimicNet provides fast performance estimation for data center networks at scale,
 [Our SIGCOMM 2021 paper](https://dl.acm.org/doi/10.1145/3452296.3472926) describes the details of the system.
 
 # Getting Started
-### 0. Setup
 
-Download script separately or run from outer directory
+If running on a GPU, make sure to set the `CUDA_HOME` path 
+```bash
+export CUDA_HOME=<PATH_TO_CUDA>
+```
+
+Download the setup script separately, or run from the parent directory of the MimicNet repo.
 ```bash
 # running from outer directory
-./MimicNet/run_0_setup.sh CPU|GPU
+./MimicNet/run_0_setup.sh (CPU | GPU)
 source /etc/profile.d/mimicnet.sh
 ```
 
-If running GPU, make sure to set the CUDA_HOME path 
+Actually run the full MimicNet process with default options:
 ```bash
-export CUDA_HOME=<<cuda_path>>
+cd MimicNet
+# variant is the protocol being simulated
+# num_clusters is the scale of the final MimicNet simulation
+./run_all.sh <VARIANT> <NUM_CLUSTERS> [ <SIMULATION_OPTIONS> ]
 ```
+You can configure the cluster topology, link speeds, simulation length, and other options by passing flags after `<NUM_CLUSTERS>`
 
 
-The remaining scripts should be run inside the MimicNet directory
+# A Closer Look
+
+If you need more control, e.g., over the number of training epochs, or you want to time individual steps, you can break down the `./run_all.sh` script into its individual steps:
+
+Again, all of these should be run inside the MimicNet directory.
+
 ### 1. Compile 
 
 Build simulation libraries 
 ```bash
 # CPU or GPU correlates to the option used in setup
-./run_1_compile.sh CPU|GPU
+./run_1_compile.sh (CPU | GPU)
 ```
 
 ### 2. Generate
@@ -32,7 +45,7 @@ Run the simulation for the specified protocol and prepare the results
 ```bash
 # variant is the protocol being simulated 
 # Currently supported variants are tcp, dctcp, and homa 
-./run_2_generate.sh <<VARIANT>>
+./run_2_generate.sh <VARIANT> [ <SIMULATION_OPTIONS> ]
 ```
 ### 3. Train 
 
@@ -42,17 +55,17 @@ Train a pair of internal models for approximating intra-cluster traffic and a fe
 # variant is the protocol being simulated
 # train_script is the script used to train the Mimic models
 # data_path is the location of the prepared results from 2_generate
-./run_3_train.sh <<VARIANT>> <<TRAIN_SCRIPT>> <<DATA_PATH>>
+./run_3_train.sh <VARIANT> <TRAIN_SCRIPT> <DATA_PATH> [ <TRAINING_OPTIONS> ]
 ``` 
 
-Optionally run hyper-parameter tuning to find optimal hyper-parameters
+OR optionally run hyper-parameter tuning to find optimal hyper-parameters
 
 ```bash
 # variant is the protocol being simulated
 # train_script is the script used to train the Mimic models
 # data_path is the location of the prepared results from 2_generate
-# search_space_file is tune/hp_configs/lstm.json
-./run_3_hypertrain.sh <<VARIANT>> <<TRAIN_SCRIPT>> <<DATA_PATH>> <<SEARCH_SPACE_FILE>>
+# search_space_file is in tune/hp_configs/lstm.json
+./run_3_hypertrain.sh <VARIANT> <TRAIN_SCRIPT> <DATA_PATH> <SEARCH_SPACE_FILE> [ <TRAINING_OPTIONS> ]
 ```
 
 ### 4. Compose
@@ -65,17 +78,7 @@ Compose a large-scale MimicNet simulation using the trained models
 # egress_model is the path to the egress model
 # feeder_model is the path to the feeder model
 # num_clusters is the scale of the simulation 
-./run_4_mimicnet.sh <<VARIANT>> <<INGRESS_MODEL>> <<EGRESS_MODEL>> <<FEEDER_MODEL>> <<NUM_CLUSTERS>>
-```
-
-### Run full process
-
-Run the following command for 1. compile, 2. generate, 3. train, and 4. compose 
-
-```bash
-# variant is the protocol being simulated
-# num_clusters is the scale of the MimicNet simulation
-./run_all.sh <<VARIANT>> <<NUM_CLUSTERS>>
+./run_4_mimicnet.sh <VARIANT> <INGRESS_MODEL> <EGRESS_MODEL> <FEEDER_MODEL> <NUM_CLUSTERS> [ <SIMULATION_OPTIONS> ]
 ```
 
 # Making Changes
