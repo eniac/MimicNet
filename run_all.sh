@@ -14,7 +14,7 @@ NUM_CLUSTERS=${2}
 ./run_1_compile.sh
 
 exec 6>&1
-RESULTS_DIR=$(./run_2_generate.sh $@ | tee /dev/fd/6 | tail -n 1)
+RESULTS_DIR=$(./run_2_generate.sh ${VARIANT} ${@:3} | tee /dev/fd/6 | tail -n 1)
 
 exec 7>&1
 MODEL_STR=$(./run_3_train.sh ${VARIANT} train/lstm/train_lstm_${VARIANT}.py \
