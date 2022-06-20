@@ -134,7 +134,7 @@ while getopts "s:r:q:v:l:c:a:b:d:p:L:S:mn" opt; do
       fi
       ;;
     L ) # Link speed
-      LINK_SPEED="OPTARG"
+      LINK_SPEED="$OPTARG"
       ;;
     \? )
     echo ${USAGE}
