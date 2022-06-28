@@ -88,7 +88,7 @@ MARK_THRES=100
 INTRA_MIMIC_FLAG=""
 INTER_MIMIC_FLAG=""
 MODE="release"
-PARALLEL_FLAG="--parallel"
+PARALLEL_FLAG=""
 MIMIC_TYPE="lstm"
 LINK_SPEED=100e6
 
@@ -129,8 +129,8 @@ while getopts "s:r:l:c:a:b:d:p:L:S:k:mn" opt; do
       MODE="$OPTARG"
       ;;
     p ) # parallelism
-      if [ "$OPTARG" = "off" ]; then
-        PARALLEL_FLAG=""
+      if [ "$OPTARG" = "on" ]; then
+        PARALLEL_FLAG="--parallel"
       fi
       ;;
     k ) # marking threshold
