@@ -3,7 +3,7 @@ MimicNet provides fast performance estimation for data center networks at scale,
 
 # Getting Started
 
-If running on a GPU, make sure to set the `CUDA_HOME` path 
+If running on a GPU, make sure to set the `CUDA_HOME` path (MimicNet currently supports CUDA 9.2) 
 ```bash
 export CUDA_HOME=<PATH_TO_CUDA>
 ```
